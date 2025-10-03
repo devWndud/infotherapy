@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}과제 상세 · Infotherapy{% endblock %}
+{% block content %}
+  <div class="card" style="max-width: 900px; margin: 0 auto;">
+    <div class="hint">{{ a.category }} · 마감: {{ a.due }}</div>
+    <h2 style="margin:6px 0 12px;">{{ a.title }}</h2>
+    <p style="white-space:pre-line;">{{ a.description }}</p>
+    {% if submitted %}
+      <span class="badge" style="border-color:#86efac; background:#ecfdf5; color:#065f46;">제출 완료</span>
+    {% else %}
+      <details style="margin-top:12px;">
+        <summary class="btn btn-outline">제출</summary>
+        <form class="form" action="{{ url_for('submit_assignment') }}" method="post" enctype="multipart/form-data" style="margin-top:12px;">
+          <input type="hidden" name="title" value="{{ a.title }}">
+          <input type="hidden" name="category" value="{{ a.category }}">
+          <div class="row">
+            <label for="text_detail">내용(텍스트)</label>
+            <textarea id="text_detail" name="text_content" placeholder="설명 또는 링크 (선택)"></textarea>
+          </div>
+          <div class="row">
+            <label for="file_detail">파일(선택)</label>
+            <input id="file_detail" name="file" type="file" accept="*/*">
+          </div>
+          <button class="btn btn-primary" type="submit">제출하기</button>
+        </form>
+      </details>
+    {% endif %}
+    <a class="btn btn-outline" href="{{ url_for('learn') }}" style="margin-top:8px;">목록으로</a>
+  </div>
+{% endblock %}
+
+

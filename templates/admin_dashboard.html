@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}관리자 · Infotherapy{% endblock %}
+{% block content %}
+  <h2 style="margin:0 0 12px;">관리자 대시보드</h2>
+  <div class="two-col">
+    <section>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="margin:0;">자료</h3>
+        <a class="btn btn-primary" href="{{ url_for('admin_material_new') }}">자료 추가</a>
+      </div>
+      <div class="list">
+        {% for m in materials %}
+          <div class="list-item">
+            <div>
+              <div style="font-weight:600;">{{ m['title'] }}</div>
+              <div class="hint">{{ m['category'] }} · {{ m['type'] }} · {{ m['date'] }}</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <a class="btn btn-outline" href="{{ url_for('admin_material_edit', item_id=m['id']) }}">수정</a>
+              <form method="post" action="{{ url_for('admin_material_delete', item_id=m['id']) }}">
+                <button class="btn btn-outline" type="submit">삭제</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+    <aside>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3 style="margin:0;">과제</h3>
+        <a class="btn btn-primary" href="{{ url_for('admin_assignment_new') }}">과제 추가</a>
+      </div>
+      <div class="list">
+        {% for a in assignments %}
+          <div class="list-item">
+            <div>
+              <div style="font-weight:600;">{{ a['title'] }}</div>
+              <div class="hint">{{ a['category'] }} · 마감 {{ a['due'] }}</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <a class="btn btn-outline" href="{{ url_for('admin_assignment_edit', item_id=a['id']) }}">수정</a>
+              <form method="post" action="{{ url_for('admin_assignment_delete', item_id=a['id']) }}">
+                <button class="btn btn-outline" type="submit">삭제</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </aside>
+  </div>
+{% endblock %}
+
+

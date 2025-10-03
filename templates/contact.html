@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}문의하기 · Infotherapy{% endblock %}
+{% block content %}
+  <h2 style="margin-bottom: 12px;">문의하기</h2>
+  <form class="form" method="post">
+    <div class="row">
+      <label for="email">이메일</label>
+      <input id="email" name="email" type="email" placeholder="you@example.com" required>
+    </div>
+    <div class="row">
+      <label for="message">메시지</label>
+      <textarea id="message" name="message" rows="6" placeholder="문의 내용을 입력해주세요" required style="padding:12px;border:1px solid var(--border);border-radius:12px;"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">보내기</button>
+  </form>
+{% endblock %}
+
+

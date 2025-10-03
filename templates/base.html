@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Infotherapy · 천안월봉고 대표 AI SW 동아리">
+    <meta property="og:title" content="Infotherapy">
+    <meta property="og:description" content="천안월봉고 대표 AI SW 동아리">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="{{ url_for('static', filename='favicon.png') }}">
+    <title>{% block title %}Infotherapy{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="{{ url_for('index') }}">
+          <span class="logo-mark">∞</span>
+          <span class="logo-text">Infotherapy</span>
+        </a>
+        <nav class="nav" id="site-nav">
+          <a href="{{ url_for('index') }}">홈</a>
+          <a href="{{ url_for('learn') }}">학습</a>
+          {% if session.get('admin') %}
+            <a href="{{ url_for('admin_dashboard') }}">관리</a>
+          {% endif %}
+          {% if session.get('uid') %}
+            <div class="profile-chip">
+              <div class="avatar-mini">{{ (session.get('name') or 'U')[:1] }}</div>
+              <span class="profile-name">{{ session.get('name') or '사용자' }}</span>
+              {% if session.get('admin') %}<span class="badge" style="height:22px;">admin</span>{% endif %}
+              <a href="{{ url_for('logout') }}" class="btn btn-outline" style="margin-left:8px;">로그아웃</a>
+            </div>
+          {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-outline">로그인</a>
+            <a href="{{ url_for('signup') }}" class="btn btn-primary">회원가입</a>
+          {% endif %}
+        </nav>
+        <button class="nav-toggle" aria-label="메뉴" onclick="toggleNav()">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash">
+            {% for category, message in messages %}
+              <div class="flash-item {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-col">
+          <h4>Infotherapy</h4>
+          <div class="footer-links">
+            <a href="{{ url_for('contact') }}">문의하기</a>
+            <a href="{{ url_for('terms') }}">이용약관</a>
+            <a href="{{ url_for('privacy') }}">개인정보처리방침</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>정보</h4>
+          <div class="footer-links">
+            <span>© 2025 Infotherapy</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+  </html>
+
+

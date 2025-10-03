@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}회원가입 · Infotherapy{% endblock %}
+{% block content %}
+  <h2 style="margin-bottom: 16px;">회원가입</h2>
+  <form class="form" method="post">
+    <div class="row">
+      <label for="name">이름</label>
+      <input id="name" name="name" type="text" placeholder="홍길동" required>
+    </div>
+    <div class="row">
+      <label for="student_id">학번</label>
+      <input id="student_id" name="student_id" type="text" placeholder="2025xxxx" required>
+    </div>
+    <div class="row">
+      <label for="invite_code">초대코드</label>
+      <input id="invite_code" name="invite_code" type="text" placeholder="예: INFOTHERAPY-2025" required>
+      <div class="hint">동아리 부원 전용 초대 코드가 필요합니다.</div>
+    </div>
+    <div class="row">
+      <label for="password">비밀번호</label>
+      <input id="password" name="password" type="password" placeholder="최소 6자" required minlength="6">
+    </div>
+    <div class="row">
+      <label for="password2">비밀번호 확인</label>
+      <input id="password2" name="password2" type="password" placeholder="다시 입력" required minlength="6">
+      <div class="hint">비밀번호가 일치해야 합니다.</div>
+    </div>
+    <input type="hidden" name="admin" id="admin_flag" value="false">
+    <button class="btn btn-primary" type="submit">회원가입</button>
+    <div class="hint">이미 계정이 있나요? <a href="{{ url_for('login') }}">로그인</a></div>
+  </form>
+  <script>
+    const pw = document.getElementById('password');
+    const pw2 = document.getElementById('password2');
+    if (pw && pw2) {
+      function validate() { pw2.setCustomValidity(pw.value !== pw2.value ? '비밀번호가 일치하지 않습니다' : ''); }
+      pw.addEventListener('input', validate);
+      pw2.addEventListener('input', validate);
+    }
+  </script>
+{% endblock %}
+
+

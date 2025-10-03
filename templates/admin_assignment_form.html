@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}과제 {{ '수정' if item else '추가' }} · Infotherapy{% endblock %}
+{% block content %}
+  <h2 style="margin-bottom: 12px;">과제 {{ '수정' if item else '추가' }}</h2>
+  <form class="form" method="post">
+    <div class="row">
+      <label>제목</label>
+      <input name="title" value="{{ item['title'] if item else '' }}" required>
+    </div>
+    <div class="row">
+      <label>마감</label>
+      <input name="due" value="{{ item['due'] if item else '' }}" placeholder="YYYY-MM-DD HH:MM">
+    </div>
+    <div class="row">
+      <label>카테고리</label>
+      <div class="selected-filter toggle-group">
+        {% set cat = (item['category'] if item else '') %}
+        <label class="chip {{ 'active' if cat=='unity' }}">
+          <input type="radio" name="category" value="unity" {{ 'checked' if cat=='unity' }} style="display:none;">Unity
+        </label>
+        <label class="chip {{ 'active' if cat=='ml' }}">
+          <input type="radio" name="category" value="ml" {{ 'checked' if cat=='ml' }} style="display:none;">머신러닝
+        </label>
+        <label class="chip {{ 'active' if cat=='dl' }}">
+          <input type="radio" name="category" value="dl" {{ 'checked' if cat=='dl' }} style="display:none;">딥러닝
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <label>설명</label>
+      <textarea name="description" placeholder="과제 상세 설명">{{ item['description'] if item else '' }}</textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">저장</button>
+    <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">취소</a>
+  </form>
+  <script>
+    (function(){
+      const group = document.querySelector('.toggle-group');
+      if (!group) return;
+      const chips = group.querySelectorAll('.chip');
+      function sync(){
+        chips.forEach(c => {
+          const i = c.querySelector('input[type="radio"]');
+          c.classList.toggle('active', i && i.checked);
+        });
+      }
+      group.addEventListener('click', (e)=>{
+        const chip = e.target.closest('.chip');
+        if (!chip) return;
+        const input = chip.querySelector('input[type="radio"]');
+        if (input) { input.checked = true; }
+        sync();
+      });
+      sync();
+    })();
+  </script>
+{% endblock %}
+
+

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}자료 상세 · Infotherapy{% endblock %}
+{% block content %}
+  <div class="card" style="max-width: 900px; margin: 0 auto;">
+    <div class="hint">{{ m.category }} · {{ m.type }} · {{ m.date }}</div>
+    <h2 style="margin:6px 0 12px;">{{ m.title }}</h2>
+    <p>{{ m.content }}</p>
+    <a class="btn btn-outline" href="{{ url_for('learn') }}" style="margin-top:8px;">목록으로</a>
+  </div>
+{% endblock %}
+
+
