@@ -1,0 +1,23 @@
+# Python venvs
+.venv/
+venv/
+myenv/
+
+# Environment files
+.env
+.env.*
+
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+
+# Uploads and local data
+uploads/
+infotherapy.db
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
