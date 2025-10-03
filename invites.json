@@ -19,7 +19,7 @@
   { "name": "설다은", "code": "sD2fG5hJ8k" },
   { "name": "백승우", "code": "L1pO4iU7yT" },
   { "name": "김주영", "code": "gH6jK9lM2n" },
-  { "name": "김희성", "code": "Q5wE8rT1yU" },
+  { "name": "김희성", "code": "Q5wE8rT1yU", "admin": true },
   { "name": "임동현", "code": "zX7cV0bN3m" },
   { "name": "장현서", "code": "kL2mN5bV8c" }
 ]
