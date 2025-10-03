@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const stored = localStorage.getItem('cats');
   let selectedCats = stored ? stored.split(',').filter(Boolean) : [];
   if (!stored) {
-    // default: all on
-    selectedCats = ['unity','ml','dl'];
+    // default: all on (including web)
+    selectedCats = ['unity','ml','dl','web'];
     localStorage.setItem('cats', selectedCats.join(','));
   }
   applyMulti(selectedCats);

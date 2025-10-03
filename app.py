@@ -9,6 +9,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import json
+import io
+import csv
+from openpyxl import Workbook
+import re
+from markupsafe import Markup, escape
 
 
 def create_app() -> Flask:
@@ -76,6 +81,20 @@ def create_app() -> Flask:
             )
             """
         )
+
+    # Jinja filters
+    url_regex = re.compile(r"(https?://[^\s]+)")
+
+    def autolink(text: str) -> Markup:
+        if not text:
+            return Markup("")
+        # Escape HTML, then linkify URLs, then convert newlines to <br>
+        html = escape(text)
+        html = url_regex.sub(lambda m: f'<a href="{m.group(1)}" target="_blank" rel="noopener">{m.group(1)}</a>', html)
+        html = html.replace("\r\n", "\n").replace("\n", "<br>")
+        return Markup(html)
+
+    app.jinja_env.filters["autolink"] = autolink
 
     @app.route("/")
     def index():
@@ -217,22 +236,26 @@ def create_app() -> Flask:
 
     @app.route("/learn")
     def learn():
-        # UI-only placeholder list data with categories
+        # load lists
         with get_db() as cx:
-            materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC NULLS LAST").fetchall()
-            assignments = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC NULLS LAST").fetchall()
-        # fallback demo data if empty
-        if not materials:
-            materials = [
-                {"id": 1, "title": "딥러닝 기초 슬라이드", "date": "2025-10-01", "type": "slides", "category": "dl", "content": "기초 개념"},
-                {"id": 2, "title": "파이썬으로 데이터 전처리", "date": "2025-09-28", "type": "notebook", "category": "ml", "content": "pandas"},
-            ]
-        if not assignments:
-            assignments = [
-                {"id": 1, "title": "과제: 로지스틱 회귀 구현", "due": "2025-10-10 23:59", "description": "Numpy만 사용", "category": "ml"},
-                {"id": 2, "title": "과제: CNN으로 MNIST 분류", "due": "2025-10-15 23:59", "description": "PyTorch 기본", "category": "dl"},
-            ]
-        # mark submitted status for current user
+            materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
+            assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC").fetchall()
+        # compute overdue flags
+        def is_overdue(due_str: str) -> bool:
+            if not due_str:
+                return False
+            for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+                try:
+                    due_dt = datetime.strptime(due_str, fmt)
+                    return datetime.now() > due_dt
+                except Exception:
+                    continue
+            return False
+        assignments = []
+        for a in assignments_rows:
+            d = dict(a)
+            d["overdue"] = is_overdue(d.get("due", ""))
+            assignments.append(d)
         submitted_keys = set()
         if session.get("uid"):
             with get_db() as cx:
@@ -257,6 +280,18 @@ def create_app() -> Flask:
             a = cx.execute("SELECT id, title, due, description, category FROM assignments WHERE id=?", (item_id,)).fetchone()
         if not a:
             return redirect(url_for("learn"))
+        a = dict(a)
+        def is_overdue(due_str: str) -> bool:
+            if not due_str:
+                return False
+            for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
+                try:
+                    due_dt = datetime.strptime(due_str, fmt)
+                    return datetime.now() > due_dt
+                except Exception:
+                    continue
+            return False
+        overdue = is_overdue(a.get("due", ""))
         submitted = False
         if session.get("uid"):
             with get_db() as cx:
@@ -265,7 +300,7 @@ def create_app() -> Flask:
                     (session.get("uid"), a["title"], a["category"]),
                 ).fetchone()
             submitted = bool(row)
-        return render_template("assignment_detail.html", a=a, submitted=submitted)
+        return render_template("assignment_detail.html", a=a, submitted=submitted, overdue=overdue)
 
     # Admin dashboard and CRUD
     @app.route("/admin")
@@ -333,6 +368,45 @@ def create_app() -> Flask:
         with get_db() as cx:
             cx.execute("DELETE FROM assignments WHERE id=?", (item_id,))
         return redirect(url_for("admin_dashboard"))
+
+    @app.route("/admin/invites/export")
+    @admin_required
+    def export_invites_csv():
+        try:
+            with open(invites_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = []
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["name", "code", "admin"])
+        for item in data:
+            writer.writerow([item.get("name", ""), item.get("code", ""), "TRUE" if item.get("admin") else "FALSE"])
+        csv_bytes = output.getvalue().encode("utf-8-sig")
+        from flask import Response
+        return Response(csv_bytes, mimetype="text/csv", headers={
+            "Content-Disposition": "attachment; filename=invites.csv"
+        })
+
+    @app.route("/admin/invites/export.xlsx")
+    @admin_required
+    def export_invites_xlsx():
+        try:
+            with open(invites_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            data = []
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "invites"
+        ws.append(["name", "code", "admin"])
+        for item in data:
+            ws.append([item.get("name", ""), item.get("code", ""), bool(item.get("admin"))])
+        bio = io.BytesIO()
+        wb.save(bio)
+        bio.seek(0)
+        from flask import send_file
+        return send_file(bio, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="invites.xlsx")
 
     @app.route("/contact", methods=["GET", "POST"])
     def contact():

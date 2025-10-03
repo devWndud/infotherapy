@@ -4,9 +4,11 @@
   <div class="card" style="max-width: 900px; margin: 0 auto;">
     <div class="hint">{{ a.category }} · 마감: {{ a.due }}</div>
     <h2 style="margin:6px 0 12px;">{{ a.title }}</h2>
-    <p style="white-space:pre-line;">{{ a.description }}</p>
+    <div style="white-space:pre-wrap; line-height:1.5;">{{ a.description | autolink | safe }}</div>
     {% if submitted %}
       <span class="badge" style="border-color:#86efac; background:#ecfdf5; color:#065f46;">제출 완료</span>
+    {% elif overdue %}
+      <span class="badge" style="border-color:#fecaca; background:#fef2f2; color:#7f1d1d;">제출 마감</span>
     {% else %}
       <details style="margin-top:12px;">
         <summary class="btn btn-outline">제출</summary>
