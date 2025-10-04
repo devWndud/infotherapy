@@ -423,6 +423,59 @@ def create_app() -> Flask:
     def privacy():
         return render_template("privacy.html")
 
+    @app.route("/google813ed25fdce8f7cd.html")
+    def google_verification():
+        return "google-site-verification: google813ed25fdce8f7cd.html"
+
+    @app.route("/googled4feaeeec5cf3d2e.html")
+    def google_verification2():
+        return "google-site-verification: googled4feaeeec5cf3d2e.html"
+
+    @app.route("/sitemap.xml")
+    def sitemap():
+        from flask import Response
+        import xml.etree.ElementTree as ET
+        
+        root = ET.Element("urlset")
+        root.set("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
+        
+        # 메인 페이지들
+        urls = [
+            {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0"},
+            {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8"},
+            {"loc": "https://infotherapy.kro.kr/contact", "changefreq": "monthly", "priority": "0.6"},
+            {"loc": "https://infotherapy.kro.kr/terms", "changefreq": "yearly", "priority": "0.4"},
+            {"loc": "https://infotherapy.kro.kr/privacy", "changefreq": "yearly", "priority": "0.4"},
+        ]
+        
+        # 동적 콘텐츠 추가
+        with get_db() as cx:
+            materials = cx.execute("SELECT id FROM materials").fetchall()
+            assignments = cx.execute("SELECT id FROM assignments").fetchall()
+            
+            for material in materials:
+                urls.append({
+                    "loc": f"https://infotherapy.kro.kr/material/{material['id']}",
+                    "changefreq": "monthly",
+                    "priority": "0.7"
+                })
+            
+            for assignment in assignments:
+                urls.append({
+                    "loc": f"https://infotherapy.kro.kr/assignment/{assignment['id']}",
+                    "changefreq": "weekly",
+                    "priority": "0.7"
+                })
+        
+        for url_data in urls:
+            url_elem = ET.SubElement(root, "url")
+            ET.SubElement(url_elem, "loc").text = url_data["loc"]
+            ET.SubElement(url_elem, "changefreq").text = url_data["changefreq"]
+            ET.SubElement(url_elem, "priority").text = url_data["priority"]
+        
+        xml_str = ET.tostring(root, encoding='unicode')
+        return Response(xml_str, mimetype='application/xml')
+
     @app.errorhandler(404)
     def not_found(e):
         return render_template("404.html"), 404

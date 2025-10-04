@@ -3,11 +3,47 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Infotherapy · 천안월봉고 대표 AI SW 동아리">
-    <meta property="og:title" content="Infotherapy">
-    <meta property="og:description" content="천안월봉고 대표 AI SW 동아리">
+    <meta name="description" content="{% block description %}Infotherapy · 천안월봉고 대표 AI SW 동아리. 실전 중심 학습과 협업을 지향하는 프로그래밍 동아리입니다.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}천안월봉고, AI, SW, 동아리, 프로그래밍, 인공지능, 소프트웨어, 학습, 협업{% endblock %}">
+    <meta name="author" content="Infotherapy">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph 메타 태그 -->
+    <meta property="og:title" content="{% block og_title %}Infotherapy{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}천안월봉고 대표 AI SW 동아리. 실전 중심 학습과 협업을 지향합니다.{% endblock %}">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="{{ url_for('static', filename='favicon.png') }}">
+    <meta property="og:url" content="https://infotherapy.kro.kr{{ request.path }}">
+    <meta property="og:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.jpg') }}">
+    <meta property="og:site_name" content="Infotherapy">
+    
+    <!-- Twitter 메타 태그 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Infotherapy{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}천안월봉고 대표 AI SW 동아리{% endblock %}">
+    <meta name="twitter:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.jpg') }}">
+    
+    <!-- 구조화된 데이터 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Infotherapy",
+      "description": "천안월봉고 대표 AI SW 동아리",
+      "url": "https://infotherapy.kro.kr",
+      "logo": "https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.jpg') }}",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "KR",
+        "addressRegion": "충청남도",
+        "addressLocality": "천안시"
+      },
+      "memberOf": {
+        "@type": "EducationalOrganization",
+        "name": "천안월봉고등학교"
+      }
+    }
+    </script>
+    
     <title>{% block title %}Infotherapy{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
