@@ -21,8 +21,12 @@ sudo ufw allow ssh
 sudo ufw allow 'Nginx Full'
 sudo ufw --force enable
 
+# 현재 사용자 홈 디렉토리 확인
+USER_HOME=$(eval echo ~$USER)
+echo "🏠 사용자 홈 디렉토리: $USER_HOME"
+
 # 프로젝트 디렉토리로 이동
-cd /home/ubuntu
+cd $USER_HOME
 
 # Git 저장소 클론 (이미 있다면 스킵)
 if [ ! -d "infotherapy" ]; then
@@ -74,7 +78,9 @@ sudo systemctl enable nginx
 
 # Systemd 서비스 설정
 echo "🔧 Systemd 서비스를 설정합니다..."
-sudo cp systemd/infotherapy.service /etc/systemd/system/
+# 서비스 파일에서 사용자 경로를 현재 사용자로 수정
+sed "s|/home/ubuntu|$USER_HOME|g" systemd/infotherapy.service > /tmp/infotherapy.service
+sudo cp /tmp/infotherapy.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable infotherapy
 sudo systemctl start infotherapy
@@ -91,5 +97,5 @@ echo "3. sudo journalctl -u infotherapy -f 로 로그 확인"
 echo "4. https://$(curl -s http://169.254.169.254/latest/meta-data/public-hostname) 으로 접속 테스트"
 echo ""
 echo "🔄 이후 배포는 다음 명령어로:"
-echo "   cd /home/ubuntu/infotherapy"
+echo "   cd $USER_HOME/infotherapy"
 echo "   ./deploy.sh"
