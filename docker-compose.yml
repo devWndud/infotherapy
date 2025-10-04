@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_SECRET=${FLASK_SECRET:-your-secret-key-change-me}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./infotherapy.db:/app/infotherapy.db
+      - ./invites.json:/app/invites.json
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./static:/var/www/html/static:ro
+    depends_on:
+      - web
+    restart: unless-stopped
