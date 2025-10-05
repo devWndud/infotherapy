@@ -301,14 +301,25 @@ def create_app() -> Flask:
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
             assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC").fetchall()
-        # compute overdue and fetch submission times for current user
+        # compute overdue (Asia/Seoul); date-only => 23:59:59 local
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
+            try:
+                from zoneinfo import ZoneInfo
+                seoul = ZoneInfo("Asia/Seoul")
+                now_local = datetime.now(seoul)
+            except Exception:
+                seoul = None
+                now_local = datetime.now()
             for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
                 try:
-                    due_dt = datetime.strptime(due_str, fmt)
-                    return datetime.now() > due_dt
+                    due_dt = datetime.strptime(due_str.strip(), fmt)
+                    if fmt == "%Y-%m-%d":
+                        due_dt = due_dt.replace(hour=23, minute=59, second=59)
+                    if seoul:
+                        due_dt = due_dt.replace(tzinfo=seoul)
+                    return now_local > due_dt
                 except Exception:
                     continue
             return False
@@ -351,10 +362,21 @@ def create_app() -> Flask:
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
+            try:
+                from zoneinfo import ZoneInfo
+                seoul = ZoneInfo("Asia/Seoul")
+                now_local = datetime.now(seoul)
+            except Exception:
+                seoul = None
+                now_local = datetime.now()
             for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
                 try:
-                    due_dt = datetime.strptime(due_str, fmt)
-                    return datetime.now() > due_dt
+                    due_dt = datetime.strptime(due_str.strip(), fmt)
+                    if fmt == "%Y-%m-%d":
+                        due_dt = due_dt.replace(hour=23, minute=59, second=59)
+                    if seoul:
+                        due_dt = due_dt.replace(tzinfo=seoul)
+                    return now_local > due_dt
                 except Exception:
                     continue
             return False
