@@ -209,8 +209,8 @@ img, video { max-width: 100%; height: auto; display: block; }
   
   .grid { grid-template-columns: 1fr; gap: 12px; }
   .two-col { grid-template-columns: 1fr; gap: 16px; }
-  .team { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .team.two-only { grid-template-columns: 1fr; max-width: 300px; }
+  .team { grid-template-columns: 1fr; gap: 12px; }
+  .team.two-only { grid-template-columns: 1fr; max-width: 360px; }
   
   .card { padding: 16px; }
   .card h3 { font-size: 16px; }
