@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Infotherapy · 홈{% endblock %}
 {% block content %}
-  <section class="hero has-bg" style="background-image: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(248,250,255,0.92)), url('{{ url_for('static', filename='images/info.jpg') }}');">
+  <section class="hero has-bg" style="background-image: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(248,250,255,0.92)), url('{{ static_url('images/info.jpg') }}');">
     <div>
       <span class="eyebrow">Heal The World with IT</span>
       <h1>INFOTHERAPY</h1>
