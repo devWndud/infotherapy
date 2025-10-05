@@ -63,6 +63,20 @@ fi
 echo "🚀 Gunicorn을 시작합니다..."
 nohup env ASSET_VERSION=$ASSET_VERSION gunicorn --config gunicorn.conf.py application:application > gunicorn.log 2>&1 &
 
+# 정적 파일 동기화 (Nginx가 /var/www/html/infotherapy/static 제공 시)
+WEB_STATIC_DIR=/var/www/html/infotherapy/static
+if [ -d "static" ]; then
+    echo "🧩 정적 파일을 Nginx 웹 루트로 동기화합니다..."
+    sudo mkdir -p "$WEB_STATIC_DIR"
+    sudo rsync -a --delete static/ "$WEB_STATIC_DIR"/
+    # 권한 정리 (www-data 사용자 기준)
+    if id www-data >/dev/null 2>&1; then
+        sudo chown -R www-data:www-data "$WEB_STATIC_DIR"
+        sudo find "$WEB_STATIC_DIR" -type d -exec chmod 755 {} \;
+        sudo find "$WEB_STATIC_DIR" -type f -exec chmod 644 {} \;
+    fi
+fi
+
 # Nginx 설정 확인 및 재시작
 if command -v nginx &> /dev/null; then
     echo "🌐 Nginx 설정을 확인합니다..."
