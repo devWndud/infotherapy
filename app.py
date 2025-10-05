@@ -18,7 +18,7 @@ from markupsafe import Markup, escape
 
 def create_app() -> Flask:
     load_dotenv()
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder=None)
     app.secret_key = os.getenv("FLASK_SECRET", "dev-secret-change-me")
 
     # SQLite init
