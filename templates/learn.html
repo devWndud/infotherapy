@@ -45,16 +45,14 @@
           <a class="list-item" data-category="{{ a.category }}" href="{{ url_for('assignment_detail', item_id=a['id'] if a['id'] is defined else loop.index) }}" style="text-decoration:none; color:inherit;">
             <div class="lead">
               <span class="dot cat-{{ a.category }}"></span>
-              <div>
-                <div style="font-weight:600;">{{ a.title }}</div>
-                <div class="hint" style="white-space:pre-wrap;">{{ a.description | autolink | safe }}</div>
-              </div>
+              <div style="font-weight:600;">{{ a.title }}</div>
             </div>
-            <span class="badge due">마감 {{ a.due }}</span>
-            {% if session.get('uid') and key in submitted_keys %}
+            {% if a.submitted_at %}
               <span class="badge" style="border-color:#86efac; background:#ecfdf5; color:#065f46;">제출 완료</span>
             {% elif a.overdue %}
               <span class="badge" style="border-color:#fecaca; background:#fef2f2; color:#7f1d1d;">제출 마감</span>
+            {% else %}
+              <span class="badge due">마감 {{ a.due | short_dt }}</span>
             {% endif %}
           </a>
         {% endfor %}

@@ -103,6 +103,35 @@ def create_app() -> Flask:
             return url_for("static", filename=filename, v=app.config.get("ASSET_VERSION"))
         return {"static_url": static_url}
 
+    # datetime short formatter (no year)
+    def format_datetime_short(value: str) -> str:
+        if not value:
+            return ""
+        # Try common formats
+        fmts = [
+            "%Y-%m-%d %H:%M",
+            "%Y-%m-%d",
+        ]
+        dt = None
+        try:
+            # ISO 8601
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+        except Exception:
+            for f in fmts:
+                try:
+                    dt = datetime.strptime(value, f)
+                    break
+                except Exception:
+                    continue
+        if not dt:
+            return value
+        # If time present (non-midnight) print mm-dd HH:MM, else mm-dd
+        if dt.hour != 0 or dt.minute != 0:
+            return dt.strftime("%m-%d %H:%M")
+        return dt.strftime("%m-%d")
+
+    app.jinja_env.filters["short_dt"] = format_datetime_short
+
     @app.route("/")
     def index():
         return render_template("index.html")
@@ -272,7 +301,7 @@ def create_app() -> Flask:
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
             assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC").fetchall()
-        # compute overdue flags
+        # compute overdue and fetch submission times for current user
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
@@ -284,19 +313,21 @@ def create_app() -> Flask:
                     continue
             return False
         assignments = []
-        for a in assignments_rows:
-            d = dict(a)
-            d["overdue"] = is_overdue(d.get("due", ""))
-            assignments.append(d)
-        submitted_keys = set()
+        submission_map = {}
         if session.get("uid"):
             with get_db() as cx:
                 rows = cx.execute(
-                    "SELECT assignment_title, category FROM submissions WHERE user_id=?",
+                    "SELECT assignment_title, IFNULL(category,'') AS category, created_at FROM submissions WHERE user_id=?",
                     (session.get("uid"),),
                 ).fetchall()
-            submitted_keys = {f"{r['assignment_title']}|{r['category'] or ''}" for r in rows}
-        return render_template("learn.html", materials=materials, assignments=assignments, submitted_keys=submitted_keys)
+            submission_map = {f"{r['assignment_title']}|{r['category']}": r["created_at"] for r in rows}
+        for a in assignments_rows:
+            d = dict(a)
+            d["overdue"] = is_overdue(d.get("due", ""))
+            key = f"{d.get('title')}|{d.get('category') or ''}"
+            d["submitted_at"] = submission_map.get(key)
+            assignments.append(d)
+        return render_template("learn.html", materials=materials, assignments=assignments)
 
     @app.route("/activities")
     def activities():
