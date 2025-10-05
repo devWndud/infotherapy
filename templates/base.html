@@ -60,23 +60,25 @@
           <span class="logo-text">Infotherapy</span>
         </a>
         <nav class="nav" id="site-nav">
-          <a href="{{ url_for('index') }}">홈</a>
-          <a href="{{ url_for('learn') }}">학습</a>
-          <a href="{{ url_for('activities') }}">활동</a>
-          {% if session.get('admin') %}
-            <a href="{{ url_for('admin_dashboard') }}">관리</a>
-          {% endif %}
-          {% if session.get('uid') %}
-            <div class="profile-chip">
-              <div class="avatar-mini">{{ (session.get('name') or 'U')[:1] }}</div>
-              <span class="profile-name">{{ session.get('name') or '사용자' }}</span>
-              {% if session.get('admin') %}<span class="badge" style="height:22px;">admin</span>{% endif %}
-              <a href="{{ url_for('logout') }}" class="btn btn-outline" style="margin-left:8px;">로그아웃</a>
-            </div>
-          {% else %}
-            <a href="{{ url_for('login') }}" class="btn btn-outline">로그인</a>
-            <a href="{{ url_for('signup') }}" class="btn btn-primary">회원가입</a>
-          {% endif %}
+          <div class="nav-content">
+            <a href="{{ url_for('index') }}">홈</a>
+            <a href="{{ url_for('learn') }}">학습</a>
+            <a href="{{ url_for('activities') }}">활동</a>
+            {% if session.get('admin') %}
+              <a href="{{ url_for('admin_dashboard') }}">관리</a>
+            {% endif %}
+            {% if session.get('uid') %}
+              <div class="profile-chip">
+                <div class="avatar-mini">{{ (session.get('name') or 'U')[:1] }}</div>
+                <span class="profile-name">{{ session.get('name') or '사용자' }}</span>
+                {% if session.get('admin') %}<span class="badge" style="height:22px;">admin</span>{% endif %}
+              </div>
+              <a href="{{ url_for('logout') }}" class="btn btn-outline">로그아웃</a>
+            {% else %}
+              <a href="{{ url_for('login') }}" class="btn btn-outline">로그인</a>
+              <a href="{{ url_for('signup') }}" class="btn btn-primary">회원가입</a>
+            {% endif %}
+          </div>
         </nav>
         <button class="nav-toggle" aria-label="메뉴" onclick="toggleNav()">
           <span></span><span></span><span></span>

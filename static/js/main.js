@@ -2,7 +2,52 @@ function toggleNav() {
   const nav = document.getElementById('site-nav');
   if (!nav) return;
   nav.classList.toggle('open');
+  
+  // 모바일에서 메뉴 열릴 때 body 스크롤 방지
+  if (nav.classList.contains('open')) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
 }
+
+// 모바일 메뉴 외부 클릭 시 닫기
+document.addEventListener('click', (e) => {
+  const nav = document.getElementById('site-nav');
+  const navToggle = document.querySelector('.nav-toggle');
+  
+  if (nav && nav.classList.contains('open')) {
+    if (!nav.contains(e.target) && !navToggle.contains(e.target)) {
+      nav.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+});
+
+// ESC 키로 모바일 메뉴 닫기
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const nav = document.getElementById('site-nav');
+    if (nav && nav.classList.contains('open')) {
+      nav.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+});
+
+// 모바일 메뉴 링크 클릭 시 자동으로 메뉴 닫기
+document.addEventListener('DOMContentLoaded', () => {
+  const navLinks = document.querySelectorAll('.nav-content a');
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const nav = document.getElementById('site-nav');
+      if (nav && nav.classList.contains('open')) {
+        nav.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+});
 
 // Simple client-side helpers for forms (UI only)
 function setLoading(button, isLoading) {

@@ -203,15 +203,155 @@
   color: #1d4ed8;
 }
 
-@media (max-width: 480px) {
-  .auth-card {
-    padding: 1.5rem 1.5rem;
-    margin: 1rem;
-    max-width: 90%;
+/* 모바일 반응형 최적화 */
+@media (max-width: 768px) {
+  .auth-container {
+    padding-top: 10vh;
+    background-position: center 80%;
   }
   
+  .auth-card {
+    padding: 1.5rem;
+    margin: 0 1rem;
+    max-width: calc(100% - 2rem);
+    border-radius: 16px;
+  }
+  
+  .auth-logo img {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .auth-logo h1 {
+    font-size: 1.25rem;
+  }
+  
+  .auth-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .form-group input {
+    padding: 1rem;
+    font-size: 16px; /* iOS 줌 방지 */
+  }
+  
+  .auth-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
   .auth-container {
-    padding: 0;
+    padding-top: 8vh;
+    background-position: center 70%;
+  }
+  
+  .auth-card {
+    padding: 1.25rem;
+    margin: 0 0.75rem;
+    max-width: calc(100% - 1.5rem);
+  }
+  
+  .auth-logo {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .auth-logo img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .auth-logo h1 {
+    font-size: 1.125rem;
+  }
+  
+  .auth-header h2 {
+    font-size: 1.375rem;
+  }
+  
+  .auth-header p {
+    font-size: 0.85rem;
+  }
+  
+  .auth-form {
+    gap: 1rem;
+  }
+  
+  .form-group input {
+    padding: 0.875rem;
+  }
+  
+  .auth-btn {
+    padding: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding-top: 6vh;
+    background-position: center 60%;
+  }
+  
+  .auth-card {
+    padding: 1rem;
+    margin: 0 0.5rem;
+    max-width: calc(100% - 1rem);
+    border-radius: 12px;
+  }
+  
+  .auth-logo img {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .auth-logo h1 {
+    font-size: 1rem;
+  }
+  
+  .auth-header h2 {
+    font-size: 1.25rem;
+  }
+  
+  .auth-header p {
+    font-size: 0.8rem;
+  }
+  
+  .form-group label {
+    font-size: 0.85rem;
+  }
+  
+  .form-group input {
+    padding: 0.75rem;
+    font-size: 16px;
+    border-radius: 10px;
+  }
+  
+  .auth-btn {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+  
+  .auth-footer p {
+    font-size: 0.8rem;
+  }
+}
+
+/* 터치 디바이스 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .auth-btn:hover {
+    transform: none;
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.2);
+  }
+  
+  .auth-btn:active {
+    transform: scale(0.98);
+  }
+  
+  .form-group input:focus {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
   }
 }
 </style>

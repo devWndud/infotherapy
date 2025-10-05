@@ -176,16 +176,200 @@ img, video { max-width: 100%; height: auto; display: block; }
 .footer-links a { color: var(--muted); text-decoration: none; }
 .footer-links a:hover { color: var(--primary); }
 
-@media (max-width: 920px) {
-  .hero { grid-template-columns: 1fr; min-height: 46vh; }
-  .two-col { grid-template-columns: 1fr; }
-  .grid { grid-template-columns: repeat( auto-fit, minmax(240px, 1fr) ); }
+/* 모바일 반응형 개선 */
+@media (max-width: 1024px) {
+  .container { padding: 0 20px; }
+  .hero { min-height: 50vh; padding: clamp(20px, 4vw, 48px) 0; }
+  .grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .team { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 }
-@media (max-width: 640px) {
-  .grid { grid-template-columns: 1fr; }
-  .nav { display: none; position: absolute; right: 20px; top: 72px; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 10px; flex-direction: column; width: 200px; }
-  .nav.open { display: flex; }
+
+@media (max-width: 768px) {
+  .container { padding: 0 16px; }
+  .header-inner { height: 56px; }
+  .logo-mark-img { width: 24px; height: 24px; }
+  .logo-text { font-size: 16px; }
+  
+  .hero { 
+    min-height: 45vh; 
+    padding: clamp(16px, 3vw, 32px) 0;
+    background-position: center 50% !important;
+  }
+  .hero h1 { 
+    font-size: clamp(28px, 6vw, 48px); 
+    margin: 0 0 8px;
+    padding-left: 0;
+  }
+  .hero p { 
+    font-size: clamp(14px, 2vw, 18px); 
+    margin: 0 0 20px;
+    padding-left: 0;
+  }
+  .eyebrow { font-size: 11px; padding: 4px 8px; }
+  
+  .grid { grid-template-columns: 1fr; gap: 12px; }
+  .two-col { grid-template-columns: 1fr; gap: 16px; }
+  .team { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .team.two-only { grid-template-columns: 1fr; max-width: 300px; }
+  
+  .card { padding: 16px; }
+  .card h3 { font-size: 16px; }
+  
+  .btn { padding: 10px 16px; font-size: 14px; }
+  .hero-actions { gap: 8px; }
+  
+  .timeline { gap: 16px; }
+  .timeline-content { padding: 12px; }
+  .timeline-title { font-size: 15px; }
+  .timeline-desc { font-size: 13px; }
+  
+  .form { gap: 12px; }
+  .form input { height: 48px; font-size: 16px; }
+  .form textarea { min-height: 100px; font-size: 16px; }
+  
+  .nav { display: none; }
   .nav-toggle { display: inline-flex; }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 0 12px; }
+  .header-inner { height: 52px; }
+  .main.container { padding: 20px 12px; }
+  
+  .hero { 
+    min-height: 40vh; 
+    padding: clamp(12px, 2vw, 24px) 0;
+  }
+  .hero h1 { 
+    font-size: clamp(24px, 8vw, 36px); 
+    line-height: 1.1;
+  }
+  .hero p { 
+    font-size: clamp(13px, 2.5vw, 16px); 
+    line-height: 1.4;
+  }
+  
+  .section { margin-top: 24px; }
+  .card { padding: 14px; border-radius: 12px; }
+  .card h3 { font-size: 15px; margin: 0 0 4px; }
+  .card p { font-size: 13px; }
+  
+  .team { grid-template-columns: 1fr; gap: 10px; }
+  .team-item { padding: 12px; }
+  .avatar { width: 56px; height: 56px; }
+  .team-name { font-size: 14px; }
+  .team-role { font-size: 12px; }
+  
+  .btn { padding: 12px 20px; font-size: 15px; border-radius: 12px; }
+  .hero-actions { flex-direction: column; align-items: center; }
+  .hero-actions .btn { width: 100%; max-width: 280px; }
+  
+  .timeline { gap: 12px; }
+  .timeline-item { grid-template-columns: 20px 1fr; gap: 8px; }
+  .timeline-node { width: 12px; height: 12px; }
+  .timeline-content { padding: 10px; border-radius: 12px; }
+  .timeline-title { font-size: 14px; }
+  .timeline-desc { font-size: 12px; }
+  
+  .form { max-width: 100%; }
+  .form input { height: 52px; padding: 12px 16px; }
+  .form textarea { min-height: 120px; padding: 12px 16px; }
+  
+  .nav-toggle { width: 40px; height: 40px; }
+  .nav-toggle span { width: 16px; height: 2px; }
+  
+  .page-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .lead { flex-wrap: wrap; }
+  
+  .footer-grid { grid-template-columns: 1fr; gap: 20px; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 8px; }
+  .main.container { padding: 16px 8px; }
+  
+  .hero { min-height: 35vh; }
+  .hero h1 { font-size: clamp(20px, 9vw, 28px); }
+  .hero p { font-size: clamp(12px, 3vw, 14px); }
+  
+  .card { padding: 12px; }
+  .card h3 { font-size: 14px; }
+  .card p { font-size: 12px; }
+  
+  .btn { padding: 10px 16px; font-size: 14px; }
+  
+  .team-item { padding: 10px; }
+  .avatar { width: 48px; height: 48px; }
+  
+  .timeline-content { padding: 8px; }
+  .timeline-title { font-size: 13px; }
+  .timeline-desc { font-size: 11px; }
+  
+  .form input { height: 48px; padding: 10px 14px; }
+  .form textarea { min-height: 100px; padding: 10px 14px; }
+}
+
+/* 모바일 네비게이션 개선 */
+.nav { 
+  display: none; 
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  right: 0; 
+  bottom: 0; 
+  background: rgba(0,0,0,0.5); 
+  z-index: 1000;
+  padding: 0;
+}
+
+.nav.open { 
+  display: flex; 
+  align-items: flex-start; 
+  justify-content: flex-end;
+  padding: 60px 20px 20px;
+}
+
+.nav-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  width: 280px;
+  max-width: 90vw;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nav-content a {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.nav-content .btn {
+  margin-top: 8px;
+  justify-content: center;
+}
+
+/* 모바일 터치 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover { transform: none; }
+  .card:hover { transform: none; }
+  .nav a:hover { background: var(--surface); }
+  
+  .btn:active { transform: scale(0.98); }
+  .card:active { transform: scale(0.99); }
+}
+
+/* 모바일 스크롤 개선 */
+@media (max-width: 768px) {
+  body { -webkit-overflow-scrolling: touch; }
+  
+  .hero.has-bg {
+    background-attachment: scroll !important;
+  }
 }
 
 
