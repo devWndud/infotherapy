@@ -194,6 +194,7 @@ img, video { max-width: 100%; height: auto; display: block; }
     min-height: 45vh; 
     padding: clamp(16px, 3vw, 32px) 0;
     background-position: center 50% !important;
+    background-size: cover !important; /* 모바일에서 꽉 채우기 */
   }
   .hero h1 { 
     font-size: clamp(28px, 6vw, 48px); 
@@ -239,6 +240,7 @@ img, video { max-width: 100%; height: auto; display: block; }
   .hero { 
     min-height: 40vh; 
     padding: clamp(12px, 2vw, 24px) 0;
+    background-size: cover !important; /* 모바일에서 꽉 채우기 */
   }
   .hero h1 { 
     font-size: clamp(24px, 8vw, 36px); 
