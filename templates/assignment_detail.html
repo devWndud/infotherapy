@@ -6,26 +6,32 @@
     <h2 style="margin:6px 0 12px;">{{ a.title }}</h2>
     <div style="white-space:pre-wrap; line-height:1.5;">{{ a.description | autolink | safe }}</div>
     {% if submitted %}
-      <span class="badge" style="border-color:#86efac; background:#ecfdf5; color:#065f46;">제출 완료</span>
+      <span class="badge" style="border-color:#86efac; background:#ecfdf5; color:#065f46;">완료</span>
+      {% if submitted_at %}<span class="hint" style="margin-left:6px;">시간: {{ submitted_at }}</span>{% endif %}
     {% elif overdue %}
       <span class="badge" style="border-color:#fecaca; background:#fef2f2; color:#7f1d1d;">제출 마감</span>
     {% else %}
-      <details style="margin-top:12px;">
-        <summary class="btn btn-outline">제출</summary>
-        <form class="form" action="{{ url_for('submit_assignment') }}" method="post" enctype="multipart/form-data" style="margin-top:12px;">
-          <input type="hidden" name="title" value="{{ a.title }}">
-          <input type="hidden" name="category" value="{{ a.category }}">
-          <div class="row">
-            <label for="text_detail">내용(텍스트)</label>
-            <textarea id="text_detail" name="text_content" placeholder="설명 또는 링크 (선택)"></textarea>
-          </div>
-          <div class="row">
-            <label for="file_detail">파일(선택)</label>
-            <input id="file_detail" name="file" type="file" accept="*/*">
-          </div>
-          <button class="btn btn-primary" type="submit">제출하기</button>
-        </form>
-      </details>
+      {% if session.get('uid') %}
+        <details style="margin-top:12px;">
+          <summary class="btn btn-outline">제출</summary>
+          <form class="form" action="{{ url_for('submit_assignment') }}" method="post" enctype="multipart/form-data" style="margin-top:12px;">
+            <input type="hidden" name="title" value="{{ a.title }}">
+            <input type="hidden" name="category" value="{{ a.category }}">
+            <div class="row">
+              <label for="text_detail">내용(텍스트)</label>
+              <textarea id="text_detail" name="text_content" placeholder="설명 또는 링크 (선택)"></textarea>
+            </div>
+            <div class="row">
+              <label for="file_detail">파일(선택)</label>
+              <input id="file_detail" name="file" type="file" accept="*/*">
+            </div>
+            <button class="btn btn-primary" type="submit">제출하기</button>
+          </form>
+        </details>
+      {% else %}
+        <div class="hint" style="margin-top:12px;">로그인 후 제출할 수 있습니다.</div>
+        <a class="btn btn-primary" href="{{ url_for('login') }}" style="margin-top:8px;">로그인</a>
+      {% endif %}
     {% endif %}
     <a class="btn btn-outline" href="{{ url_for('learn') }}" style="margin-top:8px;">목록으로</a>
   </div>

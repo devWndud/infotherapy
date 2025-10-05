@@ -167,7 +167,7 @@ def create_app() -> Flask:
         flash("로그아웃되었습니다.", "info")
         return redirect(url_for("index"))
 
-    def send_admin_email(subject: str, body: str):
+    def send_admin_email(subject: str, body: str, attachments: list | None = None):
         host = os.getenv("SMTP_HOST")
         port = int(os.getenv("SMTP_PORT", "587"))
         user = os.getenv("SMTP_USER")
@@ -181,6 +181,23 @@ def create_app() -> Flask:
         msg["To"] = ", ".join(admin_emails)
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "plain", _charset="utf-8"))
+        # attachments: list of (filepath, mime)
+        for att in attachments or []:
+            try:
+                from email.mime.base import MIMEBase
+                from email import encoders
+                path = att.get("path")
+                mime = att.get("mime", "application/octet-stream")
+                if not path or not os.path.isfile(path):
+                    continue
+                part = MIMEBase(*mime.split("/", 1))
+                with open(path, "rb") as f:
+                    part.set_payload(f.read())
+                encoders.encode_base64(part)
+                part.add_header("Content-Disposition", f"attachment; filename=\"{os.path.basename(path)}\"")
+                msg.attach(part)
+            except Exception:
+                continue
         with smtplib.SMTP(host, port) as server:
             server.starttls()
             if user and password:
@@ -217,16 +234,24 @@ def create_app() -> Flask:
                 (session.get("uid"), session.get("name"), title, category, text_content, file_path, datetime.utcnow().isoformat()),
             )
         flash("제출 완료", "info")
-        # email notify
+        # email notify - subject: 이름 - 과제명 제출
         body_lines = [
             f"제출자: {session.get('name')} (user_id={session.get('uid')})",
             f"과제: {title}",
             f"카테고리: {category}",
-            f"내용: {text_content[:500]}" if text_content else "내용: (파일만 제출)",
-            f"파일: {file_path}" if file_path else "파일: 없음",
+            f"제출시간(UTC): {datetime.utcnow().isoformat(timespec='seconds')}",
+            "",
+            "[제출 내용]",
+            text_content if text_content else "(텍스트 없음)",
         ]
         try:
-            send_admin_email(subject=f"[Infotherapy] 과제 제출 - {title}", body="\n".join(body_lines))
+            attachments = []
+            if file_path:
+                # 추정 MIME
+                import mimetypes
+                mime = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
+                attachments.append({"path": file_path, "mime": mime})
+            send_admin_email(subject=f"{session.get('name')} - {title} 제출", body="\n".join(body_lines), attachments=attachments)
         except Exception:
             pass
         return redirect(url_for("learn"))
@@ -304,14 +329,17 @@ def create_app() -> Flask:
             return False
         overdue = is_overdue(a.get("due", ""))
         submitted = False
+        submitted_at = None
         if session.get("uid"):
             with get_db() as cx:
                 row = cx.execute(
-                    "SELECT 1 FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
+                    "SELECT created_at FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
                     (session.get("uid"), a["title"], a["category"]),
                 ).fetchone()
-            submitted = bool(row)
-        return render_template("assignment_detail.html", a=a, submitted=submitted, overdue=overdue)
+            if row:
+                submitted = True
+                submitted_at = row["created_at"]
+        return render_template("assignment_detail.html", a=a, submitted=submitted, submitted_at=submitted_at, overdue=overdue)
 
     # Admin dashboard and CRUD
     @app.route("/admin")
