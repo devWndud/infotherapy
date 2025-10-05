@@ -16,6 +16,10 @@
         <h3>학습</h3>
         <p> 동아리 부원 전용 프로그래밍 학습 공간입니다</p>
       </a>
+      <a class="card" href="{{ url_for('activities') }}" style="text-decoration:none; color:inherit;">
+        <h3>활동</h3>
+        <p>Infotherapy의 다양한 활동과 프로젝트를 확인해보세요</p>
+      </a>
       <div class="card">
         <h3>동아리 소개</h3>
         <p>우리는 실전 중심 학습과 협업을 지향합니다</p>
@@ -23,30 +27,62 @@
     </div>
   </section>
 
-  <section class="section centered">
+  <section class="section centered team-section">
     <h2 style="margin:0 0 16px;">기장단</h2>
     <div class="team two-only">
       <div class="team-item">
-        <div class="avatar"></div>
+        <div class="avatar" style="background-image: url('{{ url_for('static', filename='images/gijang.jpg') }}'); background-size: cover; background-position: center;"></div>
         <div class="team-name">신주영</div>
         <div class="team-role">기장</div>
       </div>
       <div class="team-item">
-        <div class="avatar"></div>
+        <div class="avatar" style="background-image: url('{{ url_for('static', filename='images/bugijang.jpg') }}'); background-size: cover; background-position: center;"></div>
         <div class="team-name">김희성</div>
         <div class="team-role">부기장</div>
       </div>
     </div>
   </section>
 
-  <section class="section centered">
+  <section class="section centered social-section">
+    <h2 style="margin:0 0 16px;">공식 SNS</h2>
+    <div class="social-links">
+      <a href="https://www.instagram.com/info._.official/" target="_blank" class="social-card">
+        <div class="social-icon">📸</div>
+        <div class="social-content">
+          <h3>Instagram</h3>
+          <p>@info._.official</p>
+          <span class="social-desc">동아리 활동과 일상을 확인해보세요</span>
+        </div>
+      </a>
+      
+      <a href="https://linktr.ee/infotherapy" target="_blank" class="social-card">
+        <div class="social-icon">🔗</div>
+        <div class="social-content">
+          <h3>Linktree</h3>
+          <p>@infotherapy</p>
+          <span class="social-desc">인포테라피의 모든 링크를 한 곳에서</span>
+        </div>
+      </a>
+      
+      <a href="https://asked.kr/infotherapy" target="_blank" class="social-card">
+        <div class="social-icon">❓</div>
+        <div class="social-content">
+          <h3>Asked</h3>
+          <p>@infotherapy</p>
+          <span class="social-desc">익명으로 질문하고 답변받아보세요</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="section centered info-section">
     <h2 style="margin:0 0 16px;">2025 INFO</h2>
     <div class="timeline">
       <div class="timeline-item win">
         <div class="timeline-node"></div>
         <div class="timeline-content">
           <div class="timeline-title">2025 제2회 충남 학생 인공지능(AI) 코딩 창의력 한마당</div>
-          <div class="timeline-desc"><span class="award">고등부 3등 수상</span> - 2학년 신주영</div>
+          <div class="timeline-desc"><span class="award">고등부 3등</span> - 신주영</div>
         </div>
       </div>
       <div class="timeline-item win">
@@ -74,6 +110,123 @@
       </div>
     </div>
   </section>
+
+<style>
+.social-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.social-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  max-width: 400px;
+  width: 100%;
+}
+
+.social-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: #e1306c;
+}
+
+.social-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.social-content h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.social-content p {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #e1306c;
+  font-weight: 500;
+}
+
+.social-desc {
+  font-size: 0.85rem;
+  color: #718096;
+  line-height: 1.4;
+}
+
+/* 섹션 구분 */
+.team-section {
+  background: #f8fafc;
+  padding: 4rem 0;
+  position: relative;
+}
+
+.team-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  border-radius: 2px;
+}
+
+.social-section {
+  background: #ffffff;
+  padding: 4rem 0;
+  position: relative;
+}
+
+.social-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+  border-radius: 2px;
+}
+
+.info-section {
+  background: #f1f5f9;
+  padding: 4rem 0;
+}
+
+@media (max-width: 768px) {
+  .social-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.25rem;
+  }
+  
+  .social-icon {
+    font-size: 2rem;
+  }
+  
+  .team-section,
+  .social-section,
+  .info-section {
+    padding: 2rem 0;
+  }
+}
+</style>
 {% endblock %}
 
 

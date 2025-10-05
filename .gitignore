@@ -151,4 +151,4 @@ ssl/
 Thumbs.db
 
 # AWS
-.aws/
+.aws/myenv/

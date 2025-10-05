@@ -266,6 +266,10 @@ def create_app() -> Flask:
             submitted_keys = {f"{r['assignment_title']}|{r['category'] or ''}" for r in rows}
         return render_template("learn.html", materials=materials, assignments=assignments, submitted_keys=submitted_keys)
 
+    @app.route("/activities")
+    def activities():
+        return render_template("activities.html")
+
     @app.route("/material/<int:item_id>")
     def material_detail(item_id: int):
         with get_db() as cx:

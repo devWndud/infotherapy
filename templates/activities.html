@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}활동 · Infotherapy{% endblock %}
+{% block content %}
+<section class="hero has-bg" style="background-image: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(248,250,255,0.92)), url('{{ url_for('static', filename='images/info2.jpg') }}');">
+  <div>
+    <h1>동아리 활동</h1>
+    <p>Infotherapy의 다양한 활동과 프로젝트를 확인해보세요</p>
+  </div>
+</section>
+
+<div class="activities-section">
+  <div class="container">
+    <h2>주요 활동</h2>
+    <div class="activities-grid">
+      <div class="activity-card">
+        <div class="activity-icon">💻</div>
+        <h3>프로그래밍</h3>
+        <p>Python, Unity, WEB, AI 등 다양한 프로그래밍 언어와 기술을 함께 공부합니다.</p>
+        <div class="activity-tags">
+          <span class="tag">Python</span>
+          <span class="tag">WEB</span>
+          <span class="tag">AI</span>
+        </div>
+      </div>
+      
+      <div class="activity-card">
+        <div class="activity-icon">🤖</div>
+        <h3>개인 프로젝트</h3>
+        <p>프로그래밍을 공부한 내용을 바탕으로 자신만의 프로젝트를 진행합니다.</p>
+        <div class="activity-tags">
+          <span class="tag">웹사이트</span>
+          <span class="tag">게임 개발</span>
+          <span class="tag">인공지능</span>
+        </div>
+      </div>
+      
+      <div class="activity-card">
+        <div class="activity-icon">🌐</div>
+        <h3>월광제 부스 활동</h3>
+        <p>인포이즘, 우당탕팅 레이스 등 여러 부스 활동을 진행합니다.</p>
+        <div class="activity-tags">
+          <span class="tag">인포이즘</span>
+          <span class="tag">우당탕팅 레이스</span>
+          <span class="tag">달빛 오락실</span>
+        </div>
+      </div>
+      
+      <div class="activity-card">
+        <div class="activity-icon">🏆</div>
+        <h3>대회 참가</h3>
+        <p>다양한 프로그래밍 대회와 해커톤에 참가하여 실력을 향상시킵니다.</p>
+        <div class="activity-tags">
+          <span class="tag">해커톤</span>
+          <span class="tag">알고리즘</span>
+          <span class="tag">로봇</span>
+        </div>
+      </div>
+      
+      <div class="activity-card">
+        <div class="activity-icon">👥</div>
+        <h3>AI SW 역량 증진 캠프</h3>
+        <p>SW 동행 프로젝트, Notion 강의, 인공지능 강의 등 다양한 활동을 진행합니다.</p>
+        <div class="activity-tags">
+          <span class="tag">SW 동행 프로젝트</span>
+          <span class="tag">Notion 강의</span>
+          <span class="tag">인공지능 강의</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section centered">
+  <h2 style="margin:0 0 16px;">2025 활동 연혁</h2>
+  <div class="timeline">
+    <div class="timeline-item win">
+      <div class="timeline-node"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">노션 완벽 정복 강의</div>
+        <div class="timeline-desc"><span class="award">2025.05.21</span> - 외부 강사님을 초청하여 노션 강의를 진행했습니다.</div>
+      </div>
+    </div>
+    
+    <div class="timeline-item win">
+      <div class="timeline-node"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">Microsoft 기업 탐방</div>
+        <div class="timeline-desc"><span class="award">2025.05.31</span> - Microsoft 기업을 탐방하고 Auto Makers 챌린지를 진행했습니다.</div>
+      </div>
+    </div>
+
+    <div class="timeline-item win">
+      <div class="timeline-node"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">2025 청소년 sw동행 해커톤</div>
+        <div class="timeline-desc"><span class="award">2025.07.30-31</span> - 해커톤에 참가하여 부원들이 개발한 프로젝트를 발표했습니다.</div>
+      </div>
+    </div>
+
+    <div class="timeline-item win">
+      <div class="timeline-node"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">2025 청소년 sw 동행프로젝트 집중 캠프</div>
+        <div class="timeline-desc"><span class="award">2025.08.12</span> - 서울대 글로벌공학교육센터에서 열렸던 집중 캠프에 참가했습니다.</div>
+      </div>
+    </div>
+
+    <div class="timeline-item win">
+      <div class="timeline-node"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">Speak & See_ AI의 두 감각</div>
+        <div class="timeline-desc"><span class="award">2025.08.20</span> - 대학 교수님을 초청하여 CNN, Computer Vision, NLP 강의를 진행했습니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+
+.activities-section {
+  padding: 4rem 0;
+  background: #f8fafc;
+}
+
+.activities-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 3rem;
+  color: #2d3748;
+}
+
+.activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.activity-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+}
+
+.activity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.activity-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.activity-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #2d3748;
+}
+
+.activity-card p {
+  color: #718096;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.activity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  background: #e2e8f0;
+  color: #4a5568;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+
+@media (max-width: 768px) {
+  .activities-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+{% endblock %}
