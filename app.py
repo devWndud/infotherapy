@@ -20,6 +20,7 @@ def create_app() -> Flask:
     load_dotenv()
     app = Flask(__name__)
     app.secret_key = os.getenv("FLASK_SECRET", "dev-secret-change-me")
+    app.config["ASSET_VERSION"] = os.getenv("ASSET_VERSION") or datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
     # SQLite init
     db_path = os.path.join(os.path.dirname(__file__), "infotherapy.db")
@@ -95,6 +96,12 @@ def create_app() -> Flask:
         return Markup(html)
 
     app.jinja_env.filters["autolink"] = autolink
+
+    @app.context_processor
+    def inject_static_url():
+        def static_url(filename: str) -> str:
+            return url_for("static", filename=filename, v=app.config.get("ASSET_VERSION"))
+        return {"static_url": static_url}
 
     @app.route("/")
     def index():

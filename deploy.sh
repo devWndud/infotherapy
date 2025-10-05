@@ -28,6 +28,9 @@ if [ ! -f ".env" ]; then
     echo "🔧 .env 파일을 편집하여 실제 값으로 설정하세요!"
 fi
 
+# 자산 버전 갱신 (정적 캐시 무효화)
+export ASSET_VERSION=$(date +%Y%m%d%H%M%S)
+
 # 데이터베이스 초기화
 echo "🗄️  데이터베이스를 초기화합니다..."
 python -c "from app import create_app; create_app()"
@@ -58,7 +61,7 @@ fi
 
 # Gunicorn 시작
 echo "🚀 Gunicorn을 시작합니다..."
-nohup gunicorn --config gunicorn.conf.py application:application > gunicorn.log 2>&1 &
+nohup env ASSET_VERSION=$ASSET_VERSION gunicorn --config gunicorn.conf.py application:application > gunicorn.log 2>&1 &
 
 # Nginx 설정 확인 및 재시작
 if command -v nginx &> /dev/null; then
