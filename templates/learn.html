@@ -533,43 +533,44 @@
     const modalSaveBtn = document.getElementById('modal-save');
     const interestOptions = document.querySelectorAll('.interest-option input[type="checkbox"]');
 
-    // 서버에서 관심 분야 불러오기
-    let selectedInterests = {{ user_interests | tojson }};
+    // 서버에서 관심 분야 불러오기 (데이터베이스에 저장된 관심분야)
+    let userInterests = {{ user_interests | tojson }};
+    
+    // 현재 필터 상태 (실시간 필터링용)
+    let currentFilter = 'all';
     
     // 관심 분야가 선택되지 않았을 때 모달 표시
-    if (selectedInterests.length === 0) {
+    if (userInterests.length === 0) {
       setTimeout(() => {
         interestModal.classList.add('show');
       }, 500);
     }
 
+    // 필터 칩 업데이트 (현재 필터 상태에 따라)
     function updateFilterChips() {
       filterChips.forEach(chip => {
         const category = chip.dataset.cat;
-        if (category === 'all') {
-          chip.classList.toggle('active', selectedInterests.length === 4);
-        } else {
-          chip.classList.toggle('active', selectedInterests.includes(category));
-        }
+        chip.classList.toggle('active', category === currentFilter);
       });
     }
 
+    // 아이템 필터링 (현재 필터 상태에 따라)
     function filterItems() {
       let visibleMaterials = 0;
       let visibleAssignments = 0;
       
-      // 관심 분야가 선택되지 않았을 때 모달 표시
-      if (selectedInterests.length === 0) {
-        setTimeout(() => {
-          interestModal.classList.add('show');
-        }, 100);
-        return;
-      }
-      
       // Filter materials
       materials.forEach(item => {
         const category = item.dataset.category;
-        const shouldShow = selectedInterests.includes(category);
+        let shouldShow = false;
+        
+        if (currentFilter === 'all') {
+          // 전체 보기: 사용자가 선택한 관심분야에 포함된 것만
+          shouldShow = userInterests.includes(category);
+        } else {
+          // 특정 분야만: 현재 필터와 일치하는 것만
+          shouldShow = category === currentFilter;
+        }
         
         if (shouldShow) {
           item.style.display = 'flex';
@@ -582,7 +583,15 @@
       // Filter assignments
       assignments.forEach(item => {
         const category = item.dataset.category;
-        const shouldShow = selectedInterests.includes(category);
+        let shouldShow = false;
+        
+        if (currentFilter === 'all') {
+          // 전체 보기: 사용자가 선택한 관심분야에 포함된 것만
+          shouldShow = userInterests.includes(category);
+        } else {
+          // 특정 분야만: 현재 필터와 일치하는 것만
+          shouldShow = category === currentFilter;
+        }
         
         if (shouldShow) {
           item.style.display = 'flex';
@@ -603,7 +612,7 @@
     editInterestsBtn.addEventListener('click', function() {
       // 현재 선택된 관심 분야로 체크박스 설정
       interestOptions.forEach(option => {
-        option.checked = selectedInterests.includes(option.value);
+        option.checked = userInterests.includes(option.value);
       });
       interestModal.classList.add('show');
     });
@@ -621,9 +630,13 @@
           });
           
           if (response.ok) {
-            selectedInterests = [];
+            userInterests = [];
             updateFilterChips();
             filterItems();
+            // 초기화 후 모달 표시
+            setTimeout(() => {
+              interestModal.classList.add('show');
+            }, 100);
           } else {
             const error = await response.json();
             alert('초기화 중 오류가 발생했습니다: ' + error.error);
@@ -661,7 +674,7 @@
         });
         
         if (response.ok) {
-          selectedInterests = newInterests;
+          userInterests = newInterests;
           updateFilterChips();
           filterItems();
           interestModal.classList.remove('show');
@@ -682,49 +695,13 @@
       }
     });
 
-    // 필터 칩 클릭 (단일 선택)
+    // 필터 칩 클릭 (실시간 필터링용 - 서버 저장 안함)
     filterChips.forEach(chip => {
-      chip.addEventListener('click', async function() {
+      chip.addEventListener('click', function() {
         const category = this.dataset.cat;
-        
-        if (category === 'all') {
-          // 전체 선택 시 모든 분야 선택
-          selectedInterests = ['unity', 'ml', 'dl', 'web'];
-        } else {
-          // 개별 분야 토글
-          if (selectedInterests.includes(category)) {
-            if (selectedInterests.length === 1) {
-              // 마지막 분야를 해제하려고 할 때 모달 표시
-              interestModal.classList.add('show');
-              return;
-            }
-            selectedInterests = selectedInterests.filter(c => c !== category);
-          } else {
-            selectedInterests.push(category);
-          }
-        }
-        
-        // 서버에 저장
-        try {
-          const response = await fetch('/api/interests', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ interests: selectedInterests })
-          });
-          
-          if (response.ok) {
-            updateFilterChips();
-            filterItems();
-          } else {
-            const error = await response.json();
-            alert('저장 중 오류가 발생했습니다: ' + error.error);
-          }
-        } catch (error) {
-          alert('저장 중 오류가 발생했습니다.');
-          console.error('Error:', error);
-        }
+        currentFilter = category;
+        updateFilterChips();
+        filterItems();
       });
     });
 
