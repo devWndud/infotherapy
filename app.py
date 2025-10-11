@@ -141,9 +141,16 @@ def create_app() -> Flask:
         video_extensions = ['.mp4', '.avi', '.mov', '.webm', '.mkv', '.wmv', '.flv']
         return any(path.lower().endswith(ext) for ext in video_extensions)
     
+    def is_image_filter(path: str) -> bool:
+        if not path:
+            return False
+        image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']
+        return any(path.lower().endswith(ext) for ext in image_extensions)
+    
     app.jinja_env.filters["basename"] = basename_filter
     app.jinja_env.filters["file_size"] = file_size_filter
     app.jinja_env.filters["is_video"] = is_video_filter
+    app.jinja_env.filters["is_image"] = is_image_filter
 
     @app.route("/")
     def index():
@@ -263,14 +270,6 @@ def create_app() -> Flask:
             flash("이미 제출한 과제입니다.", "info")
             return redirect(url_for("learn"))
         if uploaded_file and uploaded_file.filename:
-            # 영상 파일 타입 검증
-            allowed_video_types = ['video/mp4', 'video/avi', 'video/quicktime', 'video/webm', 'video/x-msvideo', 'video/x-ms-wmv', 'video/x-flv', 'video/x-matroska']
-            file_type = uploaded_file.content_type
-            
-            if file_type not in allowed_video_types:
-                flash("지원하지 않는 파일 형식입니다. 영상 파일만 업로드 가능합니다.", "info")
-                return redirect(url_for("learn"))
-            
             safe_name = datetime.now().strftime("%Y%m%d%H%M%S_") + secure_filename(uploaded_file.filename)
             dest = os.path.join(uploads_dir, safe_name)
             uploaded_file.save(dest)
@@ -293,12 +292,14 @@ def create_app() -> Flask:
         
         if file_path:
             file_size = os.path.getsize(file_path) / (1024 * 1024)  # MB 단위
+            import mimetypes
+            file_type = mimetypes.guess_type(file_path)[0] or "알 수 없는 형식"
             body_lines.extend([
                 "",
                 "[첨부 파일]",
                 f"파일명: {os.path.basename(file_path)}",
                 f"파일 크기: {file_size:.2f}MB",
-                f"파일 타입: 영상 파일",
+                f"파일 타입: {file_type}",
                 f"파일 경로: {file_path}"
             ])
         try:
