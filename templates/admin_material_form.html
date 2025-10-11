@@ -1,65 +1,305 @@
 {% extends 'base.html' %}
 {% block title %}자료 {{ '수정' if item else '추가' }} · Infotherapy{% endblock %}
 {% block content %}
-  <h2 style="margin-bottom: 12px;">자료 {{ '수정' if item else '추가' }}</h2>
-  <form class="form" method="post">
-    <div class="row">
-      <label>제목</label>
-      <input name="title" value="{{ item['title'] if item else '' }}" required>
-    </div>
-    <div class="row">
-      <label>유형</label>
-      <input name="type" value="{{ item['type'] if item else '' }}" placeholder="slides/notebook/doc">
-    </div>
-    <div class="row">
-      <label>카테고리</label>
-      <div class="selected-filter toggle-group">
-        {% set cat = (item['category'] if item else '') %}
-        <label class="chip {{ 'active' if cat=='unity' }}">
-          <input type="radio" name="category" value="unity" {{ 'checked' if cat=='unity' }} style="display:none;">Unity
-        </label>
-        <label class="chip {{ 'active' if cat=='ml' }}">
-          <input type="radio" name="category" value="ml" {{ 'checked' if cat=='ml' }} style="display:none;">머신러닝
-        </label>
-        <label class="chip {{ 'active' if cat=='dl' }}">
-          <input type="radio" name="category" value="dl" {{ 'checked' if cat=='dl' }} style="display:none;">딥러닝
-        </label>
-        <label class="chip {{ 'active' if cat=='web' }}">
-          <input type="radio" name="category" value="web" {{ 'checked' if cat=='web' }} style="display:none;">Web
-        </label>
+  <div class="admin-form-container">
+    <div class="form-header">
+      <div class="form-title">
+        <h1>{{ '수정' if item else '추가' }} 자료</h1>
+        <p>{{ '자료 정보를 수정하세요' if item else '새로운 자료를 추가하세요' }}</p>
       </div>
+      <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">
+        대시보드로
+      </a>
     </div>
-    <div class="row">
-      <label>날짜</label>
-      <input name="date" value="{{ item['date'] if item else '' }}" placeholder="YYYY-MM-DD">
+
+    <div class="form-card">
+      <form class="admin-form" method="post">
+        <div class="form-group">
+          <label class="form-label">
+            자료 제목
+          </label>
+          <input 
+            class="form-input" 
+            name="title" 
+            value="{{ item['title'] if item else '' }}" 
+            placeholder="자료 제목을 입력하세요"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            유형
+          </label>
+          <input 
+            class="form-input" 
+            name="type" 
+            value="{{ item['type'] if item else '' }}" 
+            placeholder="slides/notebook/doc"
+          >
+          <small class="form-hint">예: slides, notebook, doc</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            카테고리
+          </label>
+          <div class="category-selector">
+            {% set cat = (item['category'] if item else '') %}
+            <label class="category-option {{ 'active' if cat=='unity' }}">
+              <input type="radio" name="category" value="unity" {{ 'checked' if cat=='unity' }}>
+              <div class="option-content">
+                <span class="option-text">Unity</span>
+              </div>
+            </label>
+            <label class="category-option {{ 'active' if cat=='ml' }}">
+              <input type="radio" name="category" value="ml" {{ 'checked' if cat=='ml' }}>
+              <div class="option-content">
+                <span class="option-text">머신러닝</span>
+              </div>
+            </label>
+            <label class="category-option {{ 'active' if cat=='dl' }}">
+              <input type="radio" name="category" value="dl" {{ 'checked' if cat=='dl' }}>
+              <div class="option-content">
+                <span class="option-text">딥러닝</span>
+              </div>
+            </label>
+            <label class="category-option {{ 'active' if cat=='web' }}">
+              <input type="radio" name="category" value="web" {{ 'checked' if cat=='web' }}>
+              <div class="option-content">
+                <span class="option-text">Web</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            날짜
+          </label>
+          <input 
+            class="form-input" 
+            name="date" 
+            value="{{ item['date'] if item else '' }}" 
+            placeholder="YYYY-MM-DD"
+          >
+          <small class="form-hint">예: 2025-01-15</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            내용
+          </label>
+          <textarea 
+            class="form-textarea" 
+            name="content" 
+            placeholder="자료에 대한 상세한 설명을 입력하세요..."
+            rows="6"
+          >{{ item['content'] if item else '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary btn-large" type="submit">
+            {{ '수정 완료' if item else '자료 추가' }}
+          </button>
+          <a class="btn btn-outline btn-large" href="{{ url_for('admin_dashboard') }}">
+            취소
+          </a>
+        </div>
+      </form>
     </div>
-    <div class="row">
-      <label>내용</label>
-      <textarea name="content" placeholder="상세 설명">{{ item['content'] if item else '' }}</textarea>
-    </div>
-    <button class="btn btn-primary" type="submit">저장</button>
-    <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">취소</a>
-  </form>
+  </div>
+  <style>
+  .admin-form-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    border-radius: 12px;
+  }
+  
+  .form-title h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+  
+  .form-title p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+  }
+  
+  .form-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .admin-form {
+    padding: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+  }
+  
+  .form-input:focus, .form-textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+  
+  .form-hint {
+    display: block;
+    margin-top: 0.25rem;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+  
+  .category-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .category-option {
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .category-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  
+  .option-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  
+  .category-option:hover .option-content {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+  
+  .category-option.active .option-content {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .option-text {
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .btn-large {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+    border: 1px solid #3b82f6;
+  }
+  
+  .btn-primary:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+  }
+  
+  .btn-outline {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .btn-outline:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #475569;
+  }
+  
+  @media (max-width: 768px) {
+    .form-actions {
+      flex-direction: column;
+    }
+  }
+  </style>
+
   <script>
-    (function(){
-      const group = document.querySelector('.toggle-group');
-      if (!group) return;
-      const chips = group.querySelectorAll('.chip');
-      function sync(){
-        chips.forEach(c => {
-          const i = c.querySelector('input[type="radio"]');
-          c.classList.toggle('active', i && i.checked);
+    document.addEventListener('DOMContentLoaded', function() {
+      const categoryOptions = document.querySelectorAll('.category-option');
+      
+      categoryOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const radio = this.querySelector('input[type="radio"]');
+          radio.checked = true;
+          
+          categoryOptions.forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
         });
-      }
-      group.addEventListener('click', (e)=>{
-        const chip = e.target.closest('.chip');
-        if (!chip) return;
-        const input = chip.querySelector('input[type="radio"]');
-        if (input) { input.checked = true; }
-        sync();
       });
-      sync();
-    })();
+    });
   </script>
 {% endblock %}
 
