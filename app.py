@@ -344,6 +344,113 @@ def create_app() -> Flask:
     def activities():
         return render_template("activities.html")
 
+    # Flask Server 통합 - API 엔드포인트들
+    @app.route("/flask_server/")
+    def flask_server_home():
+        return {"message": "Flask Server Integrated", "status": "success", "version": "1.0"}
+
+    @app.route("/flask_server/api/status")
+    def flask_server_status():
+        return {
+            "status": "running",
+            "timestamp": datetime.utcnow().isoformat(),
+            "version": "1.0",
+            "integrated": True
+        }
+
+    @app.route("/flask_server/api/users")
+    def flask_server_users():
+        if not session.get("admin"):
+            return {"error": "Admin access required"}, 403
+        
+        with get_db() as cx:
+            users = cx.execute("SELECT id, name, student_id, email, admin FROM users").fetchall()
+        return {"users": [dict(user) for user in users]}
+
+    @app.route("/flask_server/api/submissions")
+    def flask_server_submissions():
+        if not session.get("admin"):
+            return {"error": "Admin access required"}, 403
+        
+        with get_db() as cx:
+            submissions = cx.execute("""
+                SELECT s.id, s.name, s.assignment_title, s.category, s.text_content, 
+                       s.file_path, s.created_at, u.student_id
+                FROM submissions s
+                LEFT JOIN users u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+            """).fetchall()
+        return {"submissions": [dict(sub) for sub in submissions]}
+
+    @app.route("/flask_server/api/materials")
+    def flask_server_materials():
+        with get_db() as cx:
+            materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
+        return {"materials": [dict(mat) for mat in materials]}
+
+    @app.route("/flask_server/api/assignments")
+    def flask_server_assignments():
+        with get_db() as cx:
+            assignments = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC").fetchall()
+        return {"assignments": [dict(ass) for ass in assignments]}
+
+    @app.route("/flask_server/api/upload", methods=["POST"])
+    def flask_server_upload():
+        if not session.get("uid"):
+            return {"error": "Authentication required"}, 401
+        
+        if 'file' not in request.files:
+            return {"error": "No file provided"}, 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return {"error": "No file selected"}, 400
+        
+        if file:
+            safe_name = datetime.now().strftime("%Y%m%d%H%M%S_") + secure_filename(file.filename)
+            dest = os.path.join(uploads_dir, safe_name)
+            file.save(dest)
+            return {
+                "message": "File uploaded successfully",
+                "filename": safe_name,
+                "path": dest
+            }
+        
+        return {"error": "Upload failed"}, 500
+
+    @app.route("/flask_server/api/download/<filename>")
+    def flask_server_download(filename):
+        if not session.get("uid"):
+            return {"error": "Authentication required"}, 401
+        
+        file_path = os.path.join(uploads_dir, secure_filename(filename))
+        if not os.path.exists(file_path):
+            return {"error": "File not found"}, 404
+        
+        from flask import send_file
+        return send_file(file_path, as_attachment=True)
+
+    @app.route("/flask_server/api/stats")
+    def flask_server_stats():
+        if not session.get("admin"):
+            return {"error": "Admin access required"}, 403
+        
+        with get_db() as cx:
+            user_count = cx.execute("SELECT COUNT(*) as count FROM users").fetchone()["count"]
+            submission_count = cx.execute("SELECT COUNT(*) as count FROM submissions").fetchone()["count"]
+            material_count = cx.execute("SELECT COUNT(*) as count FROM materials").fetchone()["count"]
+            assignment_count = cx.execute("SELECT COUNT(*) as count FROM assignments").fetchone()["count"]
+        
+        return {
+            "stats": {
+                "users": user_count,
+                "submissions": submission_count,
+                "materials": material_count,
+                "assignments": assignment_count
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
     @app.route("/material/<int:item_id>")
     def material_detail(item_id: int):
         with get_db() as cx:
