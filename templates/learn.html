@@ -1,64 +1,385 @@
 {% extends 'base.html' %}
 {% block title %}학습 · Infotherapy{% endblock %}
 {% block content %}
-  <div class="page-head">
-    <div>
-      <h2 style="margin:0;">학습</h2> 
+  <div class="learn-header">
+    <div class="learn-title">
+      <h1>학습</h1>
+      <p>학습 자료를 확인하고 과제를 제출하세요</p>
+    </div>
+    <div class="learn-stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ materials|length }}</div>
+        <div class="stat-label">학습 자료</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ assignments|length }}</div>
+        <div class="stat-label">과제</div>
+      </div>
     </div>
   </div>
-  <div class="selected-filter toggle-group" id="cat-toggle">
-    <button class="chip" data-cat="unity">Unity</button>
-    <button class="chip" data-cat="ml">머신러닝</button>
-    <button class="chip" data-cat="dl">딥러닝</button>
-    <button class="chip" data-cat="web">Web</button>
+
+  <div class="category-filter">
+    <div class="filter-title">카테고리</div>
+    <div class="filter-buttons" id="cat-toggle">
+      <button class="filter-chip active" data-cat="all">전체</button>
+      <button class="filter-chip" data-cat="unity">Unity</button>
+      <button class="filter-chip" data-cat="ml">머신러닝</button>
+      <button class="filter-chip" data-cat="dl">딥러닝</button>
+      <button class="filter-chip" data-cat="web">Web</button>
+    </div>
   </div>
 
-  
-
-  <div class="two-col learn-grid">
-    <section class="panel">
-      <div class="panel-head">
-        <h3>학습 자료</h3>
+  <div class="learn-grid">
+    <div class="learn-section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>학습 자료</h2>
+          <span class="section-count">{{ materials|length }}개</span>
+        </div>
       </div>
-      <div class="list" id="materials">
+      <div class="learn-list" id="materials">
         {% for m in materials %}
-          <a class="list-item" data-category="{{ m.category }}" href="{{ url_for('material_detail', item_id=m['id'] if m['id'] is defined else loop.index) }}" style="text-decoration:none; color:inherit;">
-            <div class="lead">
-              <span class="dot cat-{{ m.category }}"></span>
-              <div>
-                <div style="font-weight:600;">{{ m.title }}</div>
-                <div class="hint">업데이트: {{ m.date }}</div>
+          <a class="learn-item" data-category="{{ m.category }}" href="{{ url_for('material_detail', item_id=m['id'] if m['id'] is defined else loop.index) }}">
+            <div class="item-content">
+              <div class="item-title">{{ m.title }}</div>
+              <div class="item-meta">
+                <span class="category-badge">{{ m.category }}</span>
+                <span class="type-badge">{{ m.type }}</span>
+                <span class="date-badge">{{ m.date }}</span>
               </div>
             </div>
-            <span class="badge">{{ m.type }}</span>
+            <div class="item-arrow">→</div>
           </a>
         {% endfor %}
+        {% if not materials %}
+          <div class="empty-state">
+            <h3>아직 학습 자료가 없습니다</h3>
+            <p>관리자가 자료를 추가하면 여기에 표시됩니다.</p>
+          </div>
+        {% endif %}
       </div>
-    </section>
-    <aside class="panel">
-      <div class="panel-head">
-        <h3>과제</h3>
+    </div>
+
+    <div class="learn-section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>과제</h2>
+          <span class="section-count">{{ assignments|length }}개</span>
+        </div>
       </div>
-      <div class="list" id="assignments">
+      <div class="learn-list" id="assignments">
         {% for a in assignments %}
           {% set key = a.title ~ '|' ~ (a.category or '') %}
-          <a class="list-item" data-category="{{ a.category }}" href="{{ url_for('assignment_detail', item_id=a['id'] if a['id'] is defined else loop.index) }}" style="text-decoration:none; color:inherit;">
-            <div class="lead">
-              <span class="dot cat-{{ a.category }}"></span>
-              <div style="font-weight:600;">{{ a.title }}</div>
+          <a class="learn-item" data-category="{{ a.category }}" href="{{ url_for('assignment_detail', item_id=a['id'] if a['id'] is defined else loop.index) }}">
+            <div class="item-content">
+              <div class="item-title">{{ a.title }}</div>
+              <div class="item-meta">
+                <span class="category-badge">{{ a.category }}</span>
+                {% if a.submitted_at %}
+                  <span class="status-badge submitted">제출 완료</span>
+                {% elif a.overdue %}
+                  <span class="status-badge overdue">제출 마감</span>
+                {% else %}
+                  <span class="due-badge">마감 {{ a.due | short_dt }}</span>
+                {% endif %}
+              </div>
             </div>
-            {% if a.submitted_at %}
-              <span class="badge" style="border-color:#86efac; background:#ecfdf5; color:#065f46;">제출 완료</span>
-            {% elif a.overdue %}
-              <span class="badge" style="border-color:#fecaca; background:#fef2f2; color:#7f1d1d;">제출 마감</span>
-            {% else %}
-              <span class="badge due">마감 {{ a.due | short_dt }}</span>
-            {% endif %}
+            <div class="item-arrow">→</div>
           </a>
         {% endfor %}
+        {% if not assignments %}
+          <div class="empty-state">
+            <h3>아직 과제가 없습니다</h3>
+            <p>관리자가 과제를 추가하면 여기에 표시됩니다.</p>
+          </div>
+        {% endif %}
       </div>
-    </aside>
+    </div>
   </div>
+
+  <style>
+  .learn-header {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .learn-title h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .learn-title p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+  }
+  
+  .learn-stats {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: #334155;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+  
+  .category-filter {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .filter-title {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-chip {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-chip:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1e40af;
+  }
+  
+  .filter-chip.active {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .learn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  
+  .learn-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .section-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+  }
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .section-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .section-count {
+    background: #e2e8f0;
+    color: #64748b;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .learn-list {
+    padding: 1rem;
+  }
+  
+  .learn-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .learn-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .item-content {
+    flex: 1;
+  }
+  
+  .item-title {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .item-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .category-badge, .type-badge, .date-badge, .due-badge, .status-badge {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .category-badge {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .due-badge {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  
+  .status-badge.submitted {
+    background: #dcfce7;
+    color: #166534;
+  }
+  
+  .status-badge.overdue {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+  
+  .item-arrow {
+    color: #94a3b8;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #334155;
+    font-size: 1.25rem;
+  }
+  
+  .empty-state p {
+    margin: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .learn-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .learn-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+    
+    .learn-stats {
+      justify-content: center;
+    }
+    
+    .filter-buttons {
+      justify-content: center;
+    }
+  }
+  </style>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterChips = document.querySelectorAll('.filter-chip');
+    const materials = document.querySelectorAll('#materials .learn-item');
+    const assignments = document.querySelectorAll('#assignments .learn-item');
+
+    function filterItems(category) {
+      const allItems = [...materials, ...assignments];
+      
+      allItems.forEach(item => {
+        if (category === 'all' || item.dataset.category === category) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        // Remove active class from all chips
+        filterChips.forEach(c => c.classList.remove('active'));
+        // Add active class to clicked chip
+        this.classList.add('active');
+        
+        // Filter items
+        filterItems(this.dataset.cat);
+      });
+    });
+  });
+  </script>
 {% endblock %}
 
 
