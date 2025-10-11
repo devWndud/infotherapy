@@ -74,7 +74,12 @@
     </div>
 
     <div class="submission-actions">
-      <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">목록으로</a>
+      <div style="display: flex; gap: 12px; justify-content: space-between; align-items: center;">
+        <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">목록으로</a>
+        <form method="post" action="{{ url_for('admin_submission_delete', submission_id=submission.id) }}" style="display: inline;" onsubmit="return confirm('정말로 이 제출을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+          <button type="submit" class="btn btn-danger">제출 삭제</button>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -174,6 +179,24 @@
   .hint {
     color: #6c757d;
     font-size: 14px;
+  }
+  
+  .btn-danger {
+    background: #dc2626;
+    color: white;
+    border: 1px solid #dc2626;
+    padding: 8px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
   }
   </style>
 {% endblock %}

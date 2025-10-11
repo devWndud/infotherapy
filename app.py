@@ -577,6 +577,27 @@ def create_app() -> Flask:
         
         return render_template("admin_submission_detail.html", submission=submission)
 
+    @app.route("/admin/submission/<int:submission_id>/delete", methods=["POST"])
+    @admin_required
+    def admin_submission_delete(submission_id: int):
+        with get_db() as cx:
+            submission = cx.execute("SELECT id, file_path FROM submissions WHERE id=?", (submission_id,)).fetchone()
+            if not submission:
+                flash("제출을 찾을 수 없습니다.", "error")
+                return redirect(url_for("admin_dashboard"))
+            
+            if submission['file_path'] and os.path.exists(submission['file_path']):
+                try:
+                    os.remove(submission['file_path'])
+                except Exception:
+                    pass
+            
+            cx.execute("DELETE FROM submissions WHERE id=?", (submission_id,))
+            cx.commit()
+            
+        flash("제출이 삭제되었습니다.", "success")
+        return redirect(url_for("admin_dashboard"))
+
     @app.route("/admin/submission/<int:submission_id>/download")
     @admin_required
     def admin_submission_download(submission_id: int):

@@ -32,6 +32,9 @@
             {% if submission.file_path %}
               <a class="btn btn-outline" href="{{ url_for('admin_submission_download', submission_id=submission.id) }}">파일 다운로드</a>
             {% endif %}
+            <form method="post" action="{{ url_for('admin_submission_delete', submission_id=submission.id) }}" style="display: inline;" onsubmit="return confirm('정말로 이 제출을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+              <button type="submit" class="btn btn-danger">삭제</button>
+            </form>
           </div>
         </div>
       {% endfor %}
