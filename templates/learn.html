@@ -23,8 +23,6 @@
     <div class="filter-buttons" id="cat-toggle">
       <button class="filter-chip active" data-cat="all">전체</button>
     </div>
-    <button class="btn btn-outline btn-sm" id="edit-interests">관심 분야 수정</button>
-    <button class="btn btn-outline btn-sm" id="reset-interests" style="margin-left: 0.5rem;">초기화</button>
   </div>
 
   <div class="interest-modal" id="interest-modal">
@@ -521,8 +519,6 @@
     const assignmentsSectionCount = document.getElementById('assignments-section-count');
     
     const interestModal = document.getElementById('interest-modal');
-    const editInterestsBtn = document.getElementById('edit-interests');
-    const resetInterestsBtn = document.getElementById('reset-interests');
     const modalCancelBtn = document.getElementById('modal-cancel');
     const modalSaveBtn = document.getElementById('modal-save');
     const interestOptions = document.querySelectorAll('.interest-option input[type="checkbox"]');
@@ -627,43 +623,12 @@
       assignmentsSectionCount.textContent = visibleAssignments + '개';
     }
 
-    editInterestsBtn.addEventListener('click', function() {
-      interestOptions.forEach(option => {
-        option.checked = userInterests.includes(option.value);
-      });
-      interestModal.classList.add('show');
-    });
-
-    resetInterestsBtn.addEventListener('click', async function() {
-      if (confirm('관심 분야 설정을 초기화하시겠습니까?')) {
-        try {
-          const response = await fetch('/api/interests', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ interests: [] })
-          });
-          
-          if (response.ok) {
-            userInterests = [];
-            updateFilterChips();
-            filterItems();
-            setTimeout(() => {
-              interestModal.classList.add('show');
-            }, 100);
-          } else {
-            const error = await response.json();
-            alert('초기화 중 오류가 발생했습니다: ' + error.error);
-          }
-        } catch (error) {
-          alert('초기화 중 오류가 발생했습니다.');
-          console.error('Error:', error);
-        }
-      }
-    });
 
     modalCancelBtn.addEventListener('click', function() {
+      if (userInterests.length === 0) {
+        alert('최소 하나의 분야를 선택해주세요.');
+        return;
+      }
       interestModal.classList.remove('show');
     });
 
@@ -704,6 +669,10 @@
 
     interestModal.addEventListener('click', function(e) {
       if (e.target === interestModal) {
+        if (userInterests.length === 0) {
+          alert('최소 하나의 분야를 선택해주세요.');
+          return;
+        }
         interestModal.classList.remove('show');
       }
     });
