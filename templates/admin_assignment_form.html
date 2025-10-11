@@ -64,6 +64,12 @@
                 <span class="option-text">딥러닝</span>
               </div>
             </label>
+            <label class="category-option {{ 'active' if cat=='web' }}">
+              <input type="radio" name="category" value="web" {{ 'checked' if cat=='web' }}>
+              <div class="option-content">
+                <span class="option-text">Web</span>
+              </div>
+            </label>
           </div>
         </div>
 
@@ -255,25 +261,19 @@
   }
   </style>
   <script>
-    (function(){
-      const group = document.querySelector('.toggle-group');
-      if (!group) return;
-      const chips = group.querySelectorAll('.chip');
-      function sync(){
-        chips.forEach(c => {
-          const i = c.querySelector('input[type="radio"]');
-          c.classList.toggle('active', i && i.checked);
+    document.addEventListener('DOMContentLoaded', function() {
+      const categoryOptions = document.querySelectorAll('.category-option');
+      
+      categoryOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const radio = this.querySelector('input[type="radio"]');
+          radio.checked = true;
+          
+          categoryOptions.forEach(opt => opt.classList.remove('active'));
+          this.classList.add('active');
         });
-      }
-      group.addEventListener('click', (e)=>{
-        const chip = e.target.closest('.chip');
-        if (!chip) return;
-        const input = chip.querySelector('input[type="radio"]');
-        if (input) { input.checked = true; }
-        sync();
       });
-      sync();
-    })();
+    });
   </script>
 {% endblock %}
 
