@@ -533,8 +533,8 @@
     const modalSaveBtn = document.getElementById('modal-save');
     const interestOptions = document.querySelectorAll('.interest-option input[type="checkbox"]');
 
-    // localStorage에서 관심 분야 불러오기
-    let selectedInterests = JSON.parse(localStorage.getItem('userInterests') || '[]');
+    // 서버에서 관심 분야 불러오기
+    let selectedInterests = {{ user_interests | tojson }};
     
     // 관심 분야가 선택되지 않았을 때 모달 표시
     if (selectedInterests.length === 0) {
@@ -609,12 +609,29 @@
     });
 
     // 초기화 버튼 클릭
-    resetInterestsBtn.addEventListener('click', function() {
+    resetInterestsBtn.addEventListener('click', async function() {
       if (confirm('관심 분야 설정을 초기화하시겠습니까?')) {
-        localStorage.removeItem('userInterests');
-        selectedInterests = [];
-        updateFilterChips();
-        filterItems();
+        try {
+          const response = await fetch('/api/interests', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ interests: [] })
+          });
+          
+          if (response.ok) {
+            selectedInterests = [];
+            updateFilterChips();
+            filterItems();
+          } else {
+            const error = await response.json();
+            alert('초기화 중 오류가 발생했습니다: ' + error.error);
+          }
+        } catch (error) {
+          alert('초기화 중 오류가 발생했습니다.');
+          console.error('Error:', error);
+        }
       }
     });
 
@@ -624,7 +641,7 @@
     });
 
     // 모달 저장
-    modalSaveBtn.addEventListener('click', function() {
+    modalSaveBtn.addEventListener('click', async function() {
       const newInterests = Array.from(interestOptions)
         .filter(option => option.checked)
         .map(option => option.value);
@@ -634,12 +651,28 @@
         return;
       }
       
-      selectedInterests = newInterests;
-      localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
-      
-      updateFilterChips();
-      filterItems();
-      interestModal.classList.remove('show');
+      try {
+        const response = await fetch('/api/interests', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ interests: newInterests })
+        });
+        
+        if (response.ok) {
+          selectedInterests = newInterests;
+          updateFilterChips();
+          filterItems();
+          interestModal.classList.remove('show');
+        } else {
+          const error = await response.json();
+          alert('저장 중 오류가 발생했습니다: ' + error.error);
+        }
+      } catch (error) {
+        alert('저장 중 오류가 발생했습니다.');
+        console.error('Error:', error);
+      }
     });
 
     // 모달 외부 클릭 시 닫기
@@ -651,7 +684,7 @@
 
     // 필터 칩 클릭 (단일 선택)
     filterChips.forEach(chip => {
-      chip.addEventListener('click', function() {
+      chip.addEventListener('click', async function() {
         const category = this.dataset.cat;
         
         if (category === 'all') {
@@ -671,9 +704,27 @@
           }
         }
         
-        localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
-        updateFilterChips();
-        filterItems();
+        // 서버에 저장
+        try {
+          const response = await fetch('/api/interests', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ interests: selectedInterests })
+          });
+          
+          if (response.ok) {
+            updateFilterChips();
+            filterItems();
+          } else {
+            const error = await response.json();
+            alert('저장 중 오류가 발생했습니다: ' + error.error);
+          }
+        } catch (error) {
+          alert('저장 중 오류가 발생했습니다.');
+          console.error('Error:', error);
+        }
       });
     });
 
