@@ -40,7 +40,8 @@ def create_app() -> Flask:
               student_id TEXT NOT NULL UNIQUE,
               email TEXT,
               password_hash TEXT NOT NULL,
-              admin INTEGER DEFAULT 0
+              admin INTEGER DEFAULT 0,
+              interests TEXT DEFAULT '[]'
             )
             """
         )

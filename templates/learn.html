@@ -28,6 +28,7 @@
       <button class="filter-chip" data-cat="web">Web</button>
     </div>
     <button class="btn btn-outline btn-sm" id="edit-interests">관심 분야 수정</button>
+    <button class="btn btn-outline btn-sm" id="reset-interests" style="margin-left: 0.5rem;">초기화</button>
   </div>
 
   <!-- 관심 분야 선택 모달 -->
@@ -527,15 +528,16 @@
     // 모달 관련 요소들
     const interestModal = document.getElementById('interest-modal');
     const editInterestsBtn = document.getElementById('edit-interests');
+    const resetInterestsBtn = document.getElementById('reset-interests');
     const modalCancelBtn = document.getElementById('modal-cancel');
     const modalSaveBtn = document.getElementById('modal-save');
     const interestOptions = document.querySelectorAll('.interest-option input[type="checkbox"]');
 
     // localStorage에서 관심 분야 불러오기
-    let selectedInterests = JSON.parse(localStorage.getItem('userInterests') || '["unity", "ml", "dl", "web"]');
+    let selectedInterests = JSON.parse(localStorage.getItem('userInterests') || '[]');
     
-    // 초기 설정: 첫 방문 시 모달 표시
-    if (!localStorage.getItem('userInterests')) {
+    // 관심 분야가 선택되지 않았을 때 모달 표시
+    if (selectedInterests.length === 0) {
       setTimeout(() => {
         interestModal.classList.add('show');
       }, 500);
@@ -555,6 +557,14 @@
     function filterItems() {
       let visibleMaterials = 0;
       let visibleAssignments = 0;
+      
+      // 관심 분야가 선택되지 않았을 때 모달 표시
+      if (selectedInterests.length === 0) {
+        setTimeout(() => {
+          interestModal.classList.add('show');
+        }, 100);
+        return;
+      }
       
       // Filter materials
       materials.forEach(item => {
@@ -596,6 +606,16 @@
         option.checked = selectedInterests.includes(option.value);
       });
       interestModal.classList.add('show');
+    });
+
+    // 초기화 버튼 클릭
+    resetInterestsBtn.addEventListener('click', function() {
+      if (confirm('관심 분야 설정을 초기화하시겠습니까?')) {
+        localStorage.removeItem('userInterests');
+        selectedInterests = [];
+        updateFilterChips();
+        filterItems();
+      }
     });
 
     // 모달 취소
@@ -641,7 +661,8 @@
           // 개별 분야 토글
           if (selectedInterests.includes(category)) {
             if (selectedInterests.length === 1) {
-              alert('최소 하나의 분야는 선택해야 합니다.');
+              // 마지막 분야를 해제하려고 할 때 모달 표시
+              interestModal.classList.add('show');
               return;
             }
             selectedInterests = selectedInterests.filter(c => c !== category);
