@@ -8,7 +8,7 @@
         <p>{{ '과제 정보를 수정하세요' if item else '새로운 과제를 추가하세요' }}</p>
       </div>
       <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">
-        <span>←</span> 대시보드로
+        대시보드로
       </a>
     </div>
 
@@ -16,7 +16,6 @@
       <form class="admin-form" method="post">
         <div class="form-group">
           <label class="form-label">
-            <span class="label-icon">📝</span>
             과제 제목
           </label>
           <input 
@@ -30,7 +29,6 @@
 
         <div class="form-group">
           <label class="form-label">
-            <span class="label-icon">⏰</span>
             마감일시
           </label>
           <input 
@@ -44,7 +42,6 @@
 
         <div class="form-group">
           <label class="form-label">
-            <span class="label-icon">🏷️</span>
             카테고리
           </label>
           <div class="category-selector">
@@ -52,21 +49,18 @@
             <label class="category-option {{ 'active' if cat=='unity' }}">
               <input type="radio" name="category" value="unity" {{ 'checked' if cat=='unity' }}>
               <div class="option-content">
-                <span class="option-icon">🎮</span>
                 <span class="option-text">Unity</span>
               </div>
             </label>
             <label class="category-option {{ 'active' if cat=='ml' }}">
               <input type="radio" name="category" value="ml" {{ 'checked' if cat=='ml' }}>
               <div class="option-content">
-                <span class="option-icon">🤖</span>
                 <span class="option-text">머신러닝</span>
               </div>
             </label>
             <label class="category-option {{ 'active' if cat=='dl' }}">
               <input type="radio" name="category" value="dl" {{ 'checked' if cat=='dl' }}>
               <div class="option-content">
-                <span class="option-icon">🧠</span>
                 <span class="option-text">딥러닝</span>
               </div>
             </label>
@@ -75,7 +69,6 @@
 
         <div class="form-group">
           <label class="form-label">
-            <span class="label-icon">📄</span>
             과제 설명
           </label>
           <textarea 
@@ -88,11 +81,9 @@
 
         <div class="form-actions">
           <button class="btn btn-primary btn-large" type="submit">
-            <span>💾</span>
             {{ '수정 완료' if item else '과제 추가' }}
           </button>
           <a class="btn btn-outline btn-large" href="{{ url_for('admin_dashboard') }}">
-            <span>❌</span>
             취소
           </a>
         </div>
@@ -112,9 +103,10 @@
     align-items: center;
     margin-bottom: 2rem;
     padding: 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    border-radius: 12px;
   }
   
   .form-title h1 {
@@ -125,14 +117,14 @@
   
   .form-title p {
     margin: 0;
-    opacity: 0.9;
+    color: #64748b;
     font-size: 1rem;
   }
   
   .form-card {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
     overflow: hidden;
   }
   
@@ -149,36 +141,32 @@
     align-items: center;
     gap: 0.5rem;
     font-weight: 600;
-    color: #374151;
+    color: #334155;
     margin-bottom: 0.5rem;
     font-size: 1rem;
-  }
-  
-  .label-icon {
-    font-size: 1.25rem;
   }
   
   .form-input, .form-textarea {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     font-size: 1rem;
     transition: all 0.2s ease;
-    background: #f9fafb;
+    background: #f8fafc;
   }
   
   .form-input:focus, .form-textarea:focus {
     outline: none;
     border-color: #3b82f6;
     background: white;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
   }
   
   .form-hint {
     display: block;
     margin-top: 0.25rem;
-    color: #6b7280;
+    color: #64748b;
     font-size: 0.875rem;
   }
   
@@ -205,9 +193,9 @@
     align-items: center;
     gap: 0.5rem;
     padding: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 12px;
-    background: #f9fafb;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
     transition: all 0.2s ease;
     text-align: center;
   }
@@ -223,10 +211,6 @@
     color: #1e40af;
   }
   
-  .option-icon {
-    font-size: 1.5rem;
-  }
-  
   .option-text {
     font-weight: 600;
     font-size: 0.875rem;
@@ -237,14 +221,14 @@
     gap: 1rem;
     margin-top: 2rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e5e7eb;
+    border-top: 1px solid #e2e8f0;
   }
   
   .btn-large {
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
     font-weight: 600;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -252,10 +236,6 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-  }
-  
-  .btn-large span {
-    font-size: 1rem;
   }
   
   @media (max-width: 768px) {

@@ -280,35 +280,31 @@ def create_app() -> Flask:
                 (session.get("uid"), session.get("name"), title, category, text_content, file_path, datetime.utcnow().isoformat()),
             )
         flash("제출 완료", "info")
+        
+        # 이메일 제목
+        email_subject = f"{session.get('name')} - {title} 제출"
+        
+        # 이메일 내용
         body_lines = [
-            f"제출자: {session.get('name')} (user_id={session.get('uid')})",
-            f"과제: {title}",
-            f"카테고리: {category}",
-            f"제출시간(UTC): {datetime.utcnow().isoformat(timespec='seconds')}",
+            f"제출자: {session.get('name')}",
+            f"과제명: {title}",
+            f"카테고리: {category or '없음'}",
+            f"제출 시간: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}",
             "",
             "[제출 내용]",
             text_content if text_content else "(텍스트 없음)",
         ]
         
         if file_path:
-            file_size = os.path.getsize(file_path) / (1024 * 1024)  # MB 단위
-            import mimetypes
-            file_type = mimetypes.guess_type(file_path)[0] or "알 수 없는 형식"
             body_lines.extend([
                 "",
-                "[첨부 파일]",
-                f"파일명: {os.path.basename(file_path)}",
-                f"파일 크기: {file_size:.2f}MB",
-                f"파일 타입: {file_type}",
-                f"파일 경로: {file_path}"
+                "[첨부파일]",
+                f"파일명: {os.path.basename(file_path)}"
             ])
+        
         try:
-            attachments = []
-            if file_path:
-                import mimetypes
-                mime = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
-                attachments.append({"path": file_path, "mime": mime})
-            send_admin_email(subject=f"{session.get('name')} - {title} 제출", body="\n".join(body_lines), attachments=attachments)
+            # 파일 첨부 없이 텍스트만 전송
+            send_admin_email(subject=email_subject, body="\n".join(body_lines), attachments=None)
         except Exception:
             pass
         return redirect(url_for("learn"))
