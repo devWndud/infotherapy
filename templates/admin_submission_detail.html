@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}{{ submission.name }} - {{ submission.assignment_title }} · Infotherapy{% endblock %}
+{% block content %}
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div>
+      <h2 style="margin:0 0 8px;">{{ submission.assignment_title }}</h2>
+      <div class="hint">{{ submission.name }} · {{ submission.created_at | short_dt }}</div>
+    </div>
+    <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">관리자 대시보드</a>
+  </div>
+
+  <div class="submission-card">
+    <div class="submission-header">
+      <div class="submission-info">
+        <h3 style="margin:0 0 8px;">제출자 정보</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>이름</label>
+            <span>{{ submission.name }}</span>
+          </div>
+          <div class="info-item">
+            <label>과제</label>
+            <span>{{ submission.assignment_title }}</span>
+          </div>
+          <div class="info-item">
+            <label>카테고리</label>
+            <span>{{ submission.category or '없음' }}</span>
+          </div>
+          <div class="info-item">
+            <label>제출 시간</label>
+            <span>{{ submission.created_at | short_dt }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="submission-content">
+      {% if submission.text_content %}
+        <div class="content-section">
+          <h4>제출 내용</h4>
+          <div class="content-text">{{ submission.text_content | autolink | safe }}</div>
+        </div>
+      {% endif %}
+
+      {% if submission.file_path %}
+        <div class="content-section">
+          <h4>첨부 파일</h4>
+          <div class="file-info">
+            <div class="file-details">
+              <span class="file-name">{{ submission.file_path | basename }}</span>
+              <span class="file-size">{{ submission.file_path | file_size }}MB</span>
+            </div>
+            <div class="file-actions">
+              <a class="btn btn-primary" href="{{ url_for('admin_submission_download', submission_id=submission.id) }}">
+                파일 다운로드
+              </a>
+            </div>
+          </div>
+          
+          {% if submission.file_path | is_video %}
+            <div class="video-preview">
+              <video controls style="max-width: 100%; max-height: 400px;">
+                <source src="{{ url_for('admin_submission_download', submission_id=submission.id) }}" type="video/mp4">
+                브라우저가 비디오를 지원하지 않습니다.
+              </video>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="submission-actions">
+      <a class="btn btn-outline" href="{{ url_for('admin_dashboard') }}">목록으로</a>
+    </div>
+  </div>
+
+  <style>
+  .submission-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .submission-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    background: #f8f9fa;
+  }
+  
+  .submission-content {
+    padding: 20px;
+  }
+  
+  .submission-actions {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    background: #f8f9fa;
+    text-align: right;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .info-item label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 14px;
+  }
+  
+  .content-section {
+    margin-bottom: 24px;
+  }
+  
+  .content-section h4 {
+    margin: 0 0 12px 0;
+    color: #374151;
+  }
+  
+  .content-text {
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+  
+  .file-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .file-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .file-name {
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .file-size {
+    font-size: 14px;
+    color: #6c757d;
+  }
+  
+  .video-preview {
+    margin-top: 16px;
+    text-align: center;
+  }
+  
+  .hint {
+    color: #6c757d;
+    font-size: 14px;
+  }
+  </style>
+{% endblock %}

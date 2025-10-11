@@ -38,6 +38,7 @@
               <div class="hint">{{ a['category'] }} · 마감 {{ a['due'] }}</div>
             </div>
             <div style="display:flex; gap:8px;">
+              <a class="btn btn-primary" href="{{ url_for('admin_assignment_submissions', item_id=a['id']) }}">제출 현황</a>
               <a class="btn btn-outline" href="{{ url_for('admin_assignment_edit', item_id=a['id']) }}">수정</a>
               <form method="post" action="{{ url_for('admin_assignment_delete', item_id=a['id']) }}">
                 <button class="btn btn-outline" type="submit">삭제</button>
