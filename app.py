@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_from_directory
 import os
 from dotenv import load_dotenv
 import sqlite3
@@ -551,6 +551,10 @@ def create_app() -> Flask:
         
         xml_str = ET.tostring(root, encoding='unicode')
         return Response(xml_str, mimetype='application/xml')
+
+    @app.route("/robots.txt")
+    def robots_txt():
+        return "User-agent: *\nAllow: /\n\nSitemap: https://infotherapy.kro.kr/sitemap.xml"
 
     @app.errorhandler(404)
     def not_found(e):
