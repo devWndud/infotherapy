@@ -112,11 +112,18 @@ def create_app() -> Flask:
         ]
         dt = None
         try:
-            dt = datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+            from zoneinfo import ZoneInfo
+            seoul = ZoneInfo("Asia/Seoul")
+            dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=seoul)
+            else:
+                dt = dt.astimezone(seoul)
         except Exception:
             for f in fmts:
                 try:
                     dt = datetime.strptime(value, f)
+                    dt = dt.replace(tzinfo=ZoneInfo("Asia/Seoul"))
                     break
                 except Exception:
                     continue
