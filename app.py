@@ -22,7 +22,6 @@ def create_app() -> Flask:
     app.secret_key = os.getenv("FLASK_SECRET", "dev-secret-change-me")
     app.config["ASSET_VERSION"] = os.getenv("ASSET_VERSION") or datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
-    # SQLite init
     db_path = os.path.join(os.path.dirname(__file__), "infotherapy.db")
     invites_path = os.path.join(os.path.dirname(__file__), "invites.json")
     uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
@@ -83,13 +82,11 @@ def create_app() -> Flask:
             """
         )
 
-    # Jinja filters
     url_regex = re.compile(r"(https?://[^\s]+)")
 
     def autolink(text: str) -> Markup:
         if not text:
             return Markup("")
-        # Escape HTML, then linkify URLs, then convert newlines to <br>
         html = escape(text)
         html = url_regex.sub(lambda m: f'<a href="{m.group(1)}" target="_blank" rel="noopener">{m.group(1)}</a>', html)
         html = html.replace("\r\n", "\n").replace("\n", "<br>")
@@ -103,18 +100,15 @@ def create_app() -> Flask:
             return url_for("static", filename=filename, v=app.config.get("ASSET_VERSION"))
         return {"static_url": static_url}
 
-    # datetime short formatter (no year)
     def format_datetime_short(value: str) -> str:
         if not value:
             return ""
-        # Try common formats
         fmts = [
             "%Y-%m-%d %H:%M",
             "%Y-%m-%d",
         ]
         dt = None
         try:
-            # ISO 8601
             dt = datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
         except Exception:
             for f in fmts:
@@ -125,7 +119,6 @@ def create_app() -> Flask:
                     continue
         if not dt:
             return value
-        # If time present (non-midnight) print mm-dd HH:MM, else mm-dd
         if dt.hour != 0 or dt.minute != 0:
             return dt.strftime("%m-%d %H:%M")
         return dt.strftime("%m-%d")
@@ -162,7 +155,6 @@ def create_app() -> Flask:
             password2 = request.form.get("password2")
             admin_flag = 0
 
-            # Invite validation via invites.json
             try:
                 with open(invites_path, "r", encoding="utf-8") as f:
                     invite_list = json.load(f)
@@ -204,13 +196,12 @@ def create_app() -> Flask:
         sender = os.getenv("SMTP_FROM", user or "noreply@localhost")
         admin_emails = [e.strip() for e in os.getenv("ADMIN_EMAILS", "").split(",") if e.strip()]
         if not (host and admin_emails):
-            return  # skip if email not configured
+            return
         msg = MIMEMultipart()
         msg["From"] = sender
         msg["To"] = ", ".join(admin_emails)
         msg["Subject"] = subject
         msg.attach(MIMEText(body, "plain", _charset="utf-8"))
-        # attachments: list of (filepath, mime)
         for att in attachments or []:
             try:
                 from email.mime.base import MIMEBase
@@ -243,7 +234,6 @@ def create_app() -> Flask:
         text_content = request.form.get("text_content") or ""
         uploaded_file = request.files.get("file")
         file_path = None
-        # Prevent duplicate submissions per user per assignment/category
         with get_db() as cx:
             exists = cx.execute(
                 "SELECT 1 FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
@@ -263,7 +253,6 @@ def create_app() -> Flask:
                 (session.get("uid"), session.get("name"), title, category, text_content, file_path, datetime.utcnow().isoformat()),
             )
         flash("제출 완료", "info")
-        # email notify - subject: 이름 - 과제명 제출
         body_lines = [
             f"제출자: {session.get('name')} (user_id={session.get('uid')})",
             f"과제: {title}",
@@ -276,7 +265,6 @@ def create_app() -> Flask:
         try:
             attachments = []
             if file_path:
-                # 추정 MIME
                 import mimetypes
                 mime = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
                 attachments.append({"path": file_path, "mime": mime})
@@ -297,11 +285,9 @@ def create_app() -> Flask:
 
     @app.route("/learn")
     def learn():
-        # load lists
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
             assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC").fetchall()
-        # compute overdue (Asia/Seoul); date-only => 23:59:59 local
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
@@ -395,7 +381,6 @@ def create_app() -> Flask:
                 submitted_at = row["created_at"]
         return render_template("assignment_detail.html", a=a, submitted=submitted, submitted_at=submitted_at, overdue=overdue)
 
-    # Admin dashboard and CRUD
     @app.route("/admin")
     @admin_required
     def admin_dashboard():
@@ -532,7 +517,6 @@ def create_app() -> Flask:
         root = ET.Element("urlset")
         root.set("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
         
-        # 메인 페이지들
         urls = [
             {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0"},
             {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8"},
@@ -541,7 +525,6 @@ def create_app() -> Flask:
             {"loc": "https://infotherapy.kro.kr/privacy", "changefreq": "yearly", "priority": "0.4"},
         ]
         
-        # 동적 콘텐츠 추가
         with get_db() as cx:
             materials = cx.execute("SELECT id FROM materials").fetchall()
             assignments = cx.execute("SELECT id FROM assignments").fetchall()

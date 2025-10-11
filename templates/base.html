@@ -9,21 +9,18 @@
     <meta name="robots" content="index, follow">
     <meta name="google-site-verification" content="VCHWnxyTr_WIKYh1k0ZG-yKbybpMTO9-AYHLvRCXPlk" />
     
-    <!-- Open Graph 메타 태그 -->
     <meta property="og:title" content="{% block og_title %}Infotherapy{% endblock %}">
     <meta property="og:description" content="{% block og_description %}천안월봉고 대표 AI SW 동아리. 실전 중심 학습과 협업을 지향합니다.{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://infotherapy.kro.kr{{ request.path }}">
-    <meta property="og:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.jpg') }}">
+    <meta property="og:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}">
     <meta property="og:site_name" content="Infotherapy">
     
-    <!-- Twitter 메타 태그 -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{% block twitter_title %}Infotherapy{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}천안월봉고 대표 AI SW 동아리{% endblock %}">
-    <meta name="twitter:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.jpg') }}">
+    <meta name="twitter:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}">
     
-    <!-- 구조화된 데이터 -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -31,7 +28,7 @@
       "name": "Infotherapy",
       "description": "천안월봉고 대표 AI SW 동아리",
       "url": "https://infotherapy.kro.kr",
-      "logo": "https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.jpg') }}",
+      "logo": "https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "KR",
@@ -58,7 +55,7 @@
     <header class="site-header">
       <div class="container header-inner">
         <a class="logo" href="{{ url_for('index') }}">
-          <img class="logo-mark-img" src="{{ url_for('static', filename='images/icon.jpg') }}?v=20251011" alt="Infotherapy">
+          <img class="logo-mark-img" src="{{ url_for('static', filename='images/icon.png') }}?v=20251011" alt="Infotherapy">
           <span class="logo-text">Infotherapy</span>
         </a>
         <nav class="nav" id="site-nav">
