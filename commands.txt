@@ -13,6 +13,8 @@ git status
 # Git pull 실행
 git pull
 
+
+
 # 1. 기존 프로세스 정리
 pkill -f gunicorn
 pkill -f python
@@ -28,6 +30,9 @@ nohup gunicorn --bind 127.0.0.1:5000 application:application > app.log 2>&1 &
 
 # 5. Nginx 재시작
 sudo systemctl restart nginx
+
+
+
 
 # Gunicorn 프로세스 확인
 ps aux | grep gunicorn | grep -v grep

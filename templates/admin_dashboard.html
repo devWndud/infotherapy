@@ -1,54 +1,337 @@
 {% extends 'base.html' %}
 {% block title %}관리자 · Infotherapy{% endblock %}
 {% block content %}
-  <h2 style="margin:0 0 12px;">관리자 대시보드</h2>
-  <div class="two-col">
-    <section>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0;">자료</h3>
-        <a class="btn btn-primary" href="{{ url_for('admin_material_new') }}">자료 추가</a>
+  <div class="admin-header">
+    <div class="admin-title">
+      <h1>관리자 대시보드</h1>
+      <p>자료와 과제를 관리하고 제출 현황을 확인하세요</p>
+    </div>
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ materials|length }}</div>
+        <div class="stat-label">자료</div>
       </div>
-      <div class="list">
-        {% for m in materials %}
-          <div class="list-item">
-            <div>
-              <div style="font-weight:600;">{{ m['title'] }}</div>
-              <div class="hint">{{ m['category'] }} · {{ m['type'] }} · {{ m['date'] }}</div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <a class="btn btn-outline" href="{{ url_for('admin_material_edit', item_id=m['id']) }}">수정</a>
-              <form method="post" action="{{ url_for('admin_material_delete', item_id=m['id']) }}">
-                <button class="btn btn-outline" type="submit">삭제</button>
-              </form>
-            </div>
-          </div>
-        {% endfor %}
+      <div class="stat-card">
+        <div class="stat-number">{{ assignments|length }}</div>
+        <div class="stat-label">과제</div>
       </div>
-    </section>
-    <aside>
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <h3 style="margin:0;">과제</h3>
-        <a class="btn btn-primary" href="{{ url_for('admin_assignment_new') }}">과제 추가</a>
-      </div>
-      <div class="list">
-        {% for a in assignments %}
-          <div class="list-item">
-            <div>
-              <div style="font-weight:600;">{{ a['title'] }}</div>
-              <div class="hint">{{ a['category'] }} · 마감 {{ a['due'] }}</div>
-            </div>
-            <div style="display:flex; gap:8px;">
-              <a class="btn btn-primary" href="{{ url_for('admin_assignment_submissions', item_id=a['id']) }}">제출 현황</a>
-              <a class="btn btn-outline" href="{{ url_for('admin_assignment_edit', item_id=a['id']) }}">수정</a>
-              <form method="post" action="{{ url_for('admin_assignment_delete', item_id=a['id']) }}">
-                <button class="btn btn-outline" type="submit">삭제</button>
-              </form>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </aside>
+    </div>
   </div>
+
+  <div class="admin-grid">
+    <div class="admin-section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>📚 자료 관리</h2>
+          <span class="section-count">{{ materials|length }}개</span>
+        </div>
+        <a class="btn btn-primary" href="{{ url_for('admin_material_new') }}">
+          <span>+</span> 자료 추가
+        </a>
+      </div>
+      <div class="admin-list">
+        {% for m in materials %}
+          <div class="admin-item">
+            <div class="item-content">
+              <div class="item-title">{{ m['title'] }}</div>
+              <div class="item-meta">
+                <span class="category-badge">{{ m['category'] }}</span>
+                <span class="type-badge">{{ m['type'] }}</span>
+                <span class="date-badge">{{ m['date'] }}</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <a class="btn btn-sm btn-outline" href="{{ url_for('admin_material_edit', item_id=m['id']) }}">
+                <span>✏️</span> 수정
+              </a>
+              <form method="post" action="{{ url_for('admin_material_delete', item_id=m['id']) }}" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                <button class="btn btn-sm btn-danger" type="submit">
+                  <span>🗑️</span> 삭제
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+        {% if not materials %}
+          <div class="empty-state">
+            <div class="empty-icon">📚</div>
+            <h3>아직 자료가 없습니다</h3>
+            <p>첫 번째 자료를 추가해보세요</p>
+            <a class="btn btn-primary" href="{{ url_for('admin_material_new') }}">자료 추가하기</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>📝 과제 관리</h2>
+          <span class="section-count">{{ assignments|length }}개</span>
+        </div>
+        <a class="btn btn-primary" href="{{ url_for('admin_assignment_new') }}">
+          <span>+</span> 과제 추가
+        </a>
+      </div>
+      <div class="admin-list">
+        {% for a in assignments %}
+          <div class="admin-item">
+            <div class="item-content">
+              <div class="item-title">{{ a['title'] }}</div>
+              <div class="item-meta">
+                <span class="category-badge">{{ a['category'] }}</span>
+                <span class="due-badge">마감 {{ a['due'] }}</span>
+              </div>
+            </div>
+            <div class="item-actions">
+              <a class="btn btn-sm btn-primary" href="{{ url_for('admin_assignment_submissions', item_id=a['id']) }}">
+                <span>📊</span> 제출 현황
+              </a>
+              <a class="btn btn-sm btn-outline" href="{{ url_for('admin_assignment_edit', item_id=a['id']) }}">
+                <span>✏️</span> 수정
+              </a>
+              <form method="post" action="{{ url_for('admin_assignment_delete', item_id=a['id']) }}" onsubmit="return confirm('정말 삭제하시겠습니까?')">
+                <button class="btn btn-sm btn-danger" type="submit">
+                  <span>🗑️</span> 삭제
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+        {% if not assignments %}
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <h3>아직 과제가 없습니다</h3>
+            <p>첫 번째 과제를 추가해보세요</p>
+            <a class="btn btn-primary" href="{{ url_for('admin_assignment_new') }}">과제 추가하기</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <style>
+  .admin-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .admin-title h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .admin-title p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+  
+  .admin-stats {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+  }
+  
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  
+  .admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  
+  .admin-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+  
+  .section-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+  }
+  
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .section-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .section-count {
+    background: #e5e7eb;
+    color: #6b7280;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .admin-list {
+    padding: 1rem;
+  }
+  
+  .admin-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+  }
+  
+  .admin-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+  }
+  
+  .item-content {
+    flex: 1;
+  }
+  
+  .item-title {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .item-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .category-badge, .type-badge, .date-badge, .due-badge {
+    background: #f3f4f6;
+    color: #6b7280;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .category-badge {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+  
+  .due-badge {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  
+  .item-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-sm span {
+    font-size: 0.75rem;
+  }
+  
+  .btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6b7280;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #374151;
+    font-size: 1.25rem;
+  }
+  
+  .empty-state p {
+    margin: 0 0 1.5rem 0;
+  }
+  
+  @media (max-width: 768px) {
+    .admin-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .admin-header {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+    }
+    
+    .admin-stats {
+      justify-content: center;
+    }
+    
+    .item-actions {
+      flex-direction: column;
+    }
+  }
+  </style>
 {% endblock %}
 
 

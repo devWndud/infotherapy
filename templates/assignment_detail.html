@@ -35,15 +35,17 @@
               </div>
               <div class="row">
                 <label for="file_detail">파일(선택)</label>
-                <input id="file_detail" name="file" type="file" accept="*/*" {% if overdue %}disabled aria-disabled="true"{% endif %}>
-                <small class="file-hint">모든 파일 형식 지원 (영상, 이미지, 문서, 압축파일 등)</small>
-                <div id="video-preview" class="video-preview" style="display: none;">
-                  <video controls style="max-width: 100%; max-height: 300px;">
-                    <source id="video-source" src="" type="video/mp4">
-                    브라우저가 비디오를 지원하지 않습니다.
-                  </video>
-                  <p id="file-info" class="file-info"></p>
+                <div class="file-upload-container">
+                  <input id="file_detail" name="file" type="file" accept="*/*" {% if overdue %}disabled aria-disabled="true"{% endif %}>
+                  <div id="file-selected" class="file-selected" style="display: none;">
+                    <div class="file-info">
+                      <span id="file-name"></span>
+                      <span id="file-size"></span>
+                    </div>
+                    <button type="button" id="remove-file" class="btn-remove">×</button>
+                  </div>
                 </div>
+                <small class="file-hint">모든 파일 형식 지원 (영상, 이미지, 문서, 압축파일 등)</small>
               </div>
               <button class="btn btn-primary" type="submit" {% if overdue %}disabled aria-disabled="true" title="제출 마감되어 제출할 수 없습니다"{% endif %}>제출하기</button>
             </form>
@@ -64,8 +66,35 @@
 
   <style>
   .assignment-card { max-width: 900px; margin: 0 auto; background:#fff; border:1px solid var(--border); border-radius:16px; box-shadow:0 1px 2px rgba(17,24,39,0.04); }
-  .video-preview { margin-top: 12px; padding: 12px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
-  .file-info { margin: 8px 0 0 0; font-size: 14px; color: #6c757d; }
+  .file-upload-container { position: relative; }
+  .file-selected { 
+    margin-top: 8px; 
+    padding: 12px; 
+    background: #f8f9fa; 
+    border-radius: 8px; 
+    border: 1px solid #e9ecef; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+  }
+  .file-info { display: flex; flex-direction: column; gap: 4px; }
+  .file-info span:first-child { font-weight: 600; color: #374151; }
+  .file-info span:last-child { font-size: 12px; color: #6c757d; }
+  .btn-remove { 
+    background: #dc2626; 
+    color: white; 
+    border: none; 
+    border-radius: 50%; 
+    width: 24px; 
+    height: 24px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    line-height: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+  }
+  .btn-remove:hover { background: #b91c1c; }
   .file-hint { display: block; margin-top: 4px; font-size: 12px; color: #6c757d; }
   .assignment-head { padding: 18px 18px 0; }
   .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
@@ -94,31 +123,30 @@
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('file_detail');
-    const videoPreview = document.getElementById('video-preview');
-    const videoSource = document.getElementById('video-source');
-    const fileInfo = document.getElementById('file-info');
+    const fileSelected = document.getElementById('file-selected');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const removeFileBtn = document.getElementById('remove-file');
 
     fileInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       
       if (file) {
-        const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         
-        // 파일이 영상인지 확인
-        if (file.type.startsWith('video/')) {
-          const url = URL.createObjectURL(file);
-          videoSource.src = url;
-          videoSource.type = file.type;
-          videoPreview.style.display = 'block';
-          fileInfo.textContent = `파일명: ${file.name} | 크기: ${fileSize}MB | 타입: ${file.type}`;
-        } else {
-          videoPreview.style.display = 'none';
-          fileInfo.textContent = `파일명: ${file.name} | 크기: ${fileSize}MB | 타입: ${file.type}`;
-        }
+        // 파일 정보 표시
+        fileName.textContent = file.name;
+        fileSize.textContent = `${fileSizeMB}MB`;
+        fileSelected.style.display = 'flex';
       } else {
-        videoPreview.style.display = 'none';
-        fileInfo.textContent = '';
+        fileSelected.style.display = 'none';
       }
+    });
+
+    // 파일 제거 버튼 클릭
+    removeFileBtn.addEventListener('click', function() {
+      fileInput.value = '';
+      fileSelected.style.display = 'none';
     });
   });
   </script>
