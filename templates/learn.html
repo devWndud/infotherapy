@@ -22,16 +22,11 @@
     <div class="filter-title">관심 분야</div>
     <div class="filter-buttons" id="cat-toggle">
       <button class="filter-chip active" data-cat="all">전체</button>
-      <button class="filter-chip" data-cat="unity">Unity</button>
-      <button class="filter-chip" data-cat="ml">머신러닝</button>
-      <button class="filter-chip" data-cat="dl">딥러닝</button>
-      <button class="filter-chip" data-cat="web">Web</button>
     </div>
     <button class="btn btn-outline btn-sm" id="edit-interests">관심 분야 수정</button>
     <button class="btn btn-outline btn-sm" id="reset-interests" style="margin-left: 0.5rem;">초기화</button>
   </div>
 
-  <!-- 관심 분야 선택 모달 -->
   <div class="interest-modal" id="interest-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -525,7 +520,6 @@
     const materialsSectionCount = document.getElementById('materials-section-count');
     const assignmentsSectionCount = document.getElementById('assignments-section-count');
     
-    // 모달 관련 요소들
     const interestModal = document.getElementById('interest-modal');
     const editInterestsBtn = document.getElementById('edit-interests');
     const resetInterestsBtn = document.getElementById('reset-interests');
@@ -533,42 +527,71 @@
     const modalSaveBtn = document.getElementById('modal-save');
     const interestOptions = document.querySelectorAll('.interest-option input[type="checkbox"]');
 
-    // 서버에서 관심 분야 불러오기 (데이터베이스에 저장된 관심분야)
     let userInterests = {{ user_interests | tojson }};
     
-    // 현재 필터 상태 (실시간 필터링용)
     let currentFilter = 'all';
     
-    // 관심 분야가 선택되지 않았을 때 모달 표시
     if (userInterests.length === 0) {
       setTimeout(() => {
         interestModal.classList.add('show');
       }, 500);
     }
 
-    // 필터 칩 업데이트 (현재 필터 상태에 따라)
+    function createInterestChips() {
+      const filterButtons = document.getElementById('cat-toggle');
+      
+      const existingChips = filterButtons.querySelectorAll('.filter-chip:not([data-cat="all"])');
+      existingChips.forEach(chip => chip.remove());
+      
+      const interestLabels = {
+        'unity': 'Unity',
+        'ml': '머신러닝', 
+        'dl': '딥러닝',
+        'web': 'Web'
+      };
+      
+      userInterests.forEach(interest => {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip';
+        chip.dataset.cat = interest;
+        chip.textContent = interestLabels[interest] || interest;
+        filterButtons.appendChild(chip);
+      });
+      
+      setupFilterChips();
+    }
+
+    function setupFilterChips() {
+      const allFilterChips = document.querySelectorAll('.filter-chip');
+      allFilterChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+          const category = this.dataset.cat;
+          currentFilter = category;
+          updateFilterChips();
+          filterItems();
+        });
+      });
+    }
+
     function updateFilterChips() {
-      filterChips.forEach(chip => {
+      const allFilterChips = document.querySelectorAll('.filter-chip');
+      allFilterChips.forEach(chip => {
         const category = chip.dataset.cat;
         chip.classList.toggle('active', category === currentFilter);
       });
     }
 
-    // 아이템 필터링 (현재 필터 상태에 따라)
     function filterItems() {
       let visibleMaterials = 0;
       let visibleAssignments = 0;
       
-      // Filter materials
       materials.forEach(item => {
         const category = item.dataset.category;
         let shouldShow = false;
         
         if (currentFilter === 'all') {
-          // 전체 보기: 사용자가 선택한 관심분야에 포함된 것만
           shouldShow = userInterests.includes(category);
         } else {
-          // 특정 분야만: 현재 필터와 일치하는 것만
           shouldShow = category === currentFilter;
         }
         
@@ -580,16 +603,13 @@
         }
       });
       
-      // Filter assignments
       assignments.forEach(item => {
         const category = item.dataset.category;
         let shouldShow = false;
         
         if (currentFilter === 'all') {
-          // 전체 보기: 사용자가 선택한 관심분야에 포함된 것만
           shouldShow = userInterests.includes(category);
         } else {
-          // 특정 분야만: 현재 필터와 일치하는 것만
           shouldShow = category === currentFilter;
         }
         
@@ -601,23 +621,19 @@
         }
       });
       
-      // Update counts
       materialsCount.textContent = visibleMaterials;
       assignmentsCount.textContent = visibleAssignments;
       materialsSectionCount.textContent = visibleMaterials + '개';
       assignmentsSectionCount.textContent = visibleAssignments + '개';
     }
 
-    // 관심 분야 수정 버튼 클릭
     editInterestsBtn.addEventListener('click', function() {
-      // 현재 선택된 관심 분야로 체크박스 설정
       interestOptions.forEach(option => {
         option.checked = userInterests.includes(option.value);
       });
       interestModal.classList.add('show');
     });
 
-    // 초기화 버튼 클릭
     resetInterestsBtn.addEventListener('click', async function() {
       if (confirm('관심 분야 설정을 초기화하시겠습니까?')) {
         try {
@@ -633,7 +649,6 @@
             userInterests = [];
             updateFilterChips();
             filterItems();
-            // 초기화 후 모달 표시
             setTimeout(() => {
               interestModal.classList.add('show');
             }, 100);
@@ -648,12 +663,10 @@
       }
     });
 
-    // 모달 취소
     modalCancelBtn.addEventListener('click', function() {
       interestModal.classList.remove('show');
     });
 
-    // 모달 저장
     modalSaveBtn.addEventListener('click', async function() {
       const newInterests = Array.from(interestOptions)
         .filter(option => option.checked)
@@ -675,6 +688,7 @@
         
         if (response.ok) {
           userInterests = newInterests;
+          createInterestChips();
           updateFilterChips();
           filterItems();
           interestModal.classList.remove('show');
@@ -688,24 +702,13 @@
       }
     });
 
-    // 모달 외부 클릭 시 닫기
     interestModal.addEventListener('click', function(e) {
       if (e.target === interestModal) {
         interestModal.classList.remove('show');
       }
     });
 
-    // 필터 칩 클릭 (실시간 필터링용 - 서버 저장 안함)
-    filterChips.forEach(chip => {
-      chip.addEventListener('click', function() {
-        const category = this.dataset.cat;
-        currentFilter = category;
-        updateFilterChips();
-        filterItems();
-      });
-    });
-
-    // 초기 설정
+    createInterestChips();
     updateFilterChips();
     filterItems();
   });
