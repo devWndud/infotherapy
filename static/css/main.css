@@ -48,7 +48,7 @@ body {
 .header-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
 .logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-weight: 600; }
 .logo-mark { display: inline-flex; width: 28px; height: 28px; border-radius: 8px; align-items: center; justify-content: center; background: var(--surface); color: var(--primary); }
-.logo-mark-img { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; border: 2px solid red; background: yellow; }
+.logo-mark-img { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; }
 
 .nav { display: flex; align-items: center; gap: 16px; }
 .nav a { color: var(--text); text-decoration: none; padding: 8px 10px; border-radius: 10px; }
