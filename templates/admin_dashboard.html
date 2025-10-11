@@ -18,12 +18,25 @@
     </div>
   </div>
 
+  <div class="admin-filters">
+    <div class="filter-section">
+      <h3>분야별 필터링</h3>
+      <div class="filter-buttons" id="admin-cat-toggle">
+        <button class="filter-chip active" data-cat="all">전체</button>
+        <button class="filter-chip" data-cat="unity">Unity</button>
+        <button class="filter-chip" data-cat="ml">머신러닝</button>
+        <button class="filter-chip" data-cat="dl">딥러닝</button>
+        <button class="filter-chip" data-cat="web">Web</button>
+      </div>
+    </div>
+  </div>
+
   <div class="admin-grid">
     <div class="admin-section">
       <div class="section-header">
         <div class="section-title">
           <h2>자료 관리</h2>
-          <span class="section-count">{{ materials|length }}개</span>
+          <span class="section-count" id="materials-count">{{ materials|length }}개</span>
         </div>
         <a class="btn btn-primary" href="{{ url_for('admin_material_new') }}">
           자료 추가
@@ -31,7 +44,7 @@
       </div>
       <div class="admin-list">
         {% for m in materials %}
-          <div class="admin-item">
+          <div class="admin-item" data-category="{{ m['category'] }}">
             <div class="item-content">
               <div class="item-title">{{ m['title'] }}</div>
               <div class="item-meta">
@@ -66,7 +79,7 @@
       <div class="section-header">
         <div class="section-title">
           <h2>과제 관리</h2>
-          <span class="section-count">{{ assignments|length }}개</span>
+          <span class="section-count" id="assignments-count">{{ assignments|length }}개</span>
         </div>
         <a class="btn btn-primary" href="{{ url_for('admin_assignment_new') }}">
           과제 추가
@@ -74,7 +87,7 @@
       </div>
       <div class="admin-list">
         {% for a in assignments %}
-          <div class="admin-item">
+          <div class="admin-item" data-category="{{ a['category'] }}">
             <div class="item-content">
               <div class="item-title">{{ a['title'] }}</div>
               <div class="item-meta">
@@ -119,6 +132,50 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  
+  .admin-filters {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .filter-section h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-chip {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-chip:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+  
+  .filter-chip.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
   }
   
   .admin-title h1 {
@@ -321,6 +378,65 @@
     }
   }
   </style>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const filterChips = document.querySelectorAll('#admin-cat-toggle .filter-chip');
+    const materials = document.querySelectorAll('.admin-item[data-category]');
+    const materialsCount = document.getElementById('materials-count');
+    const assignmentsCount = document.getElementById('assignments-count');
+    
+    let currentFilter = 'all';
+    
+    function updateFilterChips() {
+      filterChips.forEach(chip => {
+        const category = chip.dataset.cat;
+        chip.classList.toggle('active', category === currentFilter);
+      });
+    }
+    
+    function filterItems() {
+      let visibleMaterials = 0;
+      let visibleAssignments = 0;
+      
+      materials.forEach(item => {
+        const category = item.dataset.category;
+        let shouldShow = false;
+        
+        if (currentFilter === 'all') {
+          shouldShow = true;
+        } else {
+          shouldShow = category === currentFilter;
+        }
+        
+        if (shouldShow) {
+          item.style.display = 'flex';
+          if (item.closest('.admin-section').querySelector('h2').textContent.includes('자료')) {
+            visibleMaterials++;
+          } else {
+            visibleAssignments++;
+          }
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      materialsCount.textContent = visibleMaterials + '개';
+      assignmentsCount.textContent = visibleAssignments + '개';
+    }
+    
+    filterChips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        currentFilter = this.dataset.cat;
+        updateFilterChips();
+        filterItems();
+      });
+    });
+    
+    updateFilterChips();
+    filterItems();
+  });
+  </script>
 {% endblock %}
 
 
