@@ -1,0 +1,78 @@
+# 새로 시작
+cd /root/wndud/infotherapy
+source myenv/bin/activate
+nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+ps aux | grep gunicorn
+netstat -tlnp | grep :5000
+git pull
+pkill -f gunicorn
+pkill -f python
+cd /root/wndud/infotherapy
+source myenv/bin/activate
+nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+ps aux | grep gunicorn
+netstat -tlnp | grep :5000
+cd static/imame
+ls
+cd static/imames
+cd static/images
+ls
+cd ..
+pkill -f gunicorn
+pkill -f python
+cd /root/wndud/infotherapy
+source myenv/bin/activate
+nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+ps aux | grep gunicorn
+netstat -tlnp | grep :5000
+git pull
+pkill -f gunicorn
+pkill -f python
+cd /root/wndud/infotherapy
+source myenv/bin/activate
+nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+ps aux | grep gunicorn
+netstat -tlnp | grep :5000
+git pull
+pkill -f gunicorn
+pkill -f python
+cd /root/wndud/infotherapy
+source myenv/bin/activate
+nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+ps aux | grep gunicorn
+netstat -tlnp | grep :5000
+ls -la /var/www/html/infotherapy/static/images/
+ls -la /var/www/html/infotherapy/static/images/icon.jpg
+sudo cp /root/wndud/infotherapy/static/images/icon.jpg /var/www/html/infotherapy/static/images/
+sudo chown www-data:www-data /var/www/html/infotherapy/static/images/icon.jpg
+sudo chmod 644 /var/www/html/infotherapy/static/images/icon.jpg
+sudo cp -r /root/wndud/infotherapy/static/* /var/www/html/infotherapy/static/
+sudo chown -R www-data:www-data /var/www/html/infotherapy/static/
+sudo chmod -R 755 /var/www/html/infotherapy/static/
+sudo systemctl restart nginx
+cd wndud
+ls
+cd infotherapy
+history
+
+
+
+# 1. 기존 프로세스 종료
+pkill -f gunicorn && pkill -f python
+
+# 2. 프로젝트 디렉토리 이동 및 가상환경 활성화
+cd /root/wndud/infotherapy && source myenv/bin/activate
+
+# 3. Git 업데이트
+git pull
+
+# 4. 정적 파일 복사
+sudo cp -r /root/wndud/infotherapy/static/* /var/www/html/infotherapy/static/
+sudo chown -R www-data:www-data /var/www/html/infotherapy/static/
+sudo chmod -R 755 /var/www/html/infotherapy/static/
+
+# 5. 서버 시작
+nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+
+# 6. Nginx 재시작
+sudo systemctl restart nginx
