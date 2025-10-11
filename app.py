@@ -335,7 +335,7 @@ def create_app() -> Flask:
     def learn():
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
-            assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY due ASC").fetchall()
+            assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY id DESC").fetchall()
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
