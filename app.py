@@ -284,9 +284,12 @@ def create_app() -> Flask:
             uploaded_file.save(dest)
             file_path = dest
         with get_db() as cx:
+            from zoneinfo import ZoneInfo
+            seoul = ZoneInfo("Asia/Seoul")
+            seoul_time = datetime.now(seoul).isoformat()
             cx.execute(
                 "INSERT INTO submissions (user_id, name, assignment_title, category, text_content, file_path, created_at) VALUES (?,?,?,?,?,?,?)",
-                (session.get("uid"), session.get("name"), title, category, text_content, file_path, datetime.utcnow().isoformat()),
+                (session.get("uid"), session.get("name"), title, category, text_content, file_path, seoul_time),
             )
         flash("제출 완료", "info")
         
