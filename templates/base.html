@@ -49,16 +49,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}" type="image/png">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}?v=20251011" type="image/png">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.png') }}?v=20251011" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.png') }}?v=20251011">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   </head>
   <body>
     <header class="site-header">
       <div class="container header-inner">
         <a class="logo" href="{{ url_for('index') }}">
-          <img class="logo-mark-img" src="{{ url_for('static', filename='images/icon.jpg') }}" alt="Infotherapy">
+          <div class="logo-mark-img" style="background-image: url('{{ url_for('static', filename='images/icon.jpg') }}?v=20251011'); background-size: cover; background-position: center;"></div>
           <span class="logo-text">Infotherapy</span>
         </a>
         <nav class="nav" id="site-nav">
