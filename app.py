@@ -82,7 +82,8 @@ def create_app() -> Flask:
               due TEXT,
               description TEXT,
               category TEXT,
-              file_path TEXT
+              file_path TEXT,
+              file_paths TEXT DEFAULT '[]'
             )
             """
         )
@@ -90,6 +91,12 @@ def create_app() -> Flask:
         # 기존 테이블에 file_path 컬럼 추가 (이미 존재하면 무시됨)
         try:
             cx.execute("ALTER TABLE assignments ADD COLUMN file_path TEXT")
+        except sqlite3.OperationalError:
+            pass
+        
+        # 기존 테이블에 file_paths 컬럼 추가 (이미 존재하면 무시됨)
+        try:
+            cx.execute("ALTER TABLE assignments ADD COLUMN file_paths TEXT DEFAULT '[]'")
         except sqlite3.OperationalError:
             pass  # 컬럼이 이미 존재하는 경우
 
@@ -459,7 +466,7 @@ def create_app() -> Flask:
     @app.route("/assignment/<int:item_id>")
     def assignment_detail(item_id: int):
         with get_db() as cx:
-            a = cx.execute("SELECT id, title, due, description, category, file_path FROM assignments WHERE id=?", (item_id,)).fetchone()
+            a = cx.execute("SELECT id, title, due, description, category, file_path, file_paths FROM assignments WHERE id=?", (item_id,)).fetchone()
         if not a:
             return redirect(url_for("learn"))
         a = dict(a)
@@ -513,6 +520,20 @@ def create_app() -> Flask:
             
             filename = os.path.basename(file_path)
             return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
+    
+    @app.route("/assignment/file/<path:file_path>")
+    def download_assignment_file_by_path(file_path: str):
+        # 보안을 위해 파일 경로 검증
+        if not file_path.startswith(uploads_dir):
+            flash("잘못된 파일 경로입니다.", "error")
+            return redirect(url_for("learn"))
+        
+        if not os.path.exists(file_path):
+            flash("파일이 존재하지 않습니다.", "error")
+            return redirect(url_for("learn"))
+        
+        filename = os.path.basename(file_path)
+        return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
 
     @app.route("/admin")
     @admin_required
@@ -555,20 +576,24 @@ def create_app() -> Flask:
     @admin_required
     def admin_assignment_new():
         if request.method == "POST":
-            file_path = None
-            if 'file' in request.files:
-                file = request.files['file']
-                if file and file.filename:
-                    # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
-                    filename = file.filename
-                    # 위험한 문자만 제거
-                    filename = filename.replace('..', '').replace('/', '').replace('\\', '')
-                    file_path = os.path.join(uploads_dir, filename)
-                    file.save(file_path)
+            file_paths = []
+            
+            # 여러 파일 처리
+            if 'files' in request.files:
+                files = request.files.getlist('files')
+                for file in files:
+                    if file and file.filename and file.filename.strip():
+                        # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
+                        filename = file.filename
+                        # 위험한 문자만 제거
+                        filename = filename.replace('..', '').replace('/', '').replace('\\', '')
+                        file_path = os.path.join(uploads_dir, filename)
+                        file.save(file_path)
+                        file_paths.append(file_path)
             
             with get_db() as cx:
-                cx.execute("INSERT INTO assignments (title, due, description, category, file_path) VALUES (?,?,?,?,?)",
-                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), file_path))
+                cx.execute("INSERT INTO assignments (title, due, description, category, file_paths) VALUES (?,?,?,?,?)",
+                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), json.dumps(file_paths)))
             return redirect(url_for("admin_dashboard"))
         return render_template("admin_assignment_form.html", item=None)
 
@@ -576,41 +601,50 @@ def create_app() -> Flask:
     @admin_required
     def admin_assignment_edit(item_id: int):
         with get_db() as cx:
-            item = cx.execute("SELECT id, title, due, description, category, file_path FROM assignments WHERE id=?", (item_id,)).fetchone()
+            item = cx.execute("SELECT id, title, due, description, category, file_path, file_paths FROM assignments WHERE id=?", (item_id,)).fetchone()
         if request.method == "POST":
-            file_path = item['file_path']  # 기존 파일 경로 유지
+            # 기존 파일 경로들 가져오기
+            existing_file_paths = []
+            if item['file_paths']:
+                try:
+                    existing_file_paths = json.loads(item['file_paths'])
+                except:
+                    existing_file_paths = []
             
-            # 파일 삭제 요청 확인
-            if request.form.get('remove_file') == '1':
-                if file_path and os.path.exists(file_path):
-                    try:
-                        os.remove(file_path)
-                    except Exception:
-                        pass
-                file_path = None  # 파일 경로를 None으로 설정
-            
-            # 새 파일 업로드 확인
-            if 'file' in request.files:
-                file = request.files['file']
-                if file and file.filename and file.filename.strip():
-                    # 기존 파일 삭제
-                    if file_path and os.path.exists(file_path):
+            # 삭제할 파일들 처리
+            remove_files = request.form.get('remove_files', '')
+            if remove_files:
+                files_to_remove = remove_files.split(',')
+                for file_path in files_to_remove:
+                    if file_path.strip() and os.path.exists(file_path.strip()):
                         try:
-                            os.remove(file_path)
+                            os.remove(file_path.strip())
                         except Exception:
                             pass
-                    
-                    # 새 파일 저장
-                    # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
-                    filename = file.filename
-                    # 위험한 문자만 제거
-                    filename = filename.replace('..', '').replace('/', '').replace('\\', '')
-                    file_path = os.path.join(uploads_dir, filename)
-                    file.save(file_path)
+                    # 기존 파일 목록에서 제거
+                    if file_path.strip() in existing_file_paths:
+                        existing_file_paths.remove(file_path.strip())
+            
+            # 새 파일들 추가
+            new_file_paths = []
+            if 'files' in request.files:
+                files = request.files.getlist('files')
+                for file in files:
+                    if file and file.filename and file.filename.strip():
+                        # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
+                        filename = file.filename
+                        # 위험한 문자만 제거
+                        filename = filename.replace('..', '').replace('/', '').replace('\\', '')
+                        file_path = os.path.join(uploads_dir, filename)
+                        file.save(file_path)
+                        new_file_paths.append(file_path)
+            
+            # 최종 파일 목록 (기존 파일 + 새 파일)
+            final_file_paths = existing_file_paths + new_file_paths
             
             with get_db() as cx:
-                cx.execute("UPDATE assignments SET title=?, due=?, description=?, category=?, file_path=? WHERE id=?",
-                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), file_path, item_id))
+                cx.execute("UPDATE assignments SET title=?, due=?, description=?, category=?, file_paths=? WHERE id=?",
+                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), json.dumps(final_file_paths), item_id))
             return redirect(url_for("admin_dashboard"))
         return render_template("admin_assignment_form.html", item=item)
 
@@ -618,12 +652,28 @@ def create_app() -> Flask:
     @admin_required
     def admin_assignment_delete(item_id: int):
         with get_db() as cx:
-            assignment = cx.execute("SELECT file_path FROM assignments WHERE id=?", (item_id,)).fetchone()
+            assignment = cx.execute("SELECT file_path, file_paths FROM assignments WHERE id=?", (item_id,)).fetchone()
+            
+            # 기존 단일 파일 삭제
             if assignment and assignment['file_path'] and os.path.exists(assignment['file_path']):
                 try:
                     os.remove(assignment['file_path'])
                 except Exception:
                     pass
+            
+            # 여러 파일 삭제
+            if assignment and assignment['file_paths']:
+                try:
+                    file_paths = json.loads(assignment['file_paths'])
+                    for file_path in file_paths:
+                        if os.path.exists(file_path):
+                            try:
+                                os.remove(file_path)
+                            except Exception:
+                                pass
+                except:
+                    pass
+            
             cx.execute("DELETE FROM assignments WHERE id=?", (item_id,))
         return redirect(url_for("admin_dashboard"))
 

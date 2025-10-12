@@ -80,24 +80,40 @@
           <input 
             type="file" 
             class="form-file" 
-            name="file" 
-            id="file_input"
+            name="files" 
+            id="files_input"
             accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt"
+            multiple
           >
-          <small class="form-hint">이미지, 영상, 문서 파일을 첨부할 수 있습니다 (최대 100MB)</small>
-          {% if item and item['file_path'] %}
-          <div class="current-file">
-            <div class="current-file-info">
-              <span class="file-icon">📎</span>
-              <span class="file-name">{{ item['file_path'].split('/')[-1] if item['file_path'] else '' }}</span>
-              <button type="button" class="remove-file-btn" onclick="confirmRemoveFile()" title="파일 삭제">
-                <span class="remove-icon">×</span>
-              </button>
+          <small class="form-hint">이미지, 영상, 문서 파일을 여러 개 첨부할 수 있습니다 (최대 100MB)</small>
+          
+          <!-- 기존 파일들 표시 -->
+          {% if item and item['file_paths'] %}
+            {% set existing_files = item['file_paths'] | from_json %}
+            {% if existing_files %}
+            <div class="existing-files">
+              <h4>기존 첨부 파일</h4>
+              {% for file_path in existing_files %}
+              <div class="current-file" data-file="{{ file_path }}">
+                <div class="current-file-info">
+                  <span class="file-icon">📎</span>
+                  <span class="file-name">{{ file_path.split('/')[-1] }}</span>
+                  <button type="button" class="remove-file-btn" onclick="confirmRemoveFile('{{ file_path }}')" title="파일 삭제">
+                    <span class="remove-icon">×</span>
+                  </button>
+                </div>
+              </div>
+              {% endfor %}
+              <input type="hidden" name="remove_files" id="remove_files_input" value="">
             </div>
-            <input type="hidden" name="remove_file" id="remove_file_input" value="0">
-            <small class="file-hint">새 파일을 선택하면 기존 파일이 교체됩니다</small>
-          </div>
+            {% endif %}
           {% endif %}
+          
+          <!-- 새로 선택된 파일들 미리보기 -->
+          <div id="new-files-preview" class="new-files-preview" style="display: none;">
+            <h4>새로 추가할 파일</h4>
+            <div id="new-files-list"></div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -227,12 +243,61 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
   }
   
+  .existing-files {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  
+  .existing-files h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+  }
+  
   .current-file {
-    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     padding: 0.75rem;
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
+  }
+  
+  .current-file:last-child {
+    margin-bottom: 0;
+  }
+  
+  .new-files-preview {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+  }
+  
+  .new-files-preview h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #166534;
+  }
+  
+  .new-file-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid #bbf7d0;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .new-file-item:last-child {
+    margin-bottom: 0;
   }
   
   .current-file-info {
@@ -390,62 +455,61 @@
         });
       });
       
-      // 새 파일 선택 시 삭제 상태 초기화
-      const fileInput = document.getElementById('file_input');
-      if (fileInput) {
-        fileInput.addEventListener('change', function() {
-          if (this.files.length > 0 && this.files[0].name.trim()) {
-            const removeInput = document.getElementById('remove_file_input');
-            if (removeInput) {
-              removeInput.value = '0';
-            }
+      // 여러 파일 선택 시 미리보기
+      const filesInput = document.getElementById('files_input');
+      if (filesInput) {
+        filesInput.addEventListener('change', function() {
+          const newFilesPreview = document.getElementById('new-files-preview');
+          const newFilesList = document.getElementById('new-files-list');
+          
+          if (this.files.length > 0) {
+            newFilesList.innerHTML = '';
             
-            // 삭제 상태 UI 되돌리기
-            const currentFileDiv = document.querySelector('.current-file');
-            if (currentFileDiv) {
-              currentFileDiv.style.opacity = '1';
-              currentFileDiv.style.textDecoration = 'none';
-            }
+            Array.from(this.files).forEach((file, index) => {
+              const fileItem = document.createElement('div');
+              fileItem.className = 'new-file-item';
+              fileItem.innerHTML = `
+                <span class="file-icon">📎</span>
+                <span class="file-name">${file.name}</span>
+                <span class="file-size">(${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+              `;
+              newFilesList.appendChild(fileItem);
+            });
             
-            const removeBtn = document.querySelector('.remove-file-btn');
-            if (removeBtn) {
-              removeBtn.disabled = false;
-              removeBtn.style.opacity = '1';
-              removeBtn.style.cursor = 'pointer';
-            }
+            newFilesPreview.style.display = 'block';
+          } else {
+            newFilesPreview.style.display = 'none';
           }
         });
       }
     });
     
     // 파일 삭제 확인 함수
-    function confirmRemoveFile() {
-      const fileName = document.querySelector('.file-name').textContent;
+    function confirmRemoveFile(filePath) {
+      const fileName = filePath.split('/').pop();
       const confirmed = confirm(`정말로 "${fileName}" 파일을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
       
       if (confirmed) {
-        const removeInput = document.getElementById('remove_file_input');
-        const fileInput = document.getElementById('file_input');
-        const currentFileDiv = document.querySelector('.current-file');
+        const removeInput = document.getElementById('remove_files_input');
+        const currentFiles = removeInput.value ? removeInput.value.split(',') : [];
         
-        // 삭제 플래그 설정
-        removeInput.value = '1';
-        
-        // 파일 입력 비활성화
-        if (fileInput) {
-          fileInput.disabled = true;
-          fileInput.value = '';
+        // 삭제할 파일 추가
+        if (!currentFiles.includes(filePath)) {
+          currentFiles.push(filePath);
+          removeInput.value = currentFiles.join(',');
         }
         
-        // UI 업데이트
-        currentFileDiv.style.opacity = '0.5';
-        currentFileDiv.style.textDecoration = 'line-through';
-        
-        // 삭제 버튼 비활성화
-        const removeBtn = document.querySelector('.remove-file-btn');
-        removeBtn.disabled = true;
-        removeBtn.style.opacity = '0.5';
-        removeBtn.style.cursor = 'not-allowed';
+        // UI에서 파일 숨기기
+        const fileElement = document.querySelector(`[data-file="${filePath}"]`);
+        if (fileElement) {
+          fileElement.style.opacity = '0.5';
+          fileElement.style.textDecoration = 'line-through';
+          
+          const removeBtn = fileElement.querySelector('.remove-file-btn');
+          removeBtn.disabled = true;
+          removeBtn.style.opacity = '0.5';
+          removeBtn.style.cursor = 'not-allowed';
+        }
       }
     }
   </script>
