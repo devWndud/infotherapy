@@ -60,19 +60,18 @@
 
 <style>
 .auth-container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   padding: 0;
   margin: 0;
-  padding-top: 5vh;
+  padding: 5vh 0;
   background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(248,250,255,0.95)), url('{{ url_for('static', filename='images/info.jpg') }}');
   background-size: cover;
   background-position: center 100%;
   background-repeat: no-repeat;
   background-attachment: scroll;
-  overflow: hidden;
 }
 
 .auth-card {
@@ -83,9 +82,8 @@
   width: 100%;
   max-width: 420px;
   position: relative;
-  overflow: hidden;
-  max-height: 90vh;
-  overflow-y: auto;
+  overflow: visible;
+  margin: 0 auto;
 }
 
 .auth-card::before {
@@ -234,7 +232,7 @@
 
 @media (max-width: 768px) {
   .auth-container {
-    padding-top: 8vh;
+    padding: 8vh 0;
     background-position: center 80%;
   }
   
@@ -243,8 +241,6 @@
     margin: 0 1rem;
     max-width: calc(100% - 2rem);
     border-radius: 16px;
-    max-height: 90vh;
-    overflow-y: auto;
   }
   
   .auth-logo img {
@@ -273,7 +269,7 @@
 
 @media (max-width: 640px) {
   .auth-container {
-    padding-top: 6vh;
+    padding: 6vh 0;
     background-position: center 70%;
   }
   
@@ -320,7 +316,7 @@
 
 @media (max-width: 480px) {
   .auth-container {
-    padding-top: 4vh;
+    padding: 4vh 0;
     background-position: center 60%;
   }
   
