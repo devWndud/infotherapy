@@ -1,5 +1,5 @@
 function toggleNav() {
-  const nav = document.getElementById('site-nav');
+  const nav = document.querySelector('.nav');
   if (nav) {
     nav.classList.toggle('open');
     if (nav.classList.contains('open')) {
