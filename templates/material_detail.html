@@ -5,8 +5,14 @@
     <div class="hint">{{ m.category }} · {{ m.type }} · {{ m.date }}</div>
     <h2 style="margin:6px 0 12px;">{{ m.title }}</h2>
     <div style="white-space:pre-wrap; line-height:1.6;">{{ m.content | autolink | safe }}</div>
-    <a class="btn btn-outline" href="{{ url_for('learn') }}" style="margin-top:8px;">목록으로</a>
+    <button class="btn btn-outline" onclick="goBack()" style="margin-top:8px;">← 뒤로가기</button>
   </div>
+  
+  <script>
+  function goBack() {
+    window.history.back();
+  }
+  </script>
 {% endblock %}
 
 

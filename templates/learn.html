@@ -648,6 +648,31 @@
       assignmentsCount.textContent = visibleAssignments;
       materialsSectionCount.textContent = visibleMaterials + '개';
       assignmentsSectionCount.textContent = visibleAssignments + '개';
+      
+      saveFilterState(currentFilter);
+    }
+    
+    function saveFilterState(category) {
+      localStorage.setItem('learnFilterCategory', category);
+    }
+    
+    function loadFilterState() {
+      return localStorage.getItem('learnFilterCategory') || 'all';
+    }
+    
+    function applyFilterState() {
+      const savedCategory = loadFilterState();
+      currentFilter = savedCategory;
+      
+      const filterButtons = document.getElementById('cat-toggle');
+      filterButtons.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.cat === savedCategory) {
+          btn.classList.add('active');
+        }
+      });
+      
+      filterItems();
     }
 
 
@@ -706,7 +731,7 @@
 
     createInterestChips();
     updateFilterChips();
-    filterItems();
+    applyFilterState();
   });
   </script>
 {% endblock %}

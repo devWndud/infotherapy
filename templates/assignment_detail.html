@@ -3,6 +3,9 @@
 {% block content %}
   <div class="assignment-card">
     <div class="assignment-head">
+      <div class="back-button-container">
+        <button class="btn btn-outline" onclick="goBack()">← 뒤로가기</button>
+      </div>
       <div class="chips">
         {% if a.category %}<span class="chip">{{ a.category }}</span>{% endif %}
         {% if submitted %}
@@ -97,6 +100,7 @@
   .btn-remove:hover { background: #b91c1c; }
   .file-hint { display: block; margin-top: 4px; font-size: 12px; color: #6c757d; }
   .assignment-head { padding: 18px 18px 0; }
+  .back-button-container { margin-bottom: 12px; }
   .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
   .chip { border:1px solid var(--border); background:#fff; border-radius:999px; padding:4px 10px; font-size:12px; color: var(--muted); }
   .chip.subtle { background:#f8fafc; }
@@ -149,6 +153,10 @@
       fileSelected.style.display = 'none';
     });
   });
+  
+  function goBack() {
+    window.history.back();
+  }
   </script>
 {% endblock %}
 

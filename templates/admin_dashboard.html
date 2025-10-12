@@ -423,6 +423,30 @@
       
       materialsCount.textContent = visibleMaterials + '개';
       assignmentsCount.textContent = visibleAssignments + '개';
+      
+      saveFilterState(currentFilter);
+    }
+    
+    function saveFilterState(category) {
+      localStorage.setItem('adminFilterCategory', category);
+    }
+    
+    function loadFilterState() {
+      return localStorage.getItem('adminFilterCategory') || 'all';
+    }
+    
+    function applyFilterState() {
+      const savedCategory = loadFilterState();
+      currentFilter = savedCategory;
+      
+      filterChips.forEach(chip => {
+        chip.classList.remove('active');
+        if (chip.dataset.cat === savedCategory) {
+          chip.classList.add('active');
+        }
+      });
+      
+      filterItems();
     }
     
     filterChips.forEach(chip => {
@@ -433,8 +457,7 @@
       });
     });
     
-    updateFilterChips();
-    filterItems();
+    applyFilterState();
   });
   </script>
 {% endblock %}
