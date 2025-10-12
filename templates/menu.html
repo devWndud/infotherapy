@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}메뉴 · Infotherapy{% endblock %}
+{% block content %}
+<div class="menu-page">
+  <div class="menu-header">
+    <h1>메뉴</h1>
+    <p>Infotherapy 서비스</p>
+  </div>
+  
+  <div class="menu-grid">
+    <a href="{{ url_for('index') }}" class="menu-item">
+      <div class="menu-icon">🏠</div>
+      <div class="menu-text">
+        <h3>홈</h3>
+        <p>메인 페이지</p>
+      </div>
+    </a>
+    
+    <a href="{{ url_for('activities') }}" class="menu-item">
+      <div class="menu-icon">🎯</div>
+      <div class="menu-text">
+        <h3>활동</h3>
+        <p>프로젝트 및 활동</p>
+      </div>
+    </a>
+    
+    <a href="{{ url_for('learn') }}" class="menu-item">
+      <div class="menu-icon">📚</div>
+      <div class="menu-text">
+        <h3>학습</h3>
+        <p>자료 및 과제</p>
+      </div>
+    </a>
+    
+    {% if session.get('admin') %}
+    <a href="{{ url_for('admin_dashboard') }}" class="menu-item admin">
+      <div class="menu-icon">⚙️</div>
+      <div class="menu-text">
+        <h3>관리</h3>
+        <p>관리자 페이지</p>
+      </div>
+    </a>
+    {% endif %}
+    
+    {% if session.get('uid') %}
+    <div class="menu-item profile">
+      <div class="menu-icon">👤</div>
+      <div class="menu-text">
+        <h3>{{ session.get('name') or '사용자' }}</h3>
+        <p>내 계정</p>
+      </div>
+    </div>
+    
+    <a href="{{ url_for('logout') }}" class="menu-item logout">
+      <div class="menu-icon">🚪</div>
+      <div class="menu-text">
+        <h3>로그아웃</h3>
+        <p>계정에서 로그아웃</p>
+      </div>
+    </a>
+    {% else %}
+    <a href="{{ url_for('login') }}" class="menu-item">
+      <div class="menu-icon">🔑</div>
+      <div class="menu-text">
+        <h3>로그인</h3>
+        <p>계정에 로그인</p>
+      </div>
+    </a>
+    
+    <a href="{{ url_for('signup') }}" class="menu-item">
+      <div class="menu-icon">📝</div>
+      <div class="menu-text">
+        <h3>회원가입</h3>
+        <p>새 계정 만들기</p>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.menu-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.menu-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.menu-header h1 {
+  font-size: 2.5rem;
+  margin: 0 0 10px;
+  color: var(--primary);
+}
+
+.menu-header p {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.menu-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  border-color: var(--primary);
+}
+
+.menu-item.admin {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.menu-item.logout {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.menu-item.profile {
+  background: var(--surface);
+  cursor: default;
+}
+
+.menu-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.menu-text h3 {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.menu-text p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .menu-page {
+    padding: 20px 16px;
+  }
+  
+  .menu-header h1 {
+    font-size: 2rem;
+  }
+  
+  .menu-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .menu-item {
+    padding: 16px;
+  }
+  
+  .menu-icon {
+    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+  }
+}
+</style>
+{% endblock %}

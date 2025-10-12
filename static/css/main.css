@@ -85,6 +85,8 @@ body {
   pointer-events: auto;
   min-width: 44px;
   min-height: 44px;
+  text-decoration: none;
+  color: var(--text);
 }
 .nav-toggle span { 
   width: 18px; 
