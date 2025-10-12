@@ -587,9 +587,9 @@ def create_app() -> Flask:
                 file_path = None  # 파일 경로를 None으로 설정
             
             # 새 파일 업로드 확인
-            elif 'file' in request.files:
+            if 'file' in request.files:
                 file = request.files['file']
-                if file and file.filename:
+                if file and file.filename and file.filename.strip():
                     # 기존 파일 삭제
                     if file_path and os.path.exists(file_path):
                         try:

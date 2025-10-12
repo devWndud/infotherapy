@@ -74,11 +74,14 @@
         </div>
 
          <div class="form-group">
-           <span class="chip attachment-chip">첨부 파일</span>
+           <label class="form-label">
+             첨부 파일
+           </label>
           <input 
             type="file" 
             class="form-file" 
             name="file" 
+            id="file_input"
             accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.txt"
           >
           <small class="form-hint">이미지, 영상, 문서 파일을 첨부할 수 있습니다 (최대 100MB)</small>
@@ -388,13 +391,27 @@
       });
       
       // 새 파일 선택 시 삭제 상태 초기화
-      const fileInput = document.querySelector('input[name="file"]');
+      const fileInput = document.getElementById('file_input');
       if (fileInput) {
         fileInput.addEventListener('change', function() {
-          if (this.files.length > 0) {
+          if (this.files.length > 0 && this.files[0].name.trim()) {
             const removeInput = document.getElementById('remove_file_input');
             if (removeInput) {
               removeInput.value = '0';
+            }
+            
+            // 삭제 상태 UI 되돌리기
+            const currentFileDiv = document.querySelector('.current-file');
+            if (currentFileDiv) {
+              currentFileDiv.style.opacity = '1';
+              currentFileDiv.style.textDecoration = 'none';
+            }
+            
+            const removeBtn = document.querySelector('.remove-file-btn');
+            if (removeBtn) {
+              removeBtn.disabled = false;
+              removeBtn.style.opacity = '1';
+              removeBtn.style.cursor = 'pointer';
             }
           }
         });
@@ -408,7 +425,7 @@
       
       if (confirmed) {
         const removeInput = document.getElementById('remove_file_input');
-        const fileInput = document.querySelector('input[name="file"]');
+        const fileInput = document.getElementById('file_input');
         const currentFileDiv = document.querySelector('.current-file');
         
         // 삭제 플래그 설정
