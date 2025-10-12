@@ -42,7 +42,7 @@
           <label class="interest-option">
             <input type="checkbox" value="ml" checked>
             <div class="option-content">
-            <div class="option-title">ML</div>
+            <div class="option-title">머신러닝</div>
             <div class="option-desc">데이터 분석, 예측 모델</div>
             </div>
           </label>
@@ -83,7 +83,7 @@
             <div class="item-content">
               <div class="item-title">{{ m.title }}</div>
               <div class="item-meta">
-                <span class="category-badge">{{ m.category }}</span>
+                <span class="category-badge">{{ m.category | category_display }}</span>
                 <span class="type-badge">{{ m.type }}</span>
                 <span class="date-badge">{{ m.date }}</span>
               </div>
@@ -114,7 +114,7 @@
             <div class="item-content">
               <div class="item-title">{{ a.title }}</div>
               <div class="item-meta">
-                <span class="category-badge">{{ a.category }}</span>
+                <span class="category-badge">{{ a.category | category_display }}</span>
                 {% if a.submitted_at %}
                   <span class="status-badge submitted">제출 완료</span>
                 {% elif a.overdue %}
@@ -568,7 +568,7 @@
       
       const interestLabels = {
         'unity': 'Unity',
-        'ml': 'ML', 
+        'ml': '머신러닝', 
         'dl': '딥러닝',
         'web': 'Web'
       };

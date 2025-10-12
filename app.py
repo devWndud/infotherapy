@@ -157,10 +157,20 @@ def create_app() -> Flask:
         image_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg']
         return any(path.lower().endswith(ext) for ext in image_extensions)
     
+    def category_display_filter(category: str) -> str:
+        category_map = {
+            'unity': 'Unity',
+            'ml': '머신러닝',
+            'dl': '딥러닝',
+            'web': 'Web'
+        }
+        return category_map.get(category, category)
+    
     app.jinja_env.filters["basename"] = basename_filter
     app.jinja_env.filters["file_size"] = file_size_filter
     app.jinja_env.filters["is_video"] = is_video_filter
     app.jinja_env.filters["is_image"] = is_image_filter
+    app.jinja_env.filters["category_display"] = category_display_filter
 
     @app.route("/")
     def index():

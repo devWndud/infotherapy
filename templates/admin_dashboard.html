@@ -24,7 +24,7 @@
       <div class="filter-buttons" id="admin-cat-toggle">
         <button class="filter-chip active" data-cat="all">전체</button>
         <button class="filter-chip" data-cat="unity">Unity</button>
-        <button class="filter-chip" data-cat="ml">ML</button>
+        <button class="filter-chip" data-cat="ml">머신러닝</button>
         <button class="filter-chip" data-cat="dl">딥러닝</button>
         <button class="filter-chip" data-cat="web">Web</button>
       </div>
@@ -48,7 +48,7 @@
             <div class="item-content">
               <div class="item-title">{{ m['title'] }}</div>
               <div class="item-meta">
-                <span class="category-badge">{{ m['category'] }}</span>
+                <span class="category-badge">{{ m['category'] | category_display }}</span>
                 <span class="type-badge">{{ m['type'] }}</span>
                 <span class="date-badge">{{ m['date'] }}</span>
               </div>
@@ -91,7 +91,7 @@
             <div class="item-content">
               <div class="item-title">{{ a['title'] }}</div>
               <div class="item-meta">
-                <span class="category-badge">{{ a['category'] }}</span>
+                <span class="category-badge">{{ a['category'] | category_display }}</span>
                 <span class="due-badge">마감 {{ a['due'] }}</span>
               </div>
             </div>
