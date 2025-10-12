@@ -1,8 +1,14 @@
-function toggleNav() {
-  const nav = document.getElementById('site-nav');
-  if (nav) {
-    nav.classList.toggle('open');
-    if (nav.classList.contains('open')) {
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.querySelector('.sidebar-overlay');
+  
+  if (sidebar) {
+    sidebar.classList.toggle('open');
+    if (overlay) {
+      overlay.classList.toggle('open');
+    }
+    
+    if (sidebar.classList.contains('open')) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
