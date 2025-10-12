@@ -11,7 +11,7 @@ function toggleNav() {
 }
 
 document.addEventListener('click', (e) => {
-  const nav = document.getElementById('site-nav');
+  const nav = document.querySelector('.nav');
   const navToggle = document.querySelector('.nav-toggle');
   
   if (nav && nav.classList.contains('open')) {
@@ -24,7 +24,7 @@ document.addEventListener('click', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    const nav = document.getElementById('site-nav');
+    const nav = document.querySelector('.nav');
     if (nav && nav.classList.contains('open')) {
       nav.classList.remove('open');
       document.body.style.overflow = '';
@@ -37,10 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
   
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
-      const nav = document.getElementById('site-nav');
+      const nav = document.querySelector('.nav');
       if (nav && nav.classList.contains('open')) {
         nav.classList.remove('open');
         document.body.style.overflow = '';
+        const navToggle = document.querySelector('.nav-toggle');
         if (navToggle) {
           navToggle.setAttribute('aria-expanded', 'false');
         }
