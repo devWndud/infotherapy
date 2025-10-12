@@ -511,8 +511,20 @@ def create_app() -> Flask:
                 flash("파일이 존재하지 않습니다.", "error")
                 return redirect(url_for("learn"))
             
-            filename = os.path.basename(file_path)
-            return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
+            # 저장된 파일명에서 원본 파일명 추출
+            stored_filename = os.path.basename(file_path)
+            # assignment_20241201_123456_원본파일명.확장자 형태에서 원본 파일명 추출
+            if stored_filename.startswith('assignment_') and '_' in stored_filename[11:]:
+                # assignment_ 제거 후 날짜시간 부분 제거
+                parts = stored_filename[11:].split('_', 2)  # 날짜, 시간, 원본파일명
+                if len(parts) >= 3:
+                    original_filename = parts[2]  # 원본 파일명
+                else:
+                    original_filename = stored_filename
+            else:
+                original_filename = stored_filename
+            
+            return send_from_directory(os.path.dirname(file_path), stored_filename, as_attachment=True, download_name=original_filename)
 
     @app.route("/admin")
     @admin_required

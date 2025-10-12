@@ -28,8 +28,19 @@
         <h3 class="attachment-title">📎 첨부 파일</h3>
         <div class="attachment-item">
           <div class="attachment-info">
-            <span class="attachment-name">{{ a.file_path.split('/')[-1] }}</span>
-            <span class="attachment-size">{{ a.file_path.split('.')[-1].upper() }} 파일</span>
+            {% set stored_filename = a.file_path.split('/')[-1] %}
+            {% if stored_filename.startswith('assignment_') and '_' in stored_filename[11:] %}
+              {% set parts = stored_filename[11:].split('_', 2) %}
+              {% if parts|length >= 3 %}
+                {% set original_filename = parts[2] %}
+              {% else %}
+                {% set original_filename = stored_filename %}
+              {% endif %}
+            {% else %}
+              {% set original_filename = stored_filename %}
+            {% endif %}
+            <span class="attachment-name">{{ original_filename }}</span>
+            <span class="attachment-size">{{ original_filename.split('.')[-1].upper() }} 파일</span>
           </div>
           <a href="{{ url_for('download_assignment_file', assignment_id=a.id) }}" class="btn btn-primary btn-sm">
             다운로드
