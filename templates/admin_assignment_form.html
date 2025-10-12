@@ -89,20 +89,7 @@
           <div class="current-file">
             <div class="current-file-info">
               <span class="file-icon">📎</span>
-              {% if item and item['file_path'] %}
-                {% set stored_filename = item['file_path'].split('/')[-1] %}
-                {% if stored_filename.startswith('assignment_') and '_' in stored_filename[11:] %}
-                  {% set parts = stored_filename[11:].split('_', 2) %}
-                  {% if parts|length >= 3 %}
-                    {% set original_filename = parts[2] %}
-                  {% else %}
-                    {% set original_filename = stored_filename %}
-                  {% endif %}
-                {% else %}
-                  {% set original_filename = stored_filename %}
-                {% endif %}
-                <span class="file-name">{{ original_filename }}</span>
-              {% endif %}
+              <span class="file-name">{{ item['file_path'].split('/')[-1] if item['file_path'] else '' }}</span>
               <button type="button" class="remove-file-btn" onclick="confirmRemoveFile()" title="파일 삭제">
                 <span class="remove-icon">×</span>
               </button>
