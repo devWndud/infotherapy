@@ -223,9 +223,11 @@ def create_app() -> Flask:
                 return redirect(url_for("signup"))
             try:
                 with get_db() as cx:
+                    # 모든 분야를 기본값으로 설정
+                    default_interests = '["unity", "ml", "dl", "web"]'
                     cx.execute(
-                        "INSERT INTO users (name, student_id, password_hash, admin) VALUES (?,?,?,?)",
-                        (name, student_id, generate_password_hash(password), admin_flag),
+                        "INSERT INTO users (name, student_id, password_hash, admin, interests) VALUES (?,?,?,?,?)",
+                        (name, student_id, generate_password_hash(password), admin_flag, default_interests),
                     )
                 flash("회원가입 완료", "info")
                 return redirect(url_for("login"))

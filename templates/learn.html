@@ -24,50 +24,6 @@
     </div>
   </div>
 
-  <div class="interest-modal" id="interest-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>관심 분야 선택</h3>
-        <p>학습하고 싶은 분야를 선택해주세요. 여러 개 선택 가능합니다.</p>
-      </div>
-      <div class="modal-body">
-        <div class="interest-options">
-          <label class="interest-option">
-            <input type="checkbox" value="unity" checked>
-            <div class="option-content">
-              <div class="option-title">Unity</div>
-              <div class="option-desc">게임 개발, 3D 그래픽스</div>
-            </div>
-          </label>
-          <label class="interest-option">
-            <input type="checkbox" value="ml" checked>
-            <div class="option-content">
-            <div class="option-title">머신러닝</div>
-            <div class="option-desc">데이터 분석, 예측 모델</div>
-            </div>
-          </label>
-          <label class="interest-option">
-            <input type="checkbox" value="dl" checked>
-            <div class="option-content">
-              <div class="option-title">딥러닝</div>
-              <div class="option-desc">신경망, AI 모델</div>
-            </div>
-          </label>
-          <label class="interest-option">
-            <input type="checkbox" value="web" checked>
-            <div class="option-content">
-              <div class="option-title">Web</div>
-              <div class="option-desc">웹 개발, 프론트엔드/백엔드</div>
-            </div>
-          </label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" id="modal-cancel">취소</button>
-        <button class="btn btn-primary" id="modal-save">저장</button>
-      </div>
-    </div>
-  </div>
 
   <div class="learn-grid">
     <div class="learn-section">
@@ -414,105 +370,6 @@
     margin: 0;
   }
   
-  /* 관심 분야 선택 모달 */
-  .interest-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .interest-modal.show {
-    display: flex;
-  }
-  
-  .modal-content {
-    background: white;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .modal-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #e2e8f0;
-  }
-  
-  .modal-header h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #334155;
-  }
-  
-  .modal-header p {
-    margin: 0;
-    color: #64748b;
-    font-size: 0.875rem;
-  }
-  
-  .modal-body {
-    padding: 1.5rem;
-  }
-  
-  .interest-options {
-    display: grid;
-    gap: 1rem;
-  }
-  
-  .interest-option {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .interest-option:hover {
-    border-color: #3b82f6;
-    background: #f8fafc;
-  }
-  
-  .interest-option input[type="checkbox"] {
-    margin-right: 1rem;
-    width: 1.25rem;
-    height: 1.25rem;
-    accent-color: #3b82f6;
-  }
-  
-  .option-content {
-    flex: 1;
-  }
-  
-  .option-title {
-    font-weight: 600;
-    color: #334155;
-    margin-bottom: 0.25rem;
-  }
-  
-  .option-desc {
-    font-size: 0.875rem;
-    color: #64748b;
-  }
-  
-  .modal-footer {
-    padding: 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-  }
   
   @media (max-width: 768px) {
     .learn-grid {
@@ -545,19 +402,13 @@
     const materialsSectionCount = document.getElementById('materials-section-count');
     const assignmentsSectionCount = document.getElementById('assignments-section-count');
     
-    const interestModal = document.getElementById('interest-modal');
-    const modalCancelBtn = document.getElementById('modal-cancel');
-    const modalSaveBtn = document.getElementById('modal-save');
-    const interestOptions = document.querySelectorAll('.interest-option input[type="checkbox"]');
-
     let userInterests = {{ user_interests | tojson }};
     
     let currentFilter = 'all';
     
+    // 모든 분야를 기본값으로 설정
     if (userInterests.length === 0) {
-      setTimeout(() => {
-        interestModal.classList.add('show');
-      }, 500);
+      userInterests = ['unity', 'ml', 'dl', 'web'];
     }
 
     function createInterestChips() {
@@ -676,58 +527,6 @@
     }
 
 
-    modalCancelBtn.addEventListener('click', function() {
-      if (userInterests.length === 0) {
-        alert('최소 하나의 분야를 선택해주세요.');
-        return;
-      }
-      interestModal.classList.remove('show');
-    });
-
-    modalSaveBtn.addEventListener('click', async function() {
-      const newInterests = Array.from(interestOptions)
-        .filter(option => option.checked)
-        .map(option => option.value);
-      
-      if (newInterests.length === 0) {
-        alert('최소 하나의 분야를 선택해주세요.');
-        return;
-      }
-      
-      try {
-        const response = await fetch('/api/interests', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ interests: newInterests })
-        });
-        
-        if (response.ok) {
-          userInterests = newInterests;
-          createInterestChips();
-          updateFilterChips();
-          filterItems();
-          interestModal.classList.remove('show');
-        } else {
-          const error = await response.json();
-          alert('저장 중 오류가 발생했습니다: ' + error.error);
-        }
-      } catch (error) {
-        alert('저장 중 오류가 발생했습니다.');
-        console.error('Error:', error);
-      }
-    });
-
-    interestModal.addEventListener('click', function(e) {
-      if (e.target === interestModal) {
-        if (userInterests.length === 0) {
-          alert('최소 하나의 분야를 선택해주세요.');
-          return;
-        }
-        interestModal.classList.remove('show');
-      }
-    });
 
     createInterestChips();
     updateFilterChips();
