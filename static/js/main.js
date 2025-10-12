@@ -2,16 +2,22 @@ function toggleNav() {
   const nav = document.getElementById('site-nav');
   const navToggle = document.querySelector('.nav-toggle');
   
-  if (!nav || !navToggle) return;
+  if (!nav || !navToggle) {
+    console.log('Navigation elements not found');
+    return;
+  }
   
+  console.log('Toggle nav called');
   nav.classList.toggle('open');
   
   if (nav.classList.contains('open')) {
     document.body.style.overflow = 'hidden';
     navToggle.setAttribute('aria-expanded', 'true');
+    console.log('Menu opened');
   } else {
     document.body.style.overflow = '';
     navToggle.setAttribute('aria-expanded', 'false');
+    console.log('Menu closed');
   }
 }
 
@@ -42,24 +48,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const navToggle = document.querySelector('.nav-toggle');
   
   if (navToggle) {
-    let isHandled = false;
-    
     function handleToggle(e) {
-      if (isHandled) return;
-      isHandled = true;
-      
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
       toggleNav();
-      
-      setTimeout(() => {
-        isHandled = false;
-      }, 100);
+      return false;
     }
     
-    navToggle.addEventListener('click', handleToggle, { passive: false });
-    navToggle.addEventListener('touchstart', handleToggle, { passive: false });
-    navToggle.addEventListener('mousedown', handleToggle, { passive: false });
+    navToggle.onclick = handleToggle;
+    navToggle.ontouchstart = handleToggle;
+    navToggle.onmousedown = handleToggle;
+    
+    navToggle.addEventListener('click', handleToggle, { passive: false, capture: true });
+    navToggle.addEventListener('touchstart', handleToggle, { passive: false, capture: true });
+    navToggle.addEventListener('mousedown', handleToggle, { passive: false, capture: true });
     
     navToggle.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -70,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     navToggle.setAttribute('tabindex', '0');
     navToggle.setAttribute('role', 'button');
+    navToggle.style.pointerEvents = 'auto';
+    navToggle.style.cursor = 'pointer';
   }
   
   navLinks.forEach(link => {

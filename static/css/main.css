@@ -75,7 +75,7 @@ body {
   cursor: pointer;
   z-index: 1001;
   position: relative;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.1);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -83,6 +83,9 @@ body {
   user-select: none;
   outline: none;
   touch-action: manipulation;
+  pointer-events: auto;
+  min-width: 44px;
+  min-height: 44px;
 }
 .nav-toggle span { 
   width: 18px; 
@@ -247,7 +250,11 @@ img, video { max-width: 100%; height: auto; display: block; }
   .form textarea { min-height: 100px; font-size: 16px; }
   
   .nav { display: none; }
-  .nav-toggle { display: inline-flex; }
+  .nav-toggle { 
+    display: inline-flex !important; 
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -377,7 +384,7 @@ img, video { max-width: 100%; height: auto; display: block; }
     display: inline-flex !important;
     cursor: pointer;
     z-index: 1001;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -385,6 +392,11 @@ img, video { max-width: 100%; height: auto; display: block; }
     user-select: none;
     outline: none;
     touch-action: manipulation;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 44px;
+    min-height: 44px;
   }
   
   .nav-toggle:hover {
