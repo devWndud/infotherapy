@@ -302,8 +302,14 @@ img, video { max-width: 100%; height: auto; display: block; }
   .form input { height: 52px; padding: 12px 16px; }
   .form textarea { min-height: 120px; padding: 12px 16px; }
   
-  .nav-toggle { width: 40px; height: 40px; }
-  .nav-toggle span { width: 16px; height: 2px; }
+  .nav-toggle { 
+    width: 48px; 
+    height: 48px; 
+    min-width: 48px;
+    min-height: 48px;
+    padding: 8px;
+  }
+  .nav-toggle span { width: 18px; height: 2px; }
   
   .page-head { flex-direction: column; align-items: flex-start; gap: 8px; }
   .lead { flex-wrap: wrap; }
@@ -420,6 +426,21 @@ img, video { max-width: 100%; height: auto; display: block; }
   
   .btn:active { transform: scale(0.98); }
   .card:active { transform: scale(0.99); }
+  
+  .nav-toggle {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    padding: 10px !important;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.2) !important;
+    touch-action: manipulation !important;
+  }
+  
+  .nav-toggle:active {
+    transform: scale(0.95);
+    background: var(--surface);
+  }
 }
 
 @media (max-width: 768px) {

@@ -48,21 +48,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const navToggle = document.querySelector('.nav-toggle');
   
   if (navToggle) {
+    let touchStartTime = 0;
+    let touchEndTime = 0;
+    let isTouchHandled = false;
+    
     function handleToggle(e) {
+      if (isTouchHandled) return;
+      isTouchHandled = true;
+      
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
+      
+      console.log('Toggle triggered by:', e.type);
       toggleNav();
+      
+      setTimeout(() => {
+        isTouchHandled = false;
+      }, 300);
+      
       return false;
     }
     
-    navToggle.onclick = handleToggle;
-    navToggle.ontouchstart = handleToggle;
-    navToggle.onmousedown = handleToggle;
+    navToggle.addEventListener('touchstart', function(e) {
+      touchStartTime = Date.now();
+      console.log('Touch start at:', touchStartTime);
+    }, { passive: true });
     
-    navToggle.addEventListener('click', handleToggle, { passive: false, capture: true });
-    navToggle.addEventListener('touchstart', handleToggle, { passive: false, capture: true });
-    navToggle.addEventListener('mousedown', handleToggle, { passive: false, capture: true });
+    navToggle.addEventListener('touchend', function(e) {
+      touchEndTime = Date.now();
+      const touchDuration = touchEndTime - touchStartTime;
+      
+      console.log('Touch end at:', touchEndTime, 'Duration:', touchDuration, 'Handled:', isTouchHandled);
+      
+      if (touchDuration < 500 && !isTouchHandled) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Processing touch end');
+        handleToggle(e);
+      }
+    }, { passive: false });
+    
+    navToggle.addEventListener('touchcancel', function(e) {
+      console.log('Touch cancelled');
+      isTouchHandled = false;
+    }, { passive: true });
+    
+    navToggle.addEventListener('click', handleToggle, { passive: false });
+    navToggle.addEventListener('mousedown', handleToggle, { passive: false });
     
     navToggle.addEventListener('keydown', function(e) {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -75,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navToggle.setAttribute('role', 'button');
     navToggle.style.pointerEvents = 'auto';
     navToggle.style.cursor = 'pointer';
+    navToggle.style.touchAction = 'manipulation';
   }
   
   navLinks.forEach(link => {
