@@ -96,6 +96,8 @@ body {
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
   }
 }
 .nav-toggle span { 
@@ -361,6 +363,15 @@ img, video { max-width: 100%; height: auto; display: block; }
   align-items: center; 
   justify-content: flex-end;
   gap: 16px; 
+  width: 100%;
+}
+
+/* PC에서만 우측 정렬 강제 적용 */
+@media (min-width: 769px) {
+  .nav {
+    justify-content: flex-end !important;
+    margin-left: auto;
+  }
 }
 
 @media (max-width: 1024px) {
