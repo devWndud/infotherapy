@@ -22,6 +22,21 @@
 
     <div class="assignment-body">
       <div class="desc">{{ a.description | autolink | safe }}</div>
+      
+      {% if a.file_path %}
+      <div class="attachment-section">
+        <h3 class="attachment-title">📎 첨부 파일</h3>
+        <div class="attachment-item">
+          <div class="attachment-info">
+            <span class="attachment-name">{{ a.file_path.split('/')[-1] }}</span>
+            <span class="attachment-size">{{ a.file_path.split('.')[-1].upper() }} 파일</span>
+          </div>
+          <a href="{{ url_for('download_assignment_file', assignment_id=a.id) }}" class="btn btn-primary btn-sm">
+            다운로드
+          </a>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
     <div class="assignment-actions">
@@ -109,6 +124,54 @@
   .title { margin: 0 0 12px; font-size: 22px; }
   .assignment-body { padding: 0 18px 18px; }
   .assignment-body .desc { white-space: pre-wrap; line-height: 1.6; color: var(--text); }
+  
+  .attachment-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+  
+  .attachment-title {
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .attachment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+  
+  .attachment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .attachment-name {
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.875rem;
+  }
+  
+  .attachment-size {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+  }
   .assignment-actions { display:flex; gap:10px; align-items:center; justify-content: space-between; padding: 12px 18px 18px; border-top:1px solid var(--border); flex-wrap: wrap; }
   .submit-box { width: 100%; }
   .submit-box[open] { margin-bottom: 6px; }

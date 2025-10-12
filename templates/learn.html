@@ -71,6 +71,9 @@
               <div class="item-title">{{ a.title }}</div>
               <div class="item-meta">
                 <span class="category-badge">{{ a.category | category_display }}</span>
+                {% if a.file_path %}
+                  <span class="attachment-badge">📎 첨부파일</span>
+                {% endif %}
                 {% if a.submitted_at %}
                   <span class="status-badge submitted">제출 완료</span>
                 {% elif a.overdue %}
@@ -325,6 +328,12 @@
   .category-badge {
     background: #dbeafe;
     color: #1e40af;
+  }
+  
+  .attachment-badge {
+    background: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
   }
   
   .due-badge {

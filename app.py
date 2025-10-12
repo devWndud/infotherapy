@@ -81,10 +81,17 @@ def create_app() -> Flask:
               title TEXT NOT NULL,
               due TEXT,
               description TEXT,
-              category TEXT
+              category TEXT,
+              file_path TEXT
             )
             """
         )
+        
+        # 기존 테이블에 file_path 컬럼 추가 (이미 존재하면 무시됨)
+        try:
+            cx.execute("ALTER TABLE assignments ADD COLUMN file_path TEXT")
+        except sqlite3.OperationalError:
+            pass  # 컬럼이 이미 존재하는 경우
 
     url_regex = re.compile(r"(https?://[^\s]+)")
 
@@ -352,7 +359,7 @@ def create_app() -> Flask:
             return redirect(url_for('login'))
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
-            assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY id DESC").fetchall()
+            assignments_rows = cx.execute("SELECT id, title, due, description, category, file_path FROM assignments ORDER BY id DESC").fetchall()
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
@@ -452,7 +459,7 @@ def create_app() -> Flask:
     @app.route("/assignment/<int:item_id>")
     def assignment_detail(item_id: int):
         with get_db() as cx:
-            a = cx.execute("SELECT id, title, due, description, category FROM assignments WHERE id=?", (item_id,)).fetchone()
+            a = cx.execute("SELECT id, title, due, description, category, file_path FROM assignments WHERE id=?", (item_id,)).fetchone()
         if not a:
             return redirect(url_for("learn"))
         a = dict(a)
@@ -490,6 +497,22 @@ def create_app() -> Flask:
                 submitted = True
                 submitted_at = row["created_at"]
         return render_template("assignment_detail.html", a=a, submitted=submitted, submitted_at=submitted_at, overdue=overdue)
+
+    @app.route("/assignment/<int:assignment_id>/download")
+    def download_assignment_file(assignment_id: int):
+        with get_db() as cx:
+            assignment = cx.execute("SELECT file_path FROM assignments WHERE id=?", (assignment_id,)).fetchone()
+            if not assignment or not assignment['file_path']:
+                flash("파일을 찾을 수 없습니다.", "error")
+                return redirect(url_for("learn"))
+            
+            file_path = assignment['file_path']
+            if not os.path.exists(file_path):
+                flash("파일이 존재하지 않습니다.", "error")
+                return redirect(url_for("learn"))
+            
+            filename = os.path.basename(file_path)
+            return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
 
     @app.route("/admin")
     @admin_required
@@ -532,9 +555,17 @@ def create_app() -> Flask:
     @admin_required
     def admin_assignment_new():
         if request.method == "POST":
+            file_path = None
+            if 'file' in request.files:
+                file = request.files['file']
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(uploads_dir, f"assignment_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}")
+                    file.save(file_path)
+            
             with get_db() as cx:
-                cx.execute("INSERT INTO assignments (title, due, description, category) VALUES (?,?,?,?)",
-                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category")))
+                cx.execute("INSERT INTO assignments (title, due, description, category, file_path) VALUES (?,?,?,?,?)",
+                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), file_path))
             return redirect(url_for("admin_dashboard"))
         return render_template("admin_assignment_form.html", item=None)
 
@@ -542,11 +573,28 @@ def create_app() -> Flask:
     @admin_required
     def admin_assignment_edit(item_id: int):
         with get_db() as cx:
-            item = cx.execute("SELECT id, title, due, description, category FROM assignments WHERE id=?", (item_id,)).fetchone()
+            item = cx.execute("SELECT id, title, due, description, category, file_path FROM assignments WHERE id=?", (item_id,)).fetchone()
         if request.method == "POST":
+            file_path = item['file_path']  # 기존 파일 경로 유지
+            
+            if 'file' in request.files:
+                file = request.files['file']
+                if file and file.filename:
+                    # 기존 파일 삭제
+                    if file_path and os.path.exists(file_path):
+                        try:
+                            os.remove(file_path)
+                        except Exception:
+                            pass
+                    
+                    # 새 파일 저장
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(uploads_dir, f"assignment_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}")
+                    file.save(file_path)
+            
             with get_db() as cx:
-                cx.execute("UPDATE assignments SET title=?, due=?, description=?, category=? WHERE id=?",
-                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), item_id))
+                cx.execute("UPDATE assignments SET title=?, due=?, description=?, category=?, file_path=? WHERE id=?",
+                           (request.form.get("title"), request.form.get("due"), request.form.get("description"), request.form.get("category"), file_path, item_id))
             return redirect(url_for("admin_dashboard"))
         return render_template("admin_assignment_form.html", item=item)
 
@@ -554,6 +602,12 @@ def create_app() -> Flask:
     @admin_required
     def admin_assignment_delete(item_id: int):
         with get_db() as cx:
+            assignment = cx.execute("SELECT file_path FROM assignments WHERE id=?", (item_id,)).fetchone()
+            if assignment and assignment['file_path'] and os.path.exists(assignment['file_path']):
+                try:
+                    os.remove(assignment['file_path'])
+                except Exception:
+                    pass
             cx.execute("DELETE FROM assignments WHERE id=?", (item_id,))
         return redirect(url_for("admin_dashboard"))
 
