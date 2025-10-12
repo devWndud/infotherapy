@@ -328,7 +328,13 @@ def create_app() -> Flask:
                 filename = uploaded_file.filename
                 # 위험한 문자만 제거
                 filename = filename.replace('..', '').replace('/', '').replace('\\', '')
-                dest = os.path.join(uploads_dir, filename)
+                
+                # 파일명 중복 방지를 위해 타임스탬프 추가
+                name, ext = os.path.splitext(filename)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                unique_filename = f"{name}_{timestamp}{ext}"
+                
+                dest = os.path.join(uploads_dir, unique_filename)
                 uploaded_file.save(dest)
                 file_paths.append(dest)
         
@@ -561,6 +567,18 @@ def create_app() -> Flask:
         
         filename = os.path.basename(file_path)
         return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
+    
+    @app.route("/assignment/preview/<path:file_path>")
+    def preview_assignment_file_by_path(file_path: str):
+        # 보안을 위해 파일 경로 검증
+        if not file_path.startswith(uploads_dir):
+            return "잘못된 파일 경로입니다.", 404
+        
+        if not os.path.exists(file_path):
+            return "파일이 존재하지 않습니다.", 404
+        
+        filename = os.path.basename(file_path)
+        return send_from_directory(os.path.dirname(file_path), filename, as_attachment=False)
 
     @app.route("/admin")
     @admin_required
@@ -614,7 +632,13 @@ def create_app() -> Flask:
                         filename = file.filename
                         # 위험한 문자만 제거
                         filename = filename.replace('..', '').replace('/', '').replace('\\', '')
-                        file_path = os.path.join(uploads_dir, filename)
+                        
+                        # 파일명 중복 방지를 위해 타임스탬프 추가
+                        name, ext = os.path.splitext(filename)
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                        unique_filename = f"{name}_{timestamp}{ext}"
+                        
+                        file_path = os.path.join(uploads_dir, unique_filename)
                         file.save(file_path)
                         file_paths.append(file_path)
             
@@ -662,7 +686,13 @@ def create_app() -> Flask:
                         filename = file.filename
                         # 위험한 문자만 제거
                         filename = filename.replace('..', '').replace('/', '').replace('\\', '')
-                        file_path = os.path.join(uploads_dir, filename)
+                        
+                        # 파일명 중복 방지를 위해 타임스탬프 추가
+                        name, ext = os.path.splitext(filename)
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                        unique_filename = f"{name}_{timestamp}{ext}"
+                        
+                        file_path = os.path.join(uploads_dir, unique_filename)
                         file.save(file_path)
                         new_file_paths.append(file_path)
             
