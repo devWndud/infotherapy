@@ -392,31 +392,31 @@ img, video { max-width: 100%; height: auto; display: block; }
   background: rgba(0,0,0,0.5);
 }
 
-  .nav-content {
-    background: #fff;
-    border-radius: 0 16px 16px 0;
-    padding: 20px;
-    width: 280px;
-    max-width: 80vw;
-    box-shadow: 2px 0 20px rgba(0,0,0,0.15);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin: 0;
-    height: 100vh;
-  }
+.nav-content {
+  background: #fff;
+  border-radius: 0 16px 16px 0;
+  padding: 20px;
+  width: 280px;
+  max-width: 80vw;
+  box-shadow: 2px 0 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  height: 100vh;
+}
 
-  .nav-content a {
-    padding: 12px 16px;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 500;
-  }
+.nav-content a {
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+}
 
-  .nav-content .btn {
-    margin-top: 8px;
-    justify-content: center;
-  }
+.nav-content .btn {
+  margin-top: 8px;
+  justify-content: center;
+}
   
   .nav-toggle {
     display: inline-flex !important;
