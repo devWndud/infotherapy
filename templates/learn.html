@@ -71,7 +71,12 @@
               <div class="item-title">{{ a.title }}</div>
               <div class="item-meta">
                 <span class="category-badge">{{ a.category | category_display }}</span>
-                {% if a.file_path %}
+                {% if a.file_paths and a.file_paths.strip() %}
+                  {% set file_paths = a.file_paths | from_json %}
+                  {% if file_paths %}
+                    <span class="category-badge attachment-color">📎 첨부파일 ({{ file_paths|length }}개)</span>
+                  {% endif %}
+                {% elif a.file_path %}
                   <span class="category-badge attachment-color">📎 첨부파일</span>
                 {% endif %}
                 {% if a.submitted_at %}

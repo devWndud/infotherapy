@@ -402,7 +402,7 @@ def create_app() -> Flask:
             return redirect(url_for('login'))
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
-            assignments_rows = cx.execute("SELECT id, title, due, description, category, file_path FROM assignments ORDER BY id DESC").fetchall()
+            assignments_rows = cx.execute("SELECT id, title, due, description, category, file_path, file_paths FROM assignments ORDER BY id DESC").fetchall()
         def is_overdue(due_str: str) -> bool:
             if not due_str:
                 return False
