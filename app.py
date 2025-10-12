@@ -756,7 +756,7 @@ def create_app() -> Flask:
                 return redirect(url_for("admin_dashboard"))
             
             submissions = cx.execute("""
-                SELECT s.id, s.name, s.assignment_title, s.category, s.text_content, s.file_path, s.created_at
+                SELECT s.id, s.name, s.assignment_title, s.category, s.text_content, s.file_path, s.file_paths, s.created_at
                 FROM submissions s
                 WHERE s.assignment_title = ? AND IFNULL(s.category, '') = IFNULL(?, '')
                 ORDER BY s.created_at DESC
@@ -769,7 +769,7 @@ def create_app() -> Flask:
     def admin_submission_detail(submission_id: int):
         with get_db() as cx:
             submission = cx.execute("""
-                SELECT s.id, s.name, s.assignment_title, s.category, s.text_content, s.file_path, s.created_at
+                SELECT s.id, s.name, s.assignment_title, s.category, s.text_content, s.file_path, s.file_paths, s.created_at
                 FROM submissions s
                 WHERE s.id = ?
             """, (submission_id,)).fetchone()
@@ -819,6 +819,70 @@ def create_app() -> Flask:
                 os.path.dirname(submission['file_path']),
                 os.path.basename(submission['file_path']),
                 as_attachment=True
+            )
+
+    @app.route("/submission/file/<path:filename>")
+    @admin_required
+    def download_submission_file_by_path(filename: str):
+        """제출 파일을 파일명으로 다운로드 (as attachment)"""
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        if not os.path.exists(file_path):
+            flash("파일을 찾을 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+
+    @app.route("/submission/preview/<path:filename>")
+    @admin_required
+    def preview_submission_file_by_path(filename: str):
+        """제출 파일을 파일명으로 미리보기 (inline)"""
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        if not os.path.exists(file_path):
+            flash("파일을 찾을 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
+
+    @app.route("/admin/submission/<int:submission_id>/download-all")
+    @admin_required
+    def admin_submission_download_all(submission_id: int):
+        """제출의 모든 파일을 ZIP으로 다운로드"""
+        import zipfile
+        import tempfile
+        from io import BytesIO
+        
+        with get_db() as cx:
+            submission = cx.execute("SELECT file_paths FROM submissions WHERE id=?", (submission_id,)).fetchone()
+            
+            if not submission or not submission['file_paths']:
+                flash("파일을 찾을 수 없습니다.", "info")
+                return redirect(url_for("admin_dashboard"))
+            
+            try:
+                file_paths = json.loads(submission['file_paths'])
+            except (json.JSONDecodeError, TypeError):
+                flash("파일 정보를 읽을 수 없습니다.", "info")
+                return redirect(url_for("admin_dashboard"))
+            
+            if not file_paths:
+                flash("다운로드할 파일이 없습니다.", "info")
+                return redirect(url_for("admin_dashboard"))
+            
+            # ZIP 파일 생성
+            zip_buffer = BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for filename in file_paths:
+                    file_path = os.path.join(UPLOAD_FOLDER, filename)
+                    if os.path.exists(file_path):
+                        zip_file.write(file_path, filename)
+            
+            zip_buffer.seek(0)
+            
+            return send_file(
+                zip_buffer,
+                mimetype='application/zip',
+                as_attachment=True,
+                download_name=f'submission_{submission_id}_files.zip'
             )
 
     @app.route("/admin/invites/export")

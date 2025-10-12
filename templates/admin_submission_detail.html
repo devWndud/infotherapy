@@ -42,7 +42,55 @@
         </div>
       {% endif %}
 
-      {% if submission.file_path %}
+      {% if submission.file_paths and submission.file_paths.strip() %}
+        {% set file_paths = submission.file_paths | from_json %}
+        {% if file_paths %}
+          <div class="content-section">
+            <h4>첨부 파일 ({{ file_paths|length }}개)</h4>
+            <div class="files-grid">
+              {% for filename in file_paths %}
+                <div class="file-item">
+                  <div class="file-preview">
+                    {% set file_ext = filename.split('.')[-1].lower() %}
+                    {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp'] %}
+                      <img src="{{ url_for('preview_submission_file_by_path', filename=filename) }}" 
+                           style="width:100%; height:200px; object-fit:cover; border-radius:8px; cursor:pointer;"
+                           onclick="openFilePreview('{{ url_for('preview_submission_file_by_path', filename=filename) }}', '{{ filename }}')"
+                           alt="{{ filename }}">
+                    {% elif file_ext in ['mp4', 'webm', 'ogg', 'mov'] %}
+                      <video style="width:100%; height:200px; object-fit:cover; border-radius:8px; cursor:pointer;"
+                             onclick="openFilePreview('{{ url_for('preview_submission_file_by_path', filename=filename) }}', '{{ filename }}')">
+                        <source src="{{ url_for('preview_submission_file_by_path', filename=filename) }}">
+                      </video>
+                    {% else %}
+                      <div style="width:100%; height:200px; background:#f8f9fa; border:2px dashed #ddd; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer;"
+                           onclick="openFilePreview('{{ url_for('preview_submission_file_by_path', filename=filename) }}', '{{ filename }}')">
+                        <div style="text-align:center;">
+                          <div style="font-size:48px; color:#6c757d; margin-bottom:8px;">📄</div>
+                          <div style="font-size:14px; color:#6c757d;">{{ file_ext.upper() }}</div>
+                        </div>
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="file-info">
+                    <div class="file-name">{{ filename }}</div>
+                    <div class="file-actions">
+                      <a class="btn btn-sm btn-primary" href="{{ url_for('download_submission_file_by_path', filename=filename) }}" download="{{ filename }}">
+                        다운로드
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="file-actions-all" style="margin-top:16px; text-align:center;">
+              <a class="btn btn-outline" href="{{ url_for('admin_submission_download_all', submission_id=submission.id) }}">
+                모든 파일 다운로드 (ZIP)
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      {% elif submission.file_path %}
         <div class="content-section">
           <h4>첨부 파일</h4>
           <div class="file-info">
@@ -82,6 +130,72 @@
       </div>
     </div>
   </div>
+
+  <!-- 파일 미리보기 모달 -->
+  <div id="filePreviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+    <div style="background:#fff; border-radius:12px; max-width:90%; max-height:90%; overflow:auto; position:relative;">
+      <div style="position:absolute; top:10px; right:15px; z-index:1001;">
+        <button onclick="closeFilePreview()" style="background:none; border:none; font-size:24px; color:#666; cursor:pointer; padding:5px;">&times;</button>
+      </div>
+      <div id="filePreviewContent" style="padding:20px; text-align:center;">
+        <!-- 미리보기 내용이 여기에 표시됩니다 -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+  function openFilePreview(fileUrl, fileName) {
+    const modal = document.getElementById('filePreviewModal');
+    const content = document.getElementById('filePreviewContent');
+    
+    // 파일 확장자 확인
+    const fileExt = fileName.split('.').pop().toLowerCase();
+    
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExt)) {
+      content.innerHTML = `
+        <h3 style="margin:0 0 15px; color:#333;">${fileName}</h3>
+        <img src="${fileUrl}" style="max-width:100%; max-height:70vh; border-radius:8px;" alt="${fileName}">
+      `;
+    } else if (['mp4', 'webm', 'ogg', 'mov'].includes(fileExt)) {
+      content.innerHTML = `
+        <h3 style="margin:0 0 15px; color:#333;">${fileName}</h3>
+        <video controls style="max-width:100%; max-height:70vh; border-radius:8px;">
+          <source src="${fileUrl}">
+          브라우저가 비디오를 지원하지 않습니다.
+        </video>
+      `;
+    } else {
+      content.innerHTML = `
+        <h3 style="margin:0 0 15px; color:#333;">${fileName}</h3>
+        <p style="color:#666; margin:20px 0;">이 파일은 미리보기를 지원하지 않습니다.</p>
+        <a href="${fileUrl}" class="btn btn-primary" download="${fileName}">파일 다운로드</a>
+      `;
+    }
+    
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  
+  function closeFilePreview() {
+    const modal = document.getElementById('filePreviewModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+  
+  // ESC 키로 모달 닫기
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeFilePreview();
+    }
+  });
+  
+  // 모달 배경 클릭으로 닫기
+  document.getElementById('filePreviewModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeFilePreview();
+    }
+  });
+  </script>
 
   <style>
   .submission-card {
@@ -153,6 +267,56 @@
     background: #f8f9fa;
     border-radius: 8px;
     margin-bottom: 16px;
+  }
+  
+  .files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+  
+  .file-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+  }
+  
+  .file-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .file-preview {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .file-preview img,
+  .file-preview video {
+    transition: transform 0.2s ease;
+  }
+  
+  .file-preview:hover img,
+  .file-preview:hover video {
+    transform: scale(1.02);
+  }
+  
+  .file-info {
+    padding: 12px;
+  }
+  
+  .file-name {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+    word-break: break-all;
+  }
+  
+  .file-actions {
+    display: flex;
+    gap: 8px;
   }
   
   .file-details {
