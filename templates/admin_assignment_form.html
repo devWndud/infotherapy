@@ -89,14 +89,12 @@
             <div class="current-file-info">
               <span class="file-icon">📎</span>
               <span class="file-name">{{ item['file_path'].split('/')[-1] if item['file_path'] else '' }}</span>
+              <button type="button" class="remove-file-btn" onclick="confirmRemoveFile()" title="파일 삭제">
+                <span class="remove-icon">×</span>
+              </button>
             </div>
-            <div class="current-file-actions">
-              <label class="btn btn-outline btn-sm">
-                <input type="checkbox" name="remove_file" value="1" style="display: none;">
-                <span class="remove-file-text">파일 삭제</span>
-              </label>
-            </div>
-            <small class="file-hint">새 파일을 선택하거나 '파일 삭제'를 체크하면 기존 파일이 교체/삭제됩니다</small>
+            <input type="hidden" name="remove_file" id="remove_file_input" value="0">
+            <small class="file-hint">새 파일을 선택하면 기존 파일이 교체됩니다</small>
           </div>
           {% endif %}
         </div>
@@ -235,12 +233,6 @@
     margin-bottom: 0.5rem;
   }
   
-  .current-file-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 0.5rem;
-  }
-  
   .file-icon {
     font-size: 1.2rem;
   }
@@ -248,6 +240,7 @@
   .file-name {
     font-weight: 500;
     color: #334155;
+    flex: 1;
   }
   
   .file-hint {
@@ -256,17 +249,31 @@
     display: block;
   }
   
-  .remove-file-text {
+  .remove-file-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 0.2s ease;
+    flex-shrink: 0;
   }
   
-  .current-file-actions label:hover .remove-file-text {
-    color: #dc2626;
+  .remove-file-btn:hover {
+    background: #b91c1c;
+    transform: scale(1.1);
   }
   
-  .current-file-actions input[type="checkbox"]:checked + .remove-file-text {
-    color: #dc2626;
-    font-weight: 600;
+  .remove-icon {
+    font-weight: bold;
+    font-size: 18px;
   }
   
   .form-hint {
@@ -374,31 +381,50 @@
         });
       });
       
-      // 파일 삭제 체크박스 동작
-      const removeFileCheckbox = document.querySelector('input[name="remove_file"]');
+      // 새 파일 선택 시 삭제 상태 초기화
       const fileInput = document.querySelector('input[name="file"]');
-      
-      if (removeFileCheckbox) {
-        removeFileCheckbox.addEventListener('change', function() {
-          if (this.checked) {
-            fileInput.disabled = true;
-            fileInput.value = '';
-          } else {
-            fileInput.disabled = false;
-          }
-        });
-      }
-      
-      // 새 파일 선택 시 삭제 체크박스 해제
       if (fileInput) {
         fileInput.addEventListener('change', function() {
-          if (this.files.length > 0 && removeFileCheckbox) {
-            removeFileCheckbox.checked = false;
-            removeFileCheckbox.dispatchEvent(new Event('change'));
+          if (this.files.length > 0) {
+            const removeInput = document.getElementById('remove_file_input');
+            if (removeInput) {
+              removeInput.value = '0';
+            }
           }
         });
       }
     });
+    
+    // 파일 삭제 확인 함수
+    function confirmRemoveFile() {
+      const fileName = document.querySelector('.file-name').textContent;
+      const confirmed = confirm(`정말로 "${fileName}" 파일을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+      
+      if (confirmed) {
+        const removeInput = document.getElementById('remove_file_input');
+        const fileInput = document.querySelector('input[name="file"]');
+        const currentFileDiv = document.querySelector('.current-file');
+        
+        // 삭제 플래그 설정
+        removeInput.value = '1';
+        
+        // 파일 입력 비활성화
+        if (fileInput) {
+          fileInput.disabled = true;
+          fileInput.value = '';
+        }
+        
+        // UI 업데이트
+        currentFileDiv.style.opacity = '0.5';
+        currentFileDiv.style.textDecoration = 'line-through';
+        
+        // 삭제 버튼 비활성화
+        const removeBtn = document.querySelector('.remove-file-btn');
+        removeBtn.disabled = true;
+        removeBtn.style.opacity = '0.5';
+        removeBtn.style.cursor = 'not-allowed';
+      }
+    }
   </script>
 {% endblock %}
 
