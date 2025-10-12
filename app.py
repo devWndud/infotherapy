@@ -305,10 +305,7 @@ def create_app() -> Flask:
             )
         flash("제출 완료", "info")
         
-        # 이메일 제목
         email_subject = f"{session.get('name')} - {title} 제출"
-        
-        # 이메일 내용
         body_lines = [
             f"제출자: {session.get('name')}",
             f"과제명: {title}",
@@ -327,7 +324,6 @@ def create_app() -> Flask:
             ])
         
         try:
-            # 파일 첨부 없이 텍스트만 전송
             send_admin_email(subject=email_subject, body="\n".join(body_lines), attachments=None)
         except Exception:
             pass
@@ -384,7 +380,6 @@ def create_app() -> Flask:
             key = f"{d.get('title')}|{d.get('category') or ''}"
             d["submitted_at"] = submission_map.get(key)
             assignments.append(d)
-        # 사용자 관심 분야 불러오기
         user_interests = []
         if session.get("uid"):
             with get_db() as cx:
@@ -403,7 +398,6 @@ def create_app() -> Flask:
             return {"error": "로그인이 필요합니다."}, 401
         
         if request.method == "GET":
-            # 관심 분야 불러오기
             with get_db() as cx:
                 user_row = cx.execute("SELECT interests FROM users WHERE id=?", (session.get("uid"),)).fetchone()
                 if user_row and user_row['interests']:
@@ -416,20 +410,16 @@ def create_app() -> Flask:
             return {"interests": interests}
         
         elif request.method == "POST":
-            # 관심 분야 저장하기
             data = request.get_json()
             interests = data.get("interests", [])
             
             if not isinstance(interests, list):
                 return {"error": "관심 분야는 배열 형태여야 합니다."}, 400
             
-            # 유효한 분야인지 확인
             valid_interests = ["unity", "ml", "dl", "web"]
             for interest in interests:
                 if interest not in valid_interests:
                     return {"error": f"유효하지 않은 분야: {interest}"}, 400
-            
-            # 데이터베이스에 저장
             with get_db() as cx:
                 cx.execute("UPDATE users SET interests = ? WHERE id = ?", 
                           (json.dumps(interests), session.get("uid")))

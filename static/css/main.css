@@ -21,7 +21,6 @@ body {
   overflow-x: hidden;
 }
 
-/* 스크롤바 숨기기 */
 ::-webkit-scrollbar {
   width: 0px;
   background: transparent;
@@ -31,7 +30,6 @@ body {
   background: transparent;
 }
 
-/* Firefox */
 html {
   scrollbar-width: none;
 }
@@ -77,6 +75,14 @@ body {
   cursor: pointer;
   z-index: 1001;
   position: relative;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  outline: none;
+  touch-action: manipulation;
 }
 .nav-toggle span { 
   width: 18px; 
@@ -105,7 +111,6 @@ main.container { padding: 32px 20px; flex: 1; }
 .card h3 { margin: 0 0 6px; font-size: 18px; }
 .card p { margin: 0; color: var(--muted); }
 
-/* vertical timeline */
 .timeline { position: relative; display: grid; gap: 18px; max-width: 800px; margin: 0 auto; }
 .timeline:before { content: ""; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: var(--border); }
 .timeline-item { position: relative; display: grid; grid-template-columns: 24px 1fr; align-items: center; gap: 10px; }
@@ -114,15 +119,12 @@ main.container { padding: 32px 20px; flex: 1; }
 .timeline-title { font-weight: 700; }
 .timeline-desc { color: var(--muted); }
 
-/* awards highlight */
 .timeline-item.win .timeline-content { border-color: #bfdbfe; background: #f5faff; }
 .timeline-item.win .timeline-node { border-color: #3b82f6; }
 .award { color: #1d4ed8; font-weight: 700; background: #eff6ff; border: 1px solid #bfdbfe; padding: 2px 6px; border-radius: 8px; display: inline-block; }
 
-/* hero actions */
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
-/* team section */
 .team { display: grid; grid-template-columns: repeat( auto-fit, minmax(160px, 1fr) ); gap: 16px; max-width: 900px; margin: 0 auto; }
 .team.two-only { grid-template-columns: repeat(2, minmax(200px, 280px)); justify-content: center; }
 .team-item { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 1px 2px rgba(17,24,39,0.04); }
@@ -164,12 +166,10 @@ main.container { padding: 32px 20px; flex: 1; }
  .badge.due { background:#fff7ed; border-color:#fed7aa; color:#c2410c; }
  .empty { text-align:center; color: var(--muted); padding: 20px 0; }
 
-/* tabs */
 .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .tab { border: 1px solid var(--border); background: #fff; padding: 8px 12px; border-radius: 999px; cursor: pointer; }
 .tab.active, .tab:hover { border-color: var(--primary); color: var(--primary); }
 
-/* simple modal */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.32); display: none; align-items: center; justify-content: center; padding: 20px; }
 .modal.show { display: flex; }
 .modal-content { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px; width: 100%; max-width: 420px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
@@ -187,7 +187,6 @@ main.container { padding: 32px 20px; flex: 1; }
 
 img, video { max-width: 100%; height: auto; display: block; }
 
-/* removed fixed max-width to keep layout fully fluid to screen width */
 
 .site-footer { border-top: 1px solid var(--border); padding: 32px 0; color: var(--muted); }
 .footer-grid { display: grid; grid-template-columns: repeat( auto-fit, minmax(220px, 1fr) ); gap: 16px; max-width: 900px; margin: 0 auto; text-align: center; justify-items: center; }
@@ -196,7 +195,6 @@ img, video { max-width: 100%; height: auto; display: block; }
 .footer-links a { color: var(--muted); text-decoration: none; }
 .footer-links a:hover { color: var(--primary); }
 
-/* 모바일 반응형 개선 */
 @media (max-width: 1024px) {
   .container { padding: 0 20px; }
   .hero { min-height: 50vh; padding: clamp(20px, 4vw, 48px) 0; }
@@ -214,7 +212,7 @@ img, video { max-width: 100%; height: auto; display: block; }
     min-height: 45vh; 
     padding: clamp(16px, 3vw, 32px) 0;
     background-position: center 50% !important;
-    background-size: cover !important; /* 모바일에서 꽉 채우기 */
+    background-size: cover !important;
   }
   .hero h1 { 
     font-size: clamp(28px, 6vw, 48px); 
@@ -260,7 +258,7 @@ img, video { max-width: 100%; height: auto; display: block; }
   .hero { 
     min-height: 40vh; 
     padding: clamp(12px, 2vw, 24px) 0;
-    background-size: cover !important; /* 모바일에서 꽉 채우기 */
+    background-size: cover !important;
   }
   .hero h1 { 
     font-size: clamp(24px, 8vw, 36px); 
@@ -331,7 +329,6 @@ img, video { max-width: 100%; height: auto; display: block; }
   .form textarea { min-height: 100px; padding: 10px 14px; }
 }
 
-/* 모바일 네비게이션 개선 */
 @media (max-width: 768px) {
   .nav { 
     display: none; 
@@ -380,6 +377,14 @@ img, video { max-width: 100%; height: auto; display: block; }
     display: inline-flex !important;
     cursor: pointer;
     z-index: 1001;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
+    touch-action: manipulation;
   }
   
   .nav-toggle:hover {
@@ -389,9 +394,13 @@ img, video { max-width: 100%; height: auto; display: block; }
   .nav-toggle:active {
     transform: scale(0.95);
   }
+  
+  .nav-toggle:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
 }
 
-/* 모바일 터치 최적화 */
 @media (hover: none) and (pointer: coarse) {
   .btn:hover { transform: none; }
   .card:hover { transform: none; }
@@ -401,7 +410,6 @@ img, video { max-width: 100%; height: auto; display: block; }
   .card:active { transform: scale(0.99); }
 }
 
-/* 모바일 스크롤 개선 */
 @media (max-width: 768px) {
   body { -webkit-overflow-scrolling: touch; }
   

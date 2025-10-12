@@ -6,7 +6,6 @@ function toggleNav() {
   
   nav.classList.toggle('open');
   
-  // 모바일에서 메뉴 열릴 때 body 스크롤 방지
   if (nav.classList.contains('open')) {
     document.body.style.overflow = 'hidden';
     navToggle.setAttribute('aria-expanded', 'true');
@@ -16,7 +15,6 @@ function toggleNav() {
   }
 }
 
-// 모바일 메뉴 외부 클릭 시 닫기
 document.addEventListener('click', (e) => {
   const nav = document.getElementById('site-nav');
   const navToggle = document.querySelector('.nav-toggle');
@@ -29,7 +27,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ESC 키로 모바일 메뉴 닫기
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const nav = document.getElementById('site-nav');
@@ -40,18 +37,39 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// 모바일 메뉴 링크 클릭 시 자동으로 메뉴 닫기
 document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelectorAll('.nav-content a');
   const navToggle = document.querySelector('.nav-toggle');
   
-  // 햄버거 버튼 이벤트 리스너 추가
   if (navToggle) {
-    navToggle.addEventListener('click', (e) => {
+    let isHandled = false;
+    
+    function handleToggle(e) {
+      if (isHandled) return;
+      isHandled = true;
+      
       e.preventDefault();
       e.stopPropagation();
       toggleNav();
+      
+      setTimeout(() => {
+        isHandled = false;
+      }, 100);
+    }
+    
+    navToggle.addEventListener('click', handleToggle, { passive: false });
+    navToggle.addEventListener('touchstart', handleToggle, { passive: false });
+    navToggle.addEventListener('mousedown', handleToggle, { passive: false });
+    
+    navToggle.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleToggle(e);
+      }
     });
+    
+    navToggle.setAttribute('tabindex', '0');
+    navToggle.setAttribute('role', 'button');
   }
   
   navLinks.forEach(link => {
@@ -68,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Simple client-side helpers for forms (UI only)
 function setLoading(button, isLoading) {
   if (!button) return;
   if (isLoading) {
@@ -81,12 +98,8 @@ function setLoading(button, isLoading) {
   }
 }
 
-// Learn page category filter
 document.addEventListener('DOMContentLoaded', () => {
-  // tabs removed; use multi-category picker once
-
-  // Multi-category picker
-  const picker = null; // modal removed; use toggle buttons
+  const picker = null;
   const cancelBtn = null;
   const form = null;
   const filterBar = document.getElementById('cat-toggle');
@@ -101,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         item.style.display = show ? '' : 'none';
       });
     });
-    // update persistent chip states
     if (filterBar) {
       filterBar.style.display = 'flex';
       filterBar.querySelectorAll('.chip').forEach(b => b.classList.toggle('active', cats.includes(b.dataset.cat)));
@@ -111,19 +123,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const stored = localStorage.getItem('cats');
   let selectedCats = stored ? stored.split(',').filter(Boolean) : [];
   if (!stored) {
-    // default: all on (including web)
     selectedCats = ['unity','ml','dl','web'];
     localStorage.setItem('cats', selectedCats.join(','));
   }
   applyMulti(selectedCats);
 
-  // no manual open; only first-visit modal
   if (cancelBtn && picker) {
     cancelBtn.addEventListener('click', () => picker.classList.remove('show'));
   }
-  // Toggle buttons for categories
   if (filterBar) {
-    // initialize states
     filterBar.querySelectorAll('.chip').forEach(btn => btn.classList.toggle('active', selectedCats.includes(btn.dataset.cat)));
     filterBar.addEventListener('click', (e) => {
       const btn = e.target.closest('.chip');
