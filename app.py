@@ -345,6 +345,9 @@ def create_app() -> Flask:
 
     @app.route("/learn")
     def learn():
+        if not session.get('uid'):
+            flash("로그인이 필요합니다.", "info")
+            return redirect(url_for('login'))
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, type, category, date, content FROM materials ORDER BY date DESC").fetchall()
             assignments_rows = cx.execute("SELECT id, title, due, description, category FROM assignments ORDER BY id DESC").fetchall()
