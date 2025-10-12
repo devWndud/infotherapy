@@ -90,9 +90,12 @@ body {
 }
 
 /* PC에서는 햄버거 버튼 완전히 숨기기 */
-@media (min-width: 1025px) {
+@media (min-width: 769px) {
   .nav-toggle {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 }
 .nav-toggle span { 
