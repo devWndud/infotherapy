@@ -79,9 +79,15 @@
             {% endif %}
           </div>
         </nav>
-        <a href="{{ url_for('menu') }}" class="nav-toggle" aria-label="메뉴" target="_blank">
+        {% if request.endpoint == 'menu' %}
+        <button class="nav-toggle" aria-label="뒤로가기" onclick="history.back()">
+          <span></span><span></span><span></span>
+        </button>
+        {% else %}
+        <a href="{{ url_for('menu') }}" class="nav-toggle" aria-label="메뉴">
           <span></span><span></span><span></span>
         </a>
+        {% endif %}
       </div>
     </header>
 

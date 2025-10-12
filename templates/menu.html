@@ -8,7 +8,7 @@
   </div>
   
   <div class="menu-grid">
-    <a href="{{ url_for('index') }}" class="menu-item">
+    <a href="{{ url_for('index') }}" class="menu-item" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">🏠</div>
       <div class="menu-text">
         <h3>홈</h3>
@@ -16,7 +16,7 @@
       </div>
     </a>
     
-    <a href="{{ url_for('activities') }}" class="menu-item">
+    <a href="{{ url_for('activities') }}" class="menu-item" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">🎯</div>
       <div class="menu-text">
         <h3>활동</h3>
@@ -24,7 +24,7 @@
       </div>
     </a>
     
-    <a href="{{ url_for('learn') }}" class="menu-item">
+    <a href="{{ url_for('learn') }}" class="menu-item" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">📚</div>
       <div class="menu-text">
         <h3>학습</h3>
@@ -33,7 +33,7 @@
     </a>
     
     {% if session.get('admin') %}
-    <a href="{{ url_for('admin_dashboard') }}" class="menu-item admin">
+    <a href="{{ url_for('admin_dashboard') }}" class="menu-item admin" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">⚙️</div>
       <div class="menu-text">
         <h3>관리</h3>
@@ -51,7 +51,7 @@
       </div>
     </div>
     
-    <a href="{{ url_for('logout') }}" class="menu-item logout">
+    <a href="{{ url_for('logout') }}" class="menu-item logout" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">🚪</div>
       <div class="menu-text">
         <h3>로그아웃</h3>
@@ -59,7 +59,7 @@
       </div>
     </a>
     {% else %}
-    <a href="{{ url_for('login') }}" class="menu-item">
+    <a href="{{ url_for('login') }}" class="menu-item" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">🔑</div>
       <div class="menu-text">
         <h3>로그인</h3>
@@ -67,7 +67,7 @@
       </div>
     </a>
     
-    <a href="{{ url_for('signup') }}" class="menu-item">
+    <a href="{{ url_for('signup') }}" class="menu-item" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">📝</div>
       <div class="menu-text">
         <h3>회원가입</h3>
