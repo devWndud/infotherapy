@@ -72,7 +72,7 @@
               <div class="item-meta">
                 <span class="category-badge">{{ a.category | category_display }}</span>
                 {% if a.file_path %}
-                  <span class="attachment-badge">📎 첨부파일</span>
+                  <span class="category-badge attachment-color">📎 첨부파일</span>
                 {% endif %}
                 {% if a.submitted_at %}
                   <span class="status-badge submitted">제출 완료</span>
@@ -330,9 +330,9 @@
     color: #1e40af;
   }
   
-  .attachment-badge {
-    background: #dbeafe;
-    color: #1e40af;
+  .category-badge.attachment-color {
+    background: #f0f9ff;
+    color: #0369a1;
   }
   
   .due-badge {
