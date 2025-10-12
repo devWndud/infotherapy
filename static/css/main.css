@@ -359,10 +359,17 @@ img, video { max-width: 100%; height: auto; display: block; }
   }
 
   .nav.open { 
-    display: flex; 
+    display: flex !important; 
     align-items: flex-start; 
     justify-content: flex-end;
     padding: 60px 20px 20px;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.3);
   }
 
   .nav-content {
