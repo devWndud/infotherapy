@@ -72,11 +72,6 @@
                 </div>
               {% endfor %}
             </div>
-            <div class="file-actions-all" style="margin-top:16px; text-align:center;">
-              <a class="btn btn-outline" href="{{ url_for('admin_submission_download_all', submission_id=submission.id) }}">
-                모든 파일 다운로드 (ZIP)
-              </a>
-            </div>
           </div>
         {% endif %}
       {% elif submission.file_path %}
