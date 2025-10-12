@@ -93,12 +93,12 @@
             {% if existing_files %}
             <div class="existing-files">
               <h4>기존 첨부 파일</h4>
-              {% for file_path in existing_files %}
-              <div class="current-file" data-file="{{ file_path }}">
+              {% for filename in existing_files %}
+              <div class="current-file" data-file="{{ filename }}">
                 <div class="current-file-info">
                   <span class="file-icon">📎</span>
-                  <span class="file-name">{{ file_path.split('/')[-1] }}</span>
-                  <button type="button" class="remove-file-btn" onclick="confirmRemoveFile('{{ file_path }}')" title="파일 삭제">
+                  <span class="file-name">{{ filename }}</span>
+                  <button type="button" class="remove-file-btn" onclick="confirmRemoveFile('{{ filename }}')" title="파일 삭제">
                     <span class="remove-icon">×</span>
                   </button>
                 </div>
@@ -485,22 +485,21 @@
     });
     
     // 파일 삭제 확인 함수
-    function confirmRemoveFile(filePath) {
-      const fileName = filePath.split('/').pop();
-      const confirmed = confirm(`정말로 "${fileName}" 파일을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
+    function confirmRemoveFile(filename) {
+      const confirmed = confirm(`정말로 "${filename}" 파일을 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`);
       
       if (confirmed) {
         const removeInput = document.getElementById('remove_files_input');
         const currentFiles = removeInput.value ? removeInput.value.split(',') : [];
         
         // 삭제할 파일 추가
-        if (!currentFiles.includes(filePath)) {
-          currentFiles.push(filePath);
+        if (!currentFiles.includes(filename)) {
+          currentFiles.push(filename);
           removeInput.value = currentFiles.join(',');
         }
         
         // UI에서 파일 숨기기
-        const fileElement = document.querySelector(`[data-file="${filePath}"]`);
+        const fileElement = document.querySelector(`[data-file="${filename}"]`);
         if (fileElement) {
           fileElement.style.opacity = '0.5';
           fileElement.style.textDecoration = 'line-through';

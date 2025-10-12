@@ -334,9 +334,12 @@ def create_app() -> Flask:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
                 unique_filename = f"{name}_{timestamp}{ext}"
                 
-                dest = os.path.join(uploads_dir, unique_filename)
-                uploaded_file.save(dest)
-                file_paths.append(dest)
+                # 실제 파일 저장
+                full_dest = os.path.join(uploads_dir, unique_filename)
+                uploaded_file.save(full_dest)
+                
+                # 데이터베이스에는 파일명만 저장 (상대 경로)
+                file_paths.append(unique_filename)
         
         with get_db() as cx:
             exists = cx.execute(
@@ -554,31 +557,31 @@ def create_app() -> Flask:
             filename = os.path.basename(file_path)
             return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
     
-    @app.route("/assignment/file/<path:file_path>")
-    def download_assignment_file_by_path(file_path: str):
-        # 보안을 위해 파일 경로 검증
-        if not file_path.startswith(uploads_dir):
-            flash("잘못된 파일 경로입니다.", "error")
+    @app.route("/assignment/file/<path:filename>")
+    def download_assignment_file_by_path(filename: str):
+        # 보안을 위해 파일명 검증 (상대 경로만 허용)
+        if '..' in filename or '/' in filename or '\\' in filename:
+            flash("잘못된 파일명입니다.", "error")
             return redirect(url_for("learn"))
         
+        file_path = os.path.join(uploads_dir, filename)
         if not os.path.exists(file_path):
             flash("파일이 존재하지 않습니다.", "error")
             return redirect(url_for("learn"))
         
-        filename = os.path.basename(file_path)
-        return send_from_directory(os.path.dirname(file_path), filename, as_attachment=True)
+        return send_from_directory(uploads_dir, filename, as_attachment=True)
     
-    @app.route("/assignment/preview/<path:file_path>")
-    def preview_assignment_file_by_path(file_path: str):
-        # 보안을 위해 파일 경로 검증
-        if not file_path.startswith(uploads_dir):
-            return "잘못된 파일 경로입니다.", 404
+    @app.route("/assignment/preview/<path:filename>")
+    def preview_assignment_file_by_path(filename: str):
+        # 보안을 위해 파일명 검증 (상대 경로만 허용)
+        if '..' in filename or '/' in filename or '\\' in filename:
+            return "잘못된 파일명입니다.", 404
         
+        file_path = os.path.join(uploads_dir, filename)
         if not os.path.exists(file_path):
             return "파일이 존재하지 않습니다.", 404
         
-        filename = os.path.basename(file_path)
-        return send_from_directory(os.path.dirname(file_path), filename, as_attachment=False)
+        return send_from_directory(uploads_dir, filename, as_attachment=False)
 
     @app.route("/admin")
     @admin_required
@@ -638,9 +641,12 @@ def create_app() -> Flask:
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
                         unique_filename = f"{name}_{timestamp}{ext}"
                         
-                        file_path = os.path.join(uploads_dir, unique_filename)
-                        file.save(file_path)
-                        file_paths.append(file_path)
+                        # 실제 파일 저장
+                        full_file_path = os.path.join(uploads_dir, unique_filename)
+                        file.save(full_file_path)
+                        
+                        # 데이터베이스에는 파일명만 저장 (상대 경로)
+                        file_paths.append(unique_filename)
             
             with get_db() as cx:
                 cx.execute("INSERT INTO assignments (title, due, description, category, file_paths) VALUES (?,?,?,?,?)",
@@ -666,15 +672,18 @@ def create_app() -> Flask:
             remove_files = request.form.get('remove_files', '')
             if remove_files:
                 files_to_remove = remove_files.split(',')
-                for file_path in files_to_remove:
-                    if file_path.strip() and os.path.exists(file_path.strip()):
-                        try:
-                            os.remove(file_path.strip())
-                        except Exception:
-                            pass
-                    # 기존 파일 목록에서 제거
-                    if file_path.strip() in existing_file_paths:
-                        existing_file_paths.remove(file_path.strip())
+                for filename in files_to_remove:
+                    if filename.strip():
+                        # 실제 파일 삭제
+                        full_file_path = os.path.join(uploads_dir, filename.strip())
+                        if os.path.exists(full_file_path):
+                            try:
+                                os.remove(full_file_path)
+                            except Exception:
+                                pass
+                        # 기존 파일 목록에서 제거
+                        if filename.strip() in existing_file_paths:
+                            existing_file_paths.remove(filename.strip())
             
             # 새 파일들 추가
             new_file_paths = []
@@ -692,9 +701,12 @@ def create_app() -> Flask:
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
                         unique_filename = f"{name}_{timestamp}{ext}"
                         
-                        file_path = os.path.join(uploads_dir, unique_filename)
-                        file.save(file_path)
-                        new_file_paths.append(file_path)
+                        # 실제 파일 저장
+                        full_file_path = os.path.join(uploads_dir, unique_filename)
+                        file.save(full_file_path)
+                        
+                        # 데이터베이스에는 파일명만 저장 (상대 경로)
+                        new_file_paths.append(unique_filename)
             
             # 최종 파일 목록 (기존 파일 + 새 파일)
             final_file_paths = existing_file_paths + new_file_paths

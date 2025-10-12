@@ -29,26 +29,26 @@
         <div class="attachment-section">
           <h3 class="attachment-title">📎 첨부 파일 ({{ file_paths|length }}개)</h3>
           
-          {% for file_path in file_paths %}
+          {% for filename in file_paths %}
           <div class="attachment-item">
             <div class="attachment-info">
-              <span class="attachment-name">{{ file_path.split('/')[-1] }}</span>
-              <span class="attachment-size">{{ file_path.split('.')[-1].upper() }} 파일</span>
+              <span class="attachment-name">{{ filename }}</span>
+              <span class="attachment-size">{{ filename.split('.')[-1].upper() }} 파일</span>
             </div>
-            <a href="{{ url_for('download_assignment_file_by_path', file_path=file_path) }}" class="btn btn-primary btn-sm">
+            <a href="{{ url_for('download_assignment_file_by_path', filename=filename) }}" class="btn btn-primary btn-sm">
               다운로드
             </a>
           </div>
           
-          {% set file_ext = file_path.split('.')[-1].lower() %}
+          {% set file_ext = filename.split('.')[-1].lower() %}
           {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
             <div class="file-preview">
-              <img src="{{ url_for('preview_assignment_file_by_path', file_path=file_path) }}" alt="이미지 미리보기" class="preview-image">
+              <img src="{{ url_for('preview_assignment_file_by_path', filename=filename) }}" alt="이미지 미리보기" class="preview-image">
             </div>
           {% elif file_ext in ['mp4', 'webm', 'ogg', 'avi', 'mov'] %}
             <div class="file-preview">
               <video controls class="preview-video">
-                <source src="{{ url_for('preview_assignment_file_by_path', file_path=file_path) }}" type="video/{{ file_ext }}">
+                <source src="{{ url_for('preview_assignment_file_by_path', filename=filename) }}" type="video/{{ file_ext }}">
                 브라우저가 비디오를 지원하지 않습니다.
               </video>
             </div>
@@ -69,15 +69,16 @@
           </a>
         </div>
         
-        {% set file_ext = a.file_path.split('.')[-1].lower() %}
+        {% set filename = a.file_path.split('/')[-1] %}
+        {% set file_ext = filename.split('.')[-1].lower() %}
         {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
           <div class="file-preview">
-            <img src="{{ url_for('preview_assignment_file_by_path', file_path=a.file_path) }}" alt="이미지 미리보기" class="preview-image">
+            <img src="{{ url_for('preview_assignment_file_by_path', filename=filename) }}" alt="이미지 미리보기" class="preview-image">
           </div>
         {% elif file_ext in ['mp4', 'webm', 'ogg', 'avi', 'mov'] %}
           <div class="file-preview">
             <video controls class="preview-video">
-              <source src="{{ url_for('preview_assignment_file_by_path', file_path=a.file_path) }}" type="video/{{ file_ext }}">
+              <source src="{{ url_for('preview_assignment_file_by_path', filename=filename) }}" type="video/{{ file_ext }}">
               브라우저가 비디오를 지원하지 않습니다.
             </video>
           </div>
