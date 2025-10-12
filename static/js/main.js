@@ -1,13 +1,18 @@
 function toggleNav() {
   const nav = document.getElementById('site-nav');
-  if (!nav) return;
+  const navToggle = document.querySelector('.nav-toggle');
+  
+  if (!nav || !navToggle) return;
+  
   nav.classList.toggle('open');
   
   // 모바일에서 메뉴 열릴 때 body 스크롤 방지
   if (nav.classList.contains('open')) {
     document.body.style.overflow = 'hidden';
+    navToggle.setAttribute('aria-expanded', 'true');
   } else {
     document.body.style.overflow = '';
+    navToggle.setAttribute('aria-expanded', 'false');
   }
 }
 
@@ -38,12 +43,26 @@ document.addEventListener('keydown', (e) => {
 // 모바일 메뉴 링크 클릭 시 자동으로 메뉴 닫기
 document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelectorAll('.nav-content a');
+  const navToggle = document.querySelector('.nav-toggle');
+  
+  // 햄버거 버튼 이벤트 리스너 추가
+  if (navToggle) {
+    navToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleNav();
+    });
+  }
+  
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
       const nav = document.getElementById('site-nav');
       if (nav && nav.classList.contains('open')) {
         nav.classList.remove('open');
         document.body.style.overflow = '';
+        if (navToggle) {
+          navToggle.setAttribute('aria-expanded', 'false');
+        }
       }
     });
   });

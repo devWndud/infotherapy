@@ -1,66 +1,6 @@
-# 1. 기존 프로세스 정리
-pkill -f gunicorn
-pkill -f python
-
-# 2. PID 파일 삭제
-rm -f /tmp/gunicorn.pid
-
-# 3. 잠시 대기
-sleep 2
-
-# 4. Gunicorn 재시작
-nohup gunicorn --bind 127.0.0.1:5000 application:application > app.log 2>&1 &
-
-# 5. Nginx 재시작
-sudo systemctl restart nginx
-
-
-
-
-# Gunicorn 프로세스 확인
-ps aux | grep gunicorn | grep -v grep
-
-# 포트 확인
-netstat -tlnp | grep :5000
-
-# 웹사이트 테스트
-curl -I https://infotherapy.kro.kr/
-
-# robots.txt 테스트
-curl https://infotherapy.kro.kr/robots.txt
-
-#!/bin/bash
-# 서버 업데이트 및 재시작 스크립트
-
-echo "=== 서버 업데이트 시작 ==="
-
-# 1. 프로젝트 디렉토리로 이동
-cd /root/wndud/infotherapy
-
-# 2. 가상환경 활성화
-source myenv/bin/activate
-
-# 3. Git pull
-echo "Git pull 실행 중..."
-git pull
-
-# 4. 기존 프로세스 정리
-echo "기존 프로세스 정리 중..."
 pkill -f gunicorn
 pkill -f python
 rm -f /tmp/gunicorn.pid
 sleep 2
-
-# 5. 서버 재시작
-echo "서버 재시작 중..."
 nohup gunicorn --bind 127.0.0.1:5000 application:application > app.log 2>&1 &
 sudo systemctl restart nginx
-
-# 6. 상태 확인
-echo "상태 확인 중..."
-sleep 3
-ps aux | grep gunicorn | grep -v grep
-netstat -tlnp | grep :5000
-
-echo "=== 서버 업데이트 완료 ==="
-echo "웹사이트: https://infotherapy.kro.kr"

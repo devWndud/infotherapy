@@ -63,8 +63,28 @@ body {
 .btn-outline { border: 1px solid var(--border); color: var(--text); background: #fff; }
 .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
 
-.nav-toggle { display: none; width: 44px; height: 44px; border: 1px solid var(--border); background: #fff; border-radius: 12px; align-items: center; justify-content: center; gap: 4px; flex-direction: column; }
-.nav-toggle span { width: 18px; height: 2px; background: var(--text); display: block; }
+.nav-toggle { 
+  display: none; 
+  width: 44px; 
+  height: 44px; 
+  border: 1px solid var(--border); 
+  background: #fff; 
+  border-radius: 12px; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 4px; 
+  flex-direction: column; 
+  cursor: pointer;
+  z-index: 1001;
+  position: relative;
+}
+.nav-toggle span { 
+  width: 18px; 
+  height: 2px; 
+  background: var(--text); 
+  display: block; 
+  transition: all 0.3s ease;
+}
 
 main.container { padding: 32px 20px; flex: 1; }
 
@@ -354,6 +374,20 @@ img, video { max-width: 100%; height: auto; display: block; }
   .nav-content .btn {
     margin-top: 8px;
     justify-content: center;
+  }
+  
+  .nav-toggle {
+    display: inline-flex !important;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  
+  .nav-toggle:hover {
+    background: var(--surface);
+  }
+  
+  .nav-toggle:active {
+    transform: scale(0.95);
   }
 }
 

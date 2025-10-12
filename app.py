@@ -22,6 +22,7 @@ def create_app() -> Flask:
     app.secret_key = os.getenv("FLASK_SECRET", "dev-secret-change-me")
     app.config["ASSET_VERSION"] = os.getenv("ASSET_VERSION") or datetime.utcnow().strftime("%Y%m%d%H%M%S")
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB 파일 크기 제한
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)  # 30일간 로그인 유지
 
     db_path = os.path.join(os.path.dirname(__file__), "infotherapy.db")
     invites_path = os.path.join(os.path.dirname(__file__), "invites.json")
@@ -173,6 +174,7 @@ def create_app() -> Flask:
             with get_db() as cx:
                 row = cx.execute("SELECT id, password_hash, admin, name FROM users WHERE name=?", (name,)).fetchone()
             if row and check_password_hash(row["password_hash"], password):
+                session.permanent = True
                 session["uid"] = row["id"]
                 session["admin"] = bool(row["admin"])
                 session["name"] = row["name"]
