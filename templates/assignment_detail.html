@@ -23,7 +23,7 @@
     <div class="assignment-body">
       <div class="desc">{{ a.description | autolink | safe }}</div>
       
-      {% if a.file_paths %}
+      {% if a.file_paths and a.file_paths.strip() %}
         {% set file_paths = a.file_paths | from_json %}
         {% if file_paths %}
         <div class="attachment-section">
@@ -99,18 +99,14 @@
                 <textarea id="text_detail" name="text_content" placeholder="설명 또는 링크 (선택)" {% if overdue %}disabled aria-disabled="true"{% endif %}></textarea>
               </div>
               <div class="row">
-                <span class="chip file-chip">파일(선택)</span>
+                <label for="files_detail">파일(선택)</label>
                 <div class="file-upload-container">
-                  <input id="file_detail" name="file" type="file" accept="*/*" {% if overdue %}disabled aria-disabled="true"{% endif %}>
-                  <div id="file-selected" class="file-selected" style="display: none;">
-                    <div class="file-info">
-                      <span id="file-name"></span>
-                      <span id="file-size"></span>
-                    </div>
-                    <button type="button" id="remove-file" class="btn-remove">×</button>
+                  <input id="files_detail" name="files" type="file" accept="*/*" multiple {% if overdue %}disabled aria-disabled="true"{% endif %}>
+                  <div id="files-selected" class="files-selected" style="display: none;">
+                    <div id="files-list"></div>
                   </div>
                 </div>
-                <small class="file-hint">모든 파일 형식 지원 (영상, 이미지, 문서, 압축파일 등)</small>
+                <small class="file-hint">모든 파일 형식 지원 (영상, 이미지, 문서, 압축파일 등) - 여러 파일 선택 가능</small>
               </div>
               <button class="btn btn-primary" type="submit" {% if overdue %}disabled aria-disabled="true" title="제출 마감되어 제출할 수 없습니다"{% endif %}>제출하기</button>
             </form>
@@ -132,15 +128,23 @@
   <style>
   .assignment-card { max-width: 900px; margin: 0 auto; background:#fff; border:1px solid var(--border); border-radius:16px; box-shadow:0 1px 2px rgba(17,24,39,0.04); }
   .file-upload-container { position: relative; }
-  .file-selected { 
+  .files-selected { 
     margin-top: 8px; 
     padding: 12px; 
     background: #f8f9fa; 
     border-radius: 8px; 
     border: 1px solid #e9ecef; 
+  }
+  .file-item { 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+  .file-item:last-child { 
+    border-bottom: none; 
+    padding-bottom: 0;
   }
   .file-info { display: flex; flex-direction: column; gap: 4px; }
   .file-info span:first-child { font-weight: 600; color: #374151; }
@@ -161,7 +165,6 @@
   }
   .btn-remove:hover { background: #b91c1c; }
   .file-hint { display: block; margin-top: 4px; font-size: 12px; color: #6c757d; }
-  .file-chip { background: #dbeafe; color: #1e40af; border-color: #3b82f6; margin-bottom: 8px; }
   .assignment-head { padding: 18px 18px 0; }
   .back-button-container { margin-bottom: 12px; }
   .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
@@ -273,31 +276,55 @@
 
   <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const fileInput = document.getElementById('file_detail');
-    const fileSelected = document.getElementById('file-selected');
-    const fileName = document.getElementById('file-name');
-    const fileSize = document.getElementById('file-size');
-    const removeFileBtn = document.getElementById('remove-file');
+    const filesInput = document.getElementById('files_detail');
+    const filesSelected = document.getElementById('files-selected');
+    const filesList = document.getElementById('files-list');
 
-    fileInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
+    filesInput.addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
       
-      if (file) {
-        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      if (files.length > 0) {
+        filesList.innerHTML = '';
         
-        fileName.textContent = file.name;
-        fileSize.textContent = `${fileSizeMB}MB`;
-        fileSelected.style.display = 'flex';
+        files.forEach((file, index) => {
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          
+          const fileItem = document.createElement('div');
+          fileItem.className = 'file-item';
+          fileItem.innerHTML = `
+            <div class="file-info">
+              <span>${file.name}</span>
+              <span>${fileSizeMB}MB</span>
+            </div>
+            <button type="button" class="btn-remove" onclick="removeFile(${index})">×</button>
+          `;
+          filesList.appendChild(fileItem);
+        });
+        
+        filesSelected.style.display = 'block';
       } else {
-        fileSelected.style.display = 'none';
+        filesSelected.style.display = 'none';
       }
     });
-
-    removeFileBtn.addEventListener('click', function() {
-      fileInput.value = '';
-      fileSelected.style.display = 'none';
-    });
   });
+  
+  function removeFile(index) {
+    const filesInput = document.getElementById('files_detail');
+    const dt = new DataTransfer();
+    const files = Array.from(filesInput.files);
+    
+    // 해당 인덱스 파일 제외하고 다시 설정
+    files.forEach((file, i) => {
+      if (i !== index) {
+        dt.items.add(file);
+      }
+    });
+    
+    filesInput.files = dt.files;
+    
+    // change 이벤트 트리거하여 UI 업데이트
+    filesInput.dispatchEvent(new Event('change'));
+  }
   
   function goBack() {
     window.history.back();

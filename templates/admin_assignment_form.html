@@ -88,7 +88,7 @@
           <small class="form-hint">이미지, 영상, 문서 파일을 여러 개 첨부할 수 있습니다 (최대 100MB)</small>
           
           <!-- 기존 파일들 표시 -->
-          {% if item and item['file_paths'] %}
+          {% if item and item['file_paths'] and item['file_paths'].strip() %}
             {% set existing_files = item['file_paths'] | from_json %}
             {% if existing_files %}
             <div class="existing-files">

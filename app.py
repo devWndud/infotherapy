@@ -57,6 +57,7 @@ def create_app() -> Flask:
               category TEXT,
               text_content TEXT,
               file_path TEXT,
+              file_paths TEXT DEFAULT '[]',
               created_at TEXT NOT NULL,
               FOREIGN KEY(user_id) REFERENCES users(id)
             )
@@ -99,6 +100,12 @@ def create_app() -> Flask:
             cx.execute("ALTER TABLE assignments ADD COLUMN file_paths TEXT DEFAULT '[]'")
         except sqlite3.OperationalError:
             pass  # 컬럼이 이미 존재하는 경우
+        
+        # 기존 submissions 테이블에 file_paths 컬럼 추가 (이미 존재하면 무시됨)
+        try:
+            cx.execute("ALTER TABLE submissions ADD COLUMN file_paths TEXT DEFAULT '[]'")
+        except sqlite3.OperationalError:
+            pass  # 컬럼이 이미 존재하는 경우
 
     url_regex = re.compile(r"(https?://[^\s]+)")
 
@@ -111,6 +118,16 @@ def create_app() -> Flask:
         return Markup(html)
 
     app.jinja_env.filters["autolink"] = autolink
+    
+    def from_json_filter(json_str):
+        if not json_str or not json_str.strip():
+            return []
+        try:
+            return json.loads(json_str)
+        except:
+            return []
+    
+    app.jinja_env.filters["from_json"] = from_json_filter
 
     @app.context_processor
     def inject_static_url():
@@ -300,8 +317,21 @@ def create_app() -> Flask:
         title = request.form.get("title")
         category = request.form.get("category")
         text_content = request.form.get("text_content") or ""
-        uploaded_file = request.files.get("file")
-        file_path = None
+        
+        # 여러 파일 처리
+        uploaded_files = request.files.getlist("files")
+        file_paths = []
+        
+        for uploaded_file in uploaded_files:
+            if uploaded_file and uploaded_file.filename and uploaded_file.filename.strip():
+                # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
+                filename = uploaded_file.filename
+                # 위험한 문자만 제거
+                filename = filename.replace('..', '').replace('/', '').replace('\\', '')
+                dest = os.path.join(uploads_dir, filename)
+                uploaded_file.save(dest)
+                file_paths.append(dest)
+        
         with get_db() as cx:
             exists = cx.execute(
                 "SELECT 1 FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
@@ -310,18 +340,13 @@ def create_app() -> Flask:
         if exists:
             flash("이미 제출한 과제입니다.", "info")
             return redirect(url_for("learn"))
-        if uploaded_file and uploaded_file.filename:
-            safe_name = datetime.now().strftime("%Y%m%d%H%M%S_") + secure_filename(uploaded_file.filename)
-            dest = os.path.join(uploads_dir, safe_name)
-            uploaded_file.save(dest)
-            file_path = dest
         with get_db() as cx:
             from zoneinfo import ZoneInfo
             seoul = ZoneInfo("Asia/Seoul")
             seoul_time = datetime.now(seoul).isoformat()
             cx.execute(
-                "INSERT INTO submissions (user_id, name, assignment_title, category, text_content, file_path, created_at) VALUES (?,?,?,?,?,?,?)",
-                (session.get("uid"), session.get("name"), title, category, text_content, file_path, seoul_time),
+                "INSERT INTO submissions (user_id, name, assignment_title, category, text_content, file_paths, created_at) VALUES (?,?,?,?,?,?,?)",
+                (session.get("uid"), session.get("name"), title, category, text_content, json.dumps(file_paths), seoul_time),
             )
         flash("제출 완료", "info")
         
@@ -336,12 +361,14 @@ def create_app() -> Flask:
             text_content if text_content else "(텍스트 없음)",
         ]
         
-        if file_path:
+        if file_paths:
             body_lines.extend([
                 "",
                 "[첨부파일]",
-                f"파일명: {os.path.basename(file_path)}"
+                f"파일 개수: {len(file_paths)}개"
             ])
+            for file_path in file_paths:
+                body_lines.append(f"- {os.path.basename(file_path)}")
         
         try:
             send_admin_email(subject=email_subject, body="\n".join(body_lines), attachments=None)
@@ -605,7 +632,7 @@ def create_app() -> Flask:
         if request.method == "POST":
             # 기존 파일 경로들 가져오기
             existing_file_paths = []
-            if item['file_paths']:
+            if item['file_paths'] and item['file_paths'].strip():
                 try:
                     existing_file_paths = json.loads(item['file_paths'])
                 except:
