@@ -48,7 +48,6 @@ body {
 .logo-mark { display: inline-flex; width: 28px; height: 28px; border-radius: 8px; align-items: center; justify-content: center; background: var(--surface); color: var(--primary); }
 .logo-mark-img { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; }
 
-.nav { display: flex; align-items: center; gap: 16px; }
 .nav a { color: var(--text); text-decoration: none; padding: 8px 10px; border-radius: 10px; }
 .nav a:hover { background: var(--surface); }
 .profile-chip { display: inline-flex; align-items: center; gap: 8px; }
@@ -345,7 +344,13 @@ img, video { max-width: 100%; height: auto; display: block; }
   .form textarea { min-height: 100px; padding: 10px 14px; }
 }
 
-@media (max-width: 768px) {
+.nav { 
+  display: flex; 
+  align-items: center; 
+  gap: 16px; 
+}
+
+@media (max-width: 1024px) {
   .nav { 
     display: none; 
     position: fixed; 
