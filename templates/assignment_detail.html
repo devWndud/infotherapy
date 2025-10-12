@@ -66,7 +66,7 @@
                 <textarea id="text_detail" name="text_content" placeholder="설명 또는 링크 (선택)" {% if overdue %}disabled aria-disabled="true"{% endif %}></textarea>
               </div>
               <div class="row">
-                <label for="file_detail">파일(선택)</label>
+                <label for="file_detail" class="file-label">파일(선택)</label>
                 <div class="file-upload-container">
                   <input id="file_detail" name="file" type="file" accept="*/*" {% if overdue %}disabled aria-disabled="true"{% endif %}>
                   <div id="file-selected" class="file-selected" style="display: none;">
@@ -128,6 +128,7 @@
   }
   .btn-remove:hover { background: #b91c1c; }
   .file-hint { display: block; margin-top: 4px; font-size: 12px; color: #6c757d; }
+  .file-label { font-size: 1.1rem; font-weight: 700; color: #1e40af; }
   .assignment-head { padding: 18px 18px 0; }
   .back-button-container { margin-bottom: 12px; }
   .chips { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
