@@ -254,6 +254,9 @@ img, video { max-width: 100%; height: auto; display: block; }
     display: inline-flex !important; 
     visibility: visible !important;
     opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 9999 !important;
   }
 }
 

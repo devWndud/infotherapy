@@ -1,23 +1,12 @@
 function toggleNav() {
   const nav = document.getElementById('site-nav');
-  const navToggle = document.querySelector('.nav-toggle');
-  
-  if (!nav || !navToggle) {
-    console.log('Navigation elements not found');
-    return;
-  }
-  
-  console.log('Toggle nav called');
-  nav.classList.toggle('open');
-  
-  if (nav.classList.contains('open')) {
-    document.body.style.overflow = 'hidden';
-    navToggle.setAttribute('aria-expanded', 'true');
-    console.log('Menu opened');
-  } else {
-    document.body.style.overflow = '';
-    navToggle.setAttribute('aria-expanded', 'false');
-    console.log('Menu closed');
+  if (nav) {
+    nav.classList.toggle('open');
+    if (nav.classList.contains('open')) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
   }
 }
 
@@ -45,71 +34,6 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   const navLinks = document.querySelectorAll('.nav-content a');
-  const navToggle = document.querySelector('.nav-toggle');
-  
-  if (navToggle) {
-    let touchStartTime = 0;
-    let touchEndTime = 0;
-    let isTouchHandled = false;
-    
-    function handleToggle(e) {
-      if (isTouchHandled) return;
-      isTouchHandled = true;
-      
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      
-      console.log('Toggle triggered by:', e.type);
-      toggleNav();
-      
-      setTimeout(() => {
-        isTouchHandled = false;
-      }, 300);
-      
-      return false;
-    }
-    
-    navToggle.addEventListener('touchstart', function(e) {
-      touchStartTime = Date.now();
-      console.log('Touch start at:', touchStartTime);
-    }, { passive: true });
-    
-    navToggle.addEventListener('touchend', function(e) {
-      touchEndTime = Date.now();
-      const touchDuration = touchEndTime - touchStartTime;
-      
-      console.log('Touch end at:', touchEndTime, 'Duration:', touchDuration, 'Handled:', isTouchHandled);
-      
-      if (touchDuration < 500 && !isTouchHandled) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Processing touch end');
-        handleToggle(e);
-      }
-    }, { passive: false });
-    
-    navToggle.addEventListener('touchcancel', function(e) {
-      console.log('Touch cancelled');
-      isTouchHandled = false;
-    }, { passive: true });
-    
-    navToggle.addEventListener('click', handleToggle, { passive: false });
-    navToggle.addEventListener('mousedown', handleToggle, { passive: false });
-    
-    navToggle.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        handleToggle(e);
-      }
-    });
-    
-    navToggle.setAttribute('tabindex', '0');
-    navToggle.setAttribute('role', 'button');
-    navToggle.style.pointerEvents = 'auto';
-    navToggle.style.cursor = 'pointer';
-    navToggle.style.touchAction = 'manipulation';
-  }
   
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
