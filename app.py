@@ -569,17 +569,35 @@ def create_app() -> Flask:
             flash("잘못된 파일명입니다.", "error")
             return redirect(url_for("learn"))
         
-        file_path = os.path.join(uploads_dir, decoded_filename)
-        if not os.path.exists(file_path):
-            # 원본 파일명도 시도
-            file_path = os.path.join(uploads_dir, filename)
-            if not os.path.exists(file_path):
-                flash("파일이 존재하지 않습니다.", "error")
-                return redirect(url_for("learn"))
-            else:
-                return send_from_directory(uploads_dir, filename, as_attachment=True)
+        # 실제 파일명 찾기
+        actual_filename = None
+        try:
+            for f in os.listdir(uploads_dir):
+                # 정확한 매칭
+                if f == decoded_filename or f == filename:
+                    actual_filename = f
+                    break
+                
+                # 따옴표 제거 후 매칭
+                clean_f = f.strip("'\"")
+                if clean_f == decoded_filename or clean_f == filename:
+                    actual_filename = f
+                    break
+                
+                # 부분 매칭 (확장자 제외)
+                base_name = decoded_filename.split('.')[0]
+                if f.startswith(base_name) or clean_f.startswith(base_name):
+                    actual_filename = f
+                    break
+                    
+        except Exception as e:
+            print(f"DEBUG: Error listing directory: {e}")
         
-        return send_from_directory(uploads_dir, decoded_filename, as_attachment=True)
+        if actual_filename:
+            return send_from_directory(uploads_dir, actual_filename, as_attachment=True)
+        else:
+            flash("파일이 존재하지 않습니다.", "error")
+            return redirect(url_for("learn"))
     
     @app.route("/assignment/preview/<path:filename>")
     def preview_assignment_file_by_path(filename: str):
@@ -588,20 +606,50 @@ def create_app() -> Flask:
         # URL 디코딩
         decoded_filename = unquote(filename)
         
+        print(f"DEBUG ASSIGNMENT: Original filename: {filename}")
+        print(f"DEBUG ASSIGNMENT: Decoded filename: {decoded_filename}")
+        
         # 보안을 위해 파일명 검증 (상대 경로만 허용)
         if '..' in decoded_filename or '/' in decoded_filename or '\\' in decoded_filename:
             return "잘못된 파일명입니다.", 404
         
-        file_path = os.path.join(uploads_dir, decoded_filename)
-        if not os.path.exists(file_path):
-            # 원본 파일명도 시도
-            file_path = os.path.join(uploads_dir, filename)
-            if not os.path.exists(file_path):
-                return "파일이 존재하지 않습니다.", 404
-            else:
-                return send_from_directory(uploads_dir, filename, as_attachment=False)
+        # 실제 파일명 찾기
+        actual_filename = None
+        try:
+            for f in os.listdir(uploads_dir):
+                print(f"DEBUG ASSIGNMENT: Checking file: {repr(f)}")
+                
+                # 정확한 매칭
+                if f == decoded_filename or f == filename:
+                    actual_filename = f
+                    break
+                
+                # 따옴표 제거 후 매칭
+                clean_f = f.strip("'\"")
+                if clean_f == decoded_filename or clean_f == filename:
+                    actual_filename = f
+                    break
+                
+                # 부분 매칭 (확장자 제외)
+                base_name = decoded_filename.split('.')[0]
+                if f.startswith(base_name) or clean_f.startswith(base_name):
+                    actual_filename = f
+                    break
+                    
+        except Exception as e:
+            print(f"DEBUG ASSIGNMENT: Error listing directory: {e}")
         
-        return send_from_directory(uploads_dir, decoded_filename, as_attachment=False)
+        if actual_filename:
+            print(f"DEBUG ASSIGNMENT: Found actual filename: {actual_filename}")
+            return send_from_directory(uploads_dir, actual_filename, as_attachment=False)
+        else:
+            print(f"DEBUG ASSIGNMENT: File not found, listing uploads directory:")
+            try:
+                for f in os.listdir(uploads_dir):
+                    print(f"  - {repr(f)}")
+            except Exception as e:
+                print(f"  Error listing directory: {e}")
+            return "파일이 존재하지 않습니다.", 404
 
     @app.route("/admin")
     @admin_required
@@ -849,18 +897,36 @@ def create_app() -> Flask:
         
         # URL 디코딩
         decoded_filename = unquote(filename)
-        file_path = os.path.join(UPLOAD_FOLDER, decoded_filename)
         
-        if not os.path.exists(file_path):
-            # 원본 파일명도 시도
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            if not os.path.exists(file_path):
-                flash("파일을 찾을 수 없습니다.", "info")
-                return redirect(url_for("admin_dashboard"))
-            else:
-                return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+        # 실제 파일명 찾기
+        actual_filename = None
+        try:
+            for f in os.listdir(uploads_dir):
+                # 정확한 매칭
+                if f == decoded_filename or f == filename:
+                    actual_filename = f
+                    break
+                
+                # 따옴표 제거 후 매칭
+                clean_f = f.strip("'\"")
+                if clean_f == decoded_filename or clean_f == filename:
+                    actual_filename = f
+                    break
+                
+                # 부분 매칭 (확장자 제외)
+                base_name = decoded_filename.split('.')[0]
+                if f.startswith(base_name) or clean_f.startswith(base_name):
+                    actual_filename = f
+                    break
+                    
+        except Exception as e:
+            print(f"DEBUG: Error listing directory: {e}")
         
-        return send_from_directory(UPLOAD_FOLDER, decoded_filename, as_attachment=True)
+        if actual_filename:
+            return send_from_directory(uploads_dir, actual_filename, as_attachment=True)
+        else:
+            flash("파일을 찾을 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
 
     @app.route("/submission/preview/<path:filename>")
     @admin_required
@@ -870,18 +936,48 @@ def create_app() -> Flask:
         
         # URL 디코딩
         decoded_filename = unquote(filename)
-        file_path = os.path.join(UPLOAD_FOLDER, decoded_filename)
         
-        if not os.path.exists(file_path):
-            # 원본 파일명도 시도
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            if not os.path.exists(file_path):
-                flash("파일을 찾을 수 없습니다.", "info")
-                return redirect(url_for("admin_dashboard"))
-            else:
-                return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
+        print(f"DEBUG: Original filename: {filename}")
+        print(f"DEBUG: Decoded filename: {decoded_filename}")
         
-        return send_from_directory(UPLOAD_FOLDER, decoded_filename, as_attachment=False)
+        # 실제 파일명 찾기
+        actual_filename = None
+        try:
+            for f in os.listdir(uploads_dir):
+                print(f"DEBUG: Checking file: {repr(f)}")
+                
+                # 정확한 매칭
+                if f == decoded_filename or f == filename:
+                    actual_filename = f
+                    break
+                
+                # 따옴표 제거 후 매칭
+                clean_f = f.strip("'\"")
+                if clean_f == decoded_filename or clean_f == filename:
+                    actual_filename = f
+                    break
+                
+                # 부분 매칭 (확장자 제외)
+                base_name = decoded_filename.split('.')[0]
+                if f.startswith(base_name) or clean_f.startswith(base_name):
+                    actual_filename = f
+                    break
+                    
+        except Exception as e:
+            print(f"DEBUG: Error listing directory: {e}")
+        
+        if actual_filename:
+            print(f"DEBUG: Found actual filename: {actual_filename}")
+            return send_from_directory(uploads_dir, actual_filename, as_attachment=False)
+        else:
+            print(f"DEBUG: File not found, listing uploads directory:")
+            try:
+                for f in os.listdir(uploads_dir):
+                    print(f"  - {repr(f)}")
+            except Exception as e:
+                print(f"  Error listing directory: {e}")
+            flash("파일을 찾을 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
 
     @app.route("/admin/submission/<int:submission_id>/download-all")
     @admin_required
@@ -912,7 +1008,7 @@ def create_app() -> Flask:
             zip_buffer = BytesIO()
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                 for filename in file_paths:
-                    file_path = os.path.join(UPLOAD_FOLDER, filename)
+                    file_path = os.path.join(uploads_dir, filename)
                     if os.path.exists(file_path):
                         zip_file.write(file_path, filename)
             
