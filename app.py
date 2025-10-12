@@ -559,29 +559,49 @@ def create_app() -> Flask:
     
     @app.route("/assignment/file/<path:filename>")
     def download_assignment_file_by_path(filename: str):
+        from urllib.parse import unquote
+        
+        # URL 디코딩
+        decoded_filename = unquote(filename)
+        
         # 보안을 위해 파일명 검증 (상대 경로만 허용)
-        if '..' in filename or '/' in filename or '\\' in filename:
+        if '..' in decoded_filename or '/' in decoded_filename or '\\' in decoded_filename:
             flash("잘못된 파일명입니다.", "error")
             return redirect(url_for("learn"))
         
-        file_path = os.path.join(uploads_dir, filename)
+        file_path = os.path.join(uploads_dir, decoded_filename)
         if not os.path.exists(file_path):
-            flash("파일이 존재하지 않습니다.", "error")
-            return redirect(url_for("learn"))
+            # 원본 파일명도 시도
+            file_path = os.path.join(uploads_dir, filename)
+            if not os.path.exists(file_path):
+                flash("파일이 존재하지 않습니다.", "error")
+                return redirect(url_for("learn"))
+            else:
+                return send_from_directory(uploads_dir, filename, as_attachment=True)
         
-        return send_from_directory(uploads_dir, filename, as_attachment=True)
+        return send_from_directory(uploads_dir, decoded_filename, as_attachment=True)
     
     @app.route("/assignment/preview/<path:filename>")
     def preview_assignment_file_by_path(filename: str):
+        from urllib.parse import unquote
+        
+        # URL 디코딩
+        decoded_filename = unquote(filename)
+        
         # 보안을 위해 파일명 검증 (상대 경로만 허용)
-        if '..' in filename or '/' in filename or '\\' in filename:
+        if '..' in decoded_filename or '/' in decoded_filename or '\\' in decoded_filename:
             return "잘못된 파일명입니다.", 404
         
-        file_path = os.path.join(uploads_dir, filename)
+        file_path = os.path.join(uploads_dir, decoded_filename)
         if not os.path.exists(file_path):
-            return "파일이 존재하지 않습니다.", 404
+            # 원본 파일명도 시도
+            file_path = os.path.join(uploads_dir, filename)
+            if not os.path.exists(file_path):
+                return "파일이 존재하지 않습니다.", 404
+            else:
+                return send_from_directory(uploads_dir, filename, as_attachment=False)
         
-        return send_from_directory(uploads_dir, filename, as_attachment=False)
+        return send_from_directory(uploads_dir, decoded_filename, as_attachment=False)
 
     @app.route("/admin")
     @admin_required
@@ -825,23 +845,43 @@ def create_app() -> Flask:
     @admin_required
     def download_submission_file_by_path(filename: str):
         """제출 파일을 파일명으로 다운로드 (as attachment)"""
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        if not os.path.exists(file_path):
-            flash("파일을 찾을 수 없습니다.", "info")
-            return redirect(url_for("admin_dashboard"))
+        from urllib.parse import unquote
         
-        return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+        # URL 디코딩
+        decoded_filename = unquote(filename)
+        file_path = os.path.join(UPLOAD_FOLDER, decoded_filename)
+        
+        if not os.path.exists(file_path):
+            # 원본 파일명도 시도
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            if not os.path.exists(file_path):
+                flash("파일을 찾을 수 없습니다.", "info")
+                return redirect(url_for("admin_dashboard"))
+            else:
+                return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=True)
+        
+        return send_from_directory(UPLOAD_FOLDER, decoded_filename, as_attachment=True)
 
     @app.route("/submission/preview/<path:filename>")
     @admin_required
     def preview_submission_file_by_path(filename: str):
         """제출 파일을 파일명으로 미리보기 (inline)"""
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        if not os.path.exists(file_path):
-            flash("파일을 찾을 수 없습니다.", "info")
-            return redirect(url_for("admin_dashboard"))
+        from urllib.parse import unquote
         
-        return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
+        # URL 디코딩
+        decoded_filename = unquote(filename)
+        file_path = os.path.join(UPLOAD_FOLDER, decoded_filename)
+        
+        if not os.path.exists(file_path):
+            # 원본 파일명도 시도
+            file_path = os.path.join(UPLOAD_FOLDER, filename)
+            if not os.path.exists(file_path):
+                flash("파일을 찾을 수 없습니다.", "info")
+                return redirect(url_for("admin_dashboard"))
+            else:
+                return send_from_directory(UPLOAD_FOLDER, filename, as_attachment=False)
+        
+        return send_from_directory(UPLOAD_FOLDER, decoded_filename, as_attachment=False)
 
     @app.route("/admin/submission/<int:submission_id>/download-all")
     @admin_required
