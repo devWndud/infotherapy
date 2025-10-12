@@ -359,6 +359,7 @@ img, video { max-width: 100%; height: auto; display: block; }
 .nav { 
   display: flex; 
   align-items: center; 
+  justify-content: flex-end;
   gap: 16px; 
 }
 
