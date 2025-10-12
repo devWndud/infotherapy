@@ -559,7 +559,10 @@ def create_app() -> Flask:
             if 'file' in request.files:
                 file = request.files['file']
                 if file and file.filename:
-                    filename = secure_filename(file.filename)
+                    # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
+                    filename = file.filename
+                    # 위험한 문자만 제거
+                    filename = filename.replace('..', '').replace('/', '').replace('\\', '')
                     file_path = os.path.join(uploads_dir, filename)
                     file.save(file_path)
             
@@ -598,7 +601,10 @@ def create_app() -> Flask:
                             pass
                     
                     # 새 파일 저장
-                    filename = secure_filename(file.filename)
+                    # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
+                    filename = file.filename
+                    # 위험한 문자만 제거
+                    filename = filename.replace('..', '').replace('/', '').replace('\\', '')
                     file_path = os.path.join(uploads_dir, filename)
                     file.save(file_path)
             
