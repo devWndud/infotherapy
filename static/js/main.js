@@ -33,7 +33,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  const navLinks = document.querySelectorAll('.nav-content a');
+  const navLinks = document.querySelectorAll('.nav a');
   
   navLinks.forEach(link => {
     link.addEventListener('click', () => {
