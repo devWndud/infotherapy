@@ -86,9 +86,17 @@
           <small class="form-hint">이미지, 영상, 문서 파일을 첨부할 수 있습니다 (최대 100MB)</small>
           {% if item and item['file_path'] %}
           <div class="current-file">
-            <span class="file-icon">📎</span>
-            <span class="file-name">{{ item['file_path'].split('/')[-1] if item['file_path'] else '' }}</span>
-            <small class="file-hint">새 파일을 선택하면 기존 파일이 교체됩니다</small>
+            <div class="current-file-info">
+              <span class="file-icon">📎</span>
+              <span class="file-name">{{ item['file_path'].split('/')[-1] if item['file_path'] else '' }}</span>
+            </div>
+            <div class="current-file-actions">
+              <label class="btn btn-outline btn-sm">
+                <input type="checkbox" name="remove_file" value="1" style="display: none;">
+                <span class="remove-file-text">파일 삭제</span>
+              </label>
+            </div>
+            <small class="file-hint">새 파일을 선택하거나 '파일 삭제'를 체크하면 기존 파일이 교체/삭제됩니다</small>
           </div>
           {% endif %}
         </div>
@@ -213,14 +221,24 @@
   }
   
   .current-file {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     margin-top: 0.5rem;
     padding: 0.75rem;
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
+  }
+  
+  .current-file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .current-file-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
   }
   
   .file-icon {
@@ -235,6 +253,20 @@
   .file-hint {
     color: #64748b;
     font-size: 0.875rem;
+    display: block;
+  }
+  
+  .remove-file-text {
+    transition: all 0.2s ease;
+  }
+  
+  .current-file-actions label:hover .remove-file-text {
+    color: #dc2626;
+  }
+  
+  .current-file-actions input[type="checkbox"]:checked + .remove-file-text {
+    color: #dc2626;
+    font-weight: 600;
   }
   
   .form-hint {
@@ -341,6 +373,31 @@
           this.classList.add('active');
         });
       });
+      
+      // 파일 삭제 체크박스 동작
+      const removeFileCheckbox = document.querySelector('input[name="remove_file"]');
+      const fileInput = document.querySelector('input[name="file"]');
+      
+      if (removeFileCheckbox) {
+        removeFileCheckbox.addEventListener('change', function() {
+          if (this.checked) {
+            fileInput.disabled = true;
+            fileInput.value = '';
+          } else {
+            fileInput.disabled = false;
+          }
+        });
+      }
+      
+      // 새 파일 선택 시 삭제 체크박스 해제
+      if (fileInput) {
+        fileInput.addEventListener('change', function() {
+          if (this.files.length > 0 && removeFileCheckbox) {
+            removeFileCheckbox.checked = false;
+            removeFileCheckbox.dispatchEvent(new Event('change'));
+          }
+        });
+      }
     });
   </script>
 {% endblock %}

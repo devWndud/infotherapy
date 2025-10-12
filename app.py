@@ -577,7 +577,17 @@ def create_app() -> Flask:
         if request.method == "POST":
             file_path = item['file_path']  # 기존 파일 경로 유지
             
-            if 'file' in request.files:
+            # 파일 삭제 요청 확인
+            if request.form.get('remove_file') == '1':
+                if file_path and os.path.exists(file_path):
+                    try:
+                        os.remove(file_path)
+                    except Exception:
+                        pass
+                file_path = None  # 파일 경로를 None으로 설정
+            
+            # 새 파일 업로드 확인
+            elif 'file' in request.files:
                 file = request.files['file']
                 if file and file.filename:
                     # 기존 파일 삭제
