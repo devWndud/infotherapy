@@ -59,7 +59,7 @@
                   {% set file_ext = filename.split('.')[-1].lower() %}
                   {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
                     <div class="file-preview">
-                      <img src="{{ url_for('preview_submission_file_by_path', filename=filename) }}" alt="이미지 미리보기" class="preview-image">
+                      <img src="{{ url_for('preview_submission_file_by_path', filename=filename) }}" alt="이미지 미리보기" class="preview-image" onclick="openImageModal(this.src, '{{ filename }}')">
                     </div>
                   {% elif file_ext in ['mp4', 'webm', 'ogg', 'avi', 'mov'] %}
                     <div class="file-preview">
@@ -93,7 +93,7 @@
           {% set file_ext = filename.split('.')[-1].lower() %}
           {% if file_ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'] %}
             <div class="file-preview">
-              <img src="{{ url_for('admin_submission_download', submission_id=submission.id) }}" alt="이미지 미리보기" class="preview-image">
+              <img src="{{ url_for('admin_submission_download', submission_id=submission.id) }}" alt="이미지 미리보기" class="preview-image" onclick="openImageModal(this.src, '{{ submission.file_path | basename }}')">
             </div>
           {% elif file_ext in ['mp4', 'webm', 'ogg', 'avi', 'mov'] %}
             <div class="file-preview">
@@ -117,6 +117,14 @@
     </div>
   </div>
 
+  <!-- 이미지 모달 -->
+  <div id="imageModal" class="modal" onclick="closeImageModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <span class="close" onclick="closeImageModal()">&times;</span>
+      <img id="modalImage" src="" alt="확대된 이미지" class="modal-image">
+      <div class="modal-filename" id="modalFilename"></div>
+    </div>
+  </div>
 
   <style>
   .submission-card {
@@ -238,6 +246,12 @@
     border-radius: 8px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  
+  .preview-image:hover {
+    transform: scale(1.02);
   }
   
   .preview-video {
@@ -297,5 +311,89 @@
     background: #b91c1c;
     border-color: #b91c1c;
   }
+  
+  /* 이미지 모달 스타일 */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+  }
+  
+  .modal-content {
+    position: relative;
+    margin: auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+  
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  
+  .close:hover {
+    color: #ccc;
+  }
+  
+  .modal-image {
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal-filename {
+    color: #fff;
+    font-size: 16px;
+    margin-top: 10px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 16px;
+    border-radius: 20px;
+  }
   </style>
+
+  <script>
+  function openImageModal(imageSrc, filename) {
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalFilename = document.getElementById('modalFilename');
+    
+    modalImage.src = imageSrc;
+    modalFilename.textContent = filename;
+    modal.style.display = 'block';
+    
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeImageModal();
+      }
+    });
+  }
+  
+  function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.style.display = 'none';
+  }
+  </script>
 {% endblock %}
