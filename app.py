@@ -8,6 +8,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+import pytz
 import json
 import io
 import csv
@@ -20,7 +21,10 @@ def create_app() -> Flask:
     load_dotenv()
     app = Flask(__name__)
     app.secret_key = os.getenv("FLASK_SECRET", "dev-secret-change-me")
-    app.config["ASSET_VERSION"] = os.getenv("ASSET_VERSION") or datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    
+    # 한국 시간대 설정
+    seoul_tz = pytz.timezone('Asia/Seoul')
+    app.config["ASSET_VERSION"] = os.getenv("ASSET_VERSION") or datetime.now(seoul_tz).strftime("%Y%m%d%H%M%S")
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB 파일 크기 제한
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)  # 30일간 로그인 유지
 
@@ -331,7 +335,7 @@ def create_app() -> Flask:
                 
                 # 파일명 중복 방지를 위해 타임스탬프 추가
                 name, ext = os.path.splitext(filename)
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                timestamp = datetime.now(seoul_tz).strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
                 unique_filename = f"{name}_{timestamp}{ext}"
                 
                 # 실제 파일 저장
@@ -350,9 +354,7 @@ def create_app() -> Flask:
             flash("이미 제출한 과제입니다.", "info")
             return redirect(url_for("learn"))
         with get_db() as cx:
-            from zoneinfo import ZoneInfo
-            seoul = ZoneInfo("Asia/Seoul")
-            seoul_time = datetime.now(seoul).isoformat()
+            seoul_time = datetime.now(seoul_tz).isoformat()
             cx.execute(
                 "INSERT INTO submissions (user_id, name, assignment_title, category, text_content, file_paths, created_at) VALUES (?,?,?,?,?,?,?)",
                 (session.get("uid"), session.get("name"), title, category, text_content, json.dumps(file_paths), seoul_time),
@@ -364,7 +366,7 @@ def create_app() -> Flask:
             f"제출자: {session.get('name')}",
             f"과제명: {title}",
             f"카테고리: {category or '없음'}",
-            f"제출 시간: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"제출 시간: {datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S')}",
             "",
             "[제출 내용]",
             text_content if text_content else "(텍스트 없음)",
@@ -409,10 +411,10 @@ def create_app() -> Flask:
             try:
                 from zoneinfo import ZoneInfo
                 seoul = ZoneInfo("Asia/Seoul")
-                now_local = datetime.now(seoul)
+                now_local = datetime.now(seoul_tz)
             except Exception:
                 seoul = None
-                now_local = datetime.now()
+                now_local = datetime.now(seoul_tz)
             for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
                 try:
                     due_dt = datetime.strptime(due_str.strip(), fmt)
@@ -512,10 +514,10 @@ def create_app() -> Flask:
             try:
                 from zoneinfo import ZoneInfo
                 seoul = ZoneInfo("Asia/Seoul")
-                now_local = datetime.now(seoul)
+                now_local = datetime.now(seoul_tz)
             except Exception:
                 seoul = None
-                now_local = datetime.now()
+                now_local = datetime.now(seoul_tz)
             for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d"):
                 try:
                     due_dt = datetime.strptime(due_str.strip(), fmt)
@@ -706,7 +708,7 @@ def create_app() -> Flask:
                         
                         # 파일명 중복 방지를 위해 타임스탬프 추가
                         name, ext = os.path.splitext(filename)
-                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                        timestamp = datetime.now(seoul_tz).strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
                         unique_filename = f"{name}_{timestamp}{ext}"
                         
                         # 실제 파일 저장
@@ -766,7 +768,7 @@ def create_app() -> Flask:
                         
                         # 파일명 중복 방지를 위해 타임스탬프 추가
                         name, ext = os.path.splitext(filename)
-                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                        timestamp = datetime.now(seoul_tz).strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
                         unique_filename = f"{name}_{timestamp}{ext}"
                         
                         # 실제 파일 저장
