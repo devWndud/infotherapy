@@ -98,7 +98,15 @@
             </div>
             <div class="student-grass">
               {% for assignment in stats.assignments | reverse %}
-                {% if assignment in stats.submitted_assignments %}
+                {% set is_submitted = false %}
+                {% for submitted_assignment in stats.submitted_assignments %}
+                  {% if submitted_assignment.title == assignment.title and submitted_assignment.category == assignment.category %}
+                    {% set is_submitted = true %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+                
+                {% if is_submitted %}
                   <div class="grass-cell submitted" title="{{ assignment.title }} - 제출완료">✅</div>
                 {% else %}
                   <div class="grass-cell pending" title="{{ assignment.title }} - 미제출">⏳</div>

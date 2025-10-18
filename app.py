@@ -520,7 +520,10 @@ def create_app() -> Flask:
                             for assignment in category_assignments:
                                 key = f"{assignment['title']}|{assignment.get('category', '')}"
                                 if key in student_submission_map:
-                                    submitted_assignments.append(assignment)
+                                    # 제출한 과제의 정보를 복사하여 추가
+                                    submitted_assignment = dict(assignment)
+                                    submitted_assignment['submitted_at'] = student_submission_map[key]
+                                    submitted_assignments.append(submitted_assignment)
                             
                             student_category_stats[category] = {
                                 'total': len(category_assignments),
