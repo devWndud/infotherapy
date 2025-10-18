@@ -476,30 +476,82 @@ def create_app() -> Flask:
                     'assignments': category_assignments
                 }
         
-        # 모든 학생들의 분야별 제출 현황 데이터 생성 (간소화)
+        # 모든 학생들의 분야별 제출 현황 데이터 생성
         all_students_stats = {}
         
-        # 일단 빈 딕셔너리로 시작 (에러 방지)
-        print("DEBUG: Starting all_students_stats processing")
+        try:
+            with get_db() as cx:
+                # 모든 학생 정보 가져오기
+                students = cx.execute("SELECT id, name, interests FROM users WHERE admin = 0 ORDER BY name").fetchall()
+                print(f"DEBUG: Found {len(students)} students")
+                
+                for student in students:
+                    try:
+                        student_id = student['id']
+                        student_name = student['name']
+                        student_interests = []
+                        
+                        # 학생의 관심 분야 파싱
+                        if student['interests']:
+                            try:
+                                student_interests = json.loads(student['interests'])
+                            except:
+                                student_interests = []
+                        
+                        # 해당 학생의 제출 데이터 가져오기
+                        student_submissions = cx.execute(
+                            "SELECT assignment_title, category, created_at FROM submissions WHERE user_id = ?",
+                            (student_id,)
+                        ).fetchall()
+                        
+                        # 학생의 제출 맵 생성
+                        student_submission_map = {}
+                        for submission in student_submissions:
+                            key = f"{submission['assignment_title']}|{submission['category'] or ''}"
+                            student_submission_map[key] = submission['created_at']
+                        
+                        # 학생의 분야별 제출 현황
+                        student_category_stats = {}
+                        
+                        for category in categories:
+                            if category in student_interests:
+                                # 해당 분야의 과제들 (마감되지 않은 것만)
+                                category_assignments = [a for a in assignments if a.get('category') == category and not a.get('overdue', False)]
+                                
+                                if category_assignments:
+                                    # 해당 학생이 제출한 과제들
+                                    submitted_assignments = []
+                                    for assignment in category_assignments:
+                                        key = f"{assignment['title']}|{assignment.get('category', '')}"
+                                        if key in student_submission_map:
+                                            # 제출한 과제의 정보를 복사하여 추가
+                                            submitted_assignment = dict(assignment)
+                                            submitted_assignment['submitted_at'] = student_submission_map[key]
+                                            submitted_assignments.append(submitted_assignment)
+                                    
+                                    # 제출한 과제가 있는 경우만 추가
+                                    if submitted_assignments:
+                                        student_category_stats[category] = {
+                                            'total': len(category_assignments),
+                                            'submitted': len(submitted_assignments),
+                                            'assignments': category_assignments,
+                                            'submitted_assignments': submitted_assignments
+                                        }
+                        
+                        # 제출 내역이 있는 분야가 있는 학생만 추가
+                        if student_category_stats:
+                            all_students_stats[student_name] = student_category_stats
+                            print(f"DEBUG: Added {student_name} with {len(student_category_stats)} categories")
+                            
+                    except Exception as e:
+                        print(f"ERROR: Error processing student {student.get('name', 'Unknown')}: {e}")
+                        continue
+                        
+        except Exception as e:
+            print(f"ERROR: Error in all_students_stats: {e}")
+            all_students_stats = {}
         
-        # 간단한 테스트 데이터로 시작
-        all_students_stats = {
-            "테스트 학생": {
-                "unity": {
-                    "total": 2,
-                    "submitted": 1,
-                    "assignments": [
-                        {"title": "Unity 과제 1", "category": "unity"},
-                        {"title": "Unity 과제 2", "category": "unity"}
-                    ],
-                    "submitted_assignments": [
-                        {"title": "Unity 과제 1", "category": "unity", "submitted_at": "2025-01-12"}
-                    ]
-                }
-            }
-        }
-        
-        print(f"DEBUG: Using test data with {len(all_students_stats)} students")
+        print(f"DEBUG: Final result - {len(all_students_stats)} students with submissions")
         
         return render_template("learn.html", materials=materials, assignments=assignments, user_interests=user_interests, category_stats=category_stats, all_students_stats=all_students_stats)
 
