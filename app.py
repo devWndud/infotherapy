@@ -547,17 +547,25 @@ def create_app() -> Flask:
                                         assignment_title = assignment['title']
                                         assignment_category = assignment.get('category', '')
                                         
-                                        # 정확한 매칭 시도
-                                        exact_key = f"{assignment_title}|{assignment_category}"
-                                        print(f"DEBUG: Checking exact key: {exact_key}")
-                                        
                                         # 제출 데이터에서 매칭되는 것 찾기
                                         matched_submission = None
-                                        for submission_key, submission_time in student_submission_map.items():
-                                            if assignment_title in submission_key and assignment_category in submission_key:
-                                                matched_submission = submission_time
-                                                print(f"DEBUG: PARTIAL MATCH FOUND! {assignment_title} in {submission_key}")
-                                                break
+                                        
+                                        # 1. 정확한 매칭 시도
+                                        exact_key = f"{assignment_title}|{assignment_category}"
+                                        print(f"DEBUG: Checking exact key: {exact_key}")
+                                        if exact_key in student_submission_map:
+                                            matched_submission = student_submission_map[exact_key]
+                                            print(f"DEBUG: EXACT MATCH FOUND! {exact_key}")
+                                        else:
+                                            # 2. 부분 매칭 시도 (과제 제목이 제출 제목에 포함되는지)
+                                            for submission_key, submission_time in student_submission_map.items():
+                                                submission_title = submission_key.split('|')[0]
+                                                submission_category = submission_key.split('|')[1] if '|' in submission_key else ''
+                                                
+                                                if (assignment_title in submission_title or submission_title in assignment_title) and assignment_category == submission_category:
+                                                    matched_submission = submission_time
+                                                    print(f"DEBUG: PARTIAL MATCH FOUND! {assignment_title} matches {submission_title}")
+                                                    break
                                         
                                         if matched_submission:
                                             print(f"DEBUG: MATCH FOUND! {assignment_title}")
