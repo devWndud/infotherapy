@@ -47,18 +47,18 @@
         </div>
         <div class="contribution-details">
           {% for assignment in stats.assignments | reverse %}
-          <div class="assignment-item {{ 'submitted' if assignment.submitted_at else 'pending' }}">
-            <span class="assignment-title">{{ assignment.title }}</span>
-            <span class="assignment-status">
-              {% if assignment.submitted_at %}
-                ✅ 제출완료
-              {% elif assignment.overdue %}
-                ❌ 마감
-              {% else %}
-                ⏳ 대기중
-              {% endif %}
-            </span>
-          </div>
+            {% if not assignment.overdue %}
+            <div class="assignment-item {{ 'submitted' if assignment.submitted_at else 'pending' }}">
+              <span class="assignment-title">{{ assignment.title }}</span>
+              <span class="assignment-status">
+                {% if assignment.submitted_at %}
+                  ✅ 제출완료
+                {% else %}
+                  ⏳ 대기중
+                {% endif %}
+              </span>
+            </div>
+            {% endif %}
           {% endfor %}
         </div>
       </div>
