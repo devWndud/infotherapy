@@ -451,7 +451,32 @@ def create_app() -> Flask:
                     except:
                         user_interests = []
         
-        return render_template("learn.html", materials=materials, assignments=assignments, user_interests=user_interests)
+        # 분야별 제출 통계 데이터 생성 (GitHub 잔디 스타일)
+        category_stats = {}
+        categories = ['unity', 'ml', 'dl', 'web']
+        
+        for category in categories:
+            # 해당 분야의 과제 수
+            category_assignments = [a for a in assignments if a.get('category') == category]
+            total_assignments = len(category_assignments)
+            
+            # 해당 분야의 제출한 과제 수
+            submitted_assignments = [a for a in category_assignments if a.get('submitted_at')]
+            submitted_count = len(submitted_assignments)
+            
+            # 제출률 계산
+            submission_rate = (submitted_count / total_assignments * 100) if total_assignments > 0 else 0
+            
+            # 제출 내역이 있는 경우만 표시
+            if submitted_count > 0:
+                category_stats[category] = {
+                    'total': total_assignments,
+                    'submitted': submitted_count,
+                    'rate': round(submission_rate, 1),
+                    'assignments': category_assignments
+                }
+        
+        return render_template("learn.html", materials=materials, assignments=assignments, user_interests=user_interests, category_stats=category_stats)
 
     @app.route("/api/interests", methods=["GET", "POST"])
     def user_interests():
