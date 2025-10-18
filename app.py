@@ -476,7 +476,52 @@ def create_app() -> Flask:
                     'assignments': category_assignments
                 }
         
-        return render_template("learn.html", materials=materials, assignments=assignments, user_interests=user_interests, category_stats=category_stats)
+        # 모든 학생들의 분야별 제출 현황 데이터 생성
+        all_students_stats = {}
+        
+        with get_db() as cx:
+            # 모든 학생 정보 가져오기
+            students = cx.execute("SELECT id, name, interests FROM users WHERE admin = 0 ORDER BY name").fetchall()
+            
+            for student in students:
+                student_id = student['id']
+                student_name = student['name']
+                student_interests = []
+                
+                if student['interests']:
+                    try:
+                        student_interests = json.loads(student['interests'])
+                    except:
+                        student_interests = []
+                
+                # 학생의 분야별 제출 현황
+                student_category_stats = {}
+                
+                for category in categories:
+                    if category in student_interests:
+                        # 해당 분야의 과제들
+                        category_assignments = [a for a in assignments if a.get('category') == category and not a.get('overdue', False)]
+                        
+                        if category_assignments:
+                            # 해당 학생이 제출한 과제들
+                            submitted_assignments = []
+                            for assignment in category_assignments:
+                                key = f"{assignment['title']}|{assignment.get('category', '')}"
+                                if key in submission_map:
+                                    submitted_assignments.append(assignment)
+                            
+                            student_category_stats[category] = {
+                                'total': len(category_assignments),
+                                'submitted': len(submitted_assignments),
+                                'assignments': category_assignments,
+                                'submitted_assignments': submitted_assignments
+                            }
+                
+                # 제출 내역이 있는 분야가 있는 학생만 추가
+                if student_category_stats:
+                    all_students_stats[student_name] = student_category_stats
+        
+        return render_template("learn.html", materials=materials, assignments=assignments, user_interests=user_interests, category_stats=category_stats, all_students_stats=all_students_stats)
 
     @app.route("/api/interests", methods=["GET", "POST"])
     def user_interests():

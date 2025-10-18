@@ -67,6 +67,53 @@
   </div>
   {% endif %}
 
+  <!-- 모든 학생들의 분야별 제출 현황 -->
+  {% if all_students_stats %}
+  <div class="all-students-contribution">
+    <div class="contribution-header">
+      <h3>👥 모든 학생 제출 현황</h3>
+      <p>전체 학생들의 분야별 과제 제출 현황</p>
+    </div>
+    
+    {% for category in ['unity', 'ml', 'dl', 'web'] %}
+      {% set category_students = [] %}
+      {% for student_name, student_stats in all_students_stats.items() %}
+        {% if category in student_stats %}
+          {% set _ = category_students.append((student_name, student_stats[category])) %}
+        {% endif %}
+      {% endfor %}
+      
+      {% if category_students %}
+      <div class="category-section">
+        <div class="category-header">
+          <h4>{{ category | category_display }}</h4>
+        </div>
+        <div class="students-grid">
+          {% for student_name, stats in category_students %}
+          <div class="student-card">
+            <div class="student-name">{{ student_name }}</div>
+            <div class="student-stats">
+              <span class="submission-count">{{ stats.submitted }}/{{ stats.total }}</span>
+              <span class="submission-rate">{{ (stats.submitted / stats.total * 100) | round(1) }}%</span>
+            </div>
+            <div class="student-grass">
+              {% for assignment in stats.assignments | reverse %}
+                {% if assignment in stats.submitted_assignments %}
+                  <div class="grass-cell submitted" title="{{ assignment.title }} - 제출완료">✅</div>
+                {% else %}
+                  <div class="grass-cell pending" title="{{ assignment.title }} - 미제출">⏳</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="category-filter">
     <div class="filter-buttons" id="cat-toggle">
       <button class="filter-chip active" data-cat="all">전체</button>
@@ -331,6 +378,118 @@
   
   .assignment-item.pending .assignment-status {
     color: #d97706;
+  }
+  
+  /* 모든 학생 제출 현황 스타일 */
+  .all-students-contribution {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .category-section {
+    margin-bottom: 2rem;
+  }
+  
+  .category-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .category-header {
+    margin-bottom: 1rem;
+  }
+  
+  .category-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #334155;
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border-radius: 6px;
+    display: inline-block;
+  }
+  
+  .students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .student-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+  }
+  
+  .student-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .student-name {
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .student-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+  }
+  
+  .submission-count {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  
+  .submission-rate {
+    font-weight: 700;
+    color: #3b82f6;
+    font-size: 0.9rem;
+  }
+  
+  .student-grass {
+    display: flex;
+    gap: 2px;
+    flex-wrap: wrap;
+  }
+  
+  .grass-cell {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .grass-cell.submitted {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+  
+  .grass-cell.pending {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fde68a;
+  }
+  
+  .grass-cell:hover {
+    transform: scale(1.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   }
   
   .stat-card {
@@ -623,6 +782,20 @@
     
     .assignment-item {
       font-size: 0.8rem;
+    }
+    
+    .students-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .student-card {
+      padding: 0.75rem;
+    }
+    
+    .grass-cell {
+      width: 18px;
+      height: 18px;
+      font-size: 9px;
     }
   }
   </style>
