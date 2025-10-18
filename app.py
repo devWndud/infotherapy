@@ -485,6 +485,22 @@ def create_app() -> Flask:
                 students = cx.execute("SELECT id, name, interests FROM users WHERE admin = 0 ORDER BY name").fetchall()
                 print(f"DEBUG: Found {len(students)} students")
                 
+                # 학생 데이터 상세 확인
+                for student in students:
+                    print(f"DEBUG: Student data: {dict(student)}")
+                
+                # 제출 데이터도 확인
+                all_submissions = cx.execute("SELECT user_id, assignment_title, category, created_at FROM submissions").fetchall()
+                print(f"DEBUG: Found {len(all_submissions)} total submissions")
+                for submission in all_submissions:
+                    print(f"DEBUG: Submission: {dict(submission)}")
+                
+                # 과제 데이터도 확인
+                all_assignments = cx.execute("SELECT id, title, category, due FROM assignments").fetchall()
+                print(f"DEBUG: Found {len(all_assignments)} total assignments")
+                for assignment in all_assignments:
+                    print(f"DEBUG: Assignment: {dict(assignment)}")
+                
                 for student in students:
                     try:
                         student_id = student['id']
@@ -529,19 +545,21 @@ def create_app() -> Flask:
                                             submitted_assignment['submitted_at'] = student_submission_map[key]
                                             submitted_assignments.append(submitted_assignment)
                                     
-                                    # 제출한 과제가 있는 경우만 추가
-                                    if submitted_assignments:
-                                        student_category_stats[category] = {
-                                            'total': len(category_assignments),
-                                            'submitted': len(submitted_assignments),
-                                            'assignments': category_assignments,
-                                            'submitted_assignments': submitted_assignments
-                                        }
+                                    # 과제가 있는 분야는 모두 추가 (제출 여부 관계없이)
+                                    student_category_stats[category] = {
+                                        'total': len(category_assignments),
+                                        'submitted': len(submitted_assignments),
+                                        'assignments': category_assignments,
+                                        'submitted_assignments': submitted_assignments
+                                    }
+                                    print(f"DEBUG: Added category {category} for {student_name}: {len(submitted_assignments)}/{len(category_assignments)}")
                         
-                        # 제출 내역이 있는 분야가 있는 학생만 추가
+                        # 관심 분야에 과제가 있는 학생은 모두 추가
                         if student_category_stats:
                             all_students_stats[student_name] = student_category_stats
                             print(f"DEBUG: Added {student_name} with {len(student_category_stats)} categories")
+                        else:
+                            print(f"DEBUG: No categories for {student_name}")
                             
                     except Exception as e:
                         print(f"ERROR: Error processing student {student.get('name', 'Unknown')}: {e}")
