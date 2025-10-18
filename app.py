@@ -476,16 +476,13 @@ def create_app() -> Flask:
                     'assignments': category_assignments
                 }
         
-        # 모든 학생들의 분야별 제출 현황 데이터 생성
+        # 모든 학생들의 분야별 제출 현황 데이터 생성 (개인 현황과 동일한 로직 사용)
         all_students_stats = {}
         
         try:
             with get_db() as cx:
                 # 모든 학생 정보 가져오기
                 students = cx.execute("SELECT id, name, interests FROM users WHERE admin = 0 ORDER BY name").fetchall()
-                print(f"DEBUG: Found {len(students)} students")
-                
-                # 기본 정보만 출력
                 print(f"DEBUG: Found {len(students)} students")
                 
                 for student in students:
@@ -501,19 +498,13 @@ def create_app() -> Flask:
                             except:
                                 student_interests = []
                         
-                        # 해당 학생의 제출 데이터 가져오기
+                        # 해당 학생의 제출 데이터 가져오기 (개인 현황과 동일)
                         student_submissions = cx.execute(
                             "SELECT assignment_title, category, created_at FROM submissions WHERE user_id = ?",
                             (student_id,)
                         ).fetchall()
                         
-                        # 학생의 제출 맵 생성
-                        student_submission_map = {}
-                        for submission in student_submissions:
-                            key = f"{submission['assignment_title']}|{submission['category'] or ''}"
-                            student_submission_map[key] = submission['created_at']
-                        
-                        # 학생의 분야별 제출 현황
+                        # 학생의 분야별 제출 현황 (개인 현황과 동일한 로직)
                         student_category_stats = {}
                         
                         for category in categories:
@@ -522,36 +513,20 @@ def create_app() -> Flask:
                                 category_assignments = [a for a in assignments if a.get('category') == category and not a.get('overdue', False)]
                                 
                                 if category_assignments:
-                                    # 해당 학생이 제출한 과제들
+                                    # 해당 학생이 제출한 과제들 (개인 현황과 동일한 로직)
                                     submitted_assignments = []
                                     for assignment in category_assignments:
-                                        assignment_title = assignment['title']
-                                        assignment_category = assignment.get('category', '')
-                                        
-                                        # 제출 데이터에서 매칭되는 것 찾기
-                                        matched_submission = None
-                                        
-                                        # 1. 정확한 매칭 시도
-                                        exact_key = f"{assignment_title}|{assignment_category}"
-                                        if exact_key in student_submission_map:
-                                            matched_submission = student_submission_map[exact_key]
-                                        else:
-                                            # 2. 부분 매칭 시도 (과제 제목이 제출 제목에 포함되는지)
-                                            for submission_key, submission_time in student_submission_map.items():
-                                                submission_title = submission_key.split('|')[0]
-                                                submission_category = submission_key.split('|')[1] if '|' in submission_key else ''
-                                                
-                                                if (assignment_title in submission_title or submission_title in assignment_title) and assignment_category == submission_category:
-                                                    matched_submission = submission_time
-                                                    break
-                                        
-                                        if matched_submission:
-                                            # 제출한 과제의 정보를 복사하여 추가
-                                            submitted_assignment = dict(assignment)
-                                            submitted_assignment['submitted_at'] = matched_submission
-                                            submitted_assignments.append(submitted_assignment)
+                                        # 제출 데이터에서 해당 과제를 찾기
+                                        for submission in student_submissions:
+                                            if (submission['assignment_title'] == assignment['title'] and 
+                                                submission['category'] == assignment.get('category')):
+                                                # 제출한 과제의 정보를 복사하여 추가
+                                                submitted_assignment = dict(assignment)
+                                                submitted_assignment['submitted_at'] = submission['created_at']
+                                                submitted_assignments.append(submitted_assignment)
+                                                break
                                     
-                                    # 과제가 있는 분야는 모두 추가 (제출 여부 관계없이)
+                                    # 과제가 있는 분야는 모두 추가
                                     student_category_stats[category] = {
                                         'total': len(category_assignments),
                                         'submitted': len(submitted_assignments),
