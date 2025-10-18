@@ -102,7 +102,6 @@
                 {% for submitted_assignment in stats.submitted_assignments %}
                   {% if submitted_assignment.title == assignment.title and submitted_assignment.category == assignment.category %}
                     {% set is_submitted = true %}
-                    {% break %}
                   {% endif %}
                 {% endfor %}
                 
