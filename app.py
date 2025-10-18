@@ -494,6 +494,18 @@ def create_app() -> Flask:
                     except:
                         student_interests = []
                 
+                # 해당 학생의 제출 데이터 가져오기
+                student_submissions = cx.execute(
+                    "SELECT assignment_title, category, created_at FROM submissions WHERE user_id = ?",
+                    (student_id,)
+                ).fetchall()
+                
+                # 학생의 제출 맵 생성
+                student_submission_map = {}
+                for submission in student_submissions:
+                    key = f"{submission['assignment_title']}|{submission['category'] or ''}"
+                    student_submission_map[key] = submission['created_at']
+                
                 # 학생의 분야별 제출 현황
                 student_category_stats = {}
                 
@@ -507,7 +519,7 @@ def create_app() -> Flask:
                             submitted_assignments = []
                             for assignment in category_assignments:
                                 key = f"{assignment['title']}|{assignment.get('category', '')}"
-                                if key in submission_map:
+                                if key in student_submission_map:
                                     submitted_assignments.append(assignment)
                             
                             student_category_stats[category] = {
