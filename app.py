@@ -485,21 +485,8 @@ def create_app() -> Flask:
                 students = cx.execute("SELECT id, name, interests FROM users WHERE admin = 0 ORDER BY name").fetchall()
                 print(f"DEBUG: Found {len(students)} students")
                 
-                # 학생 데이터 상세 확인
-                for student in students:
-                    print(f"DEBUG: Student data: {dict(student)}")
-                
-                # 제출 데이터도 확인
-                all_submissions = cx.execute("SELECT user_id, assignment_title, category, created_at FROM submissions").fetchall()
-                print(f"DEBUG: Found {len(all_submissions)} total submissions")
-                for submission in all_submissions:
-                    print(f"DEBUG: Submission: {dict(submission)}")
-                
-                # 과제 데이터도 확인
-                all_assignments = cx.execute("SELECT id, title, category, due FROM assignments").fetchall()
-                print(f"DEBUG: Found {len(all_assignments)} total assignments")
-                for assignment in all_assignments:
-                    print(f"DEBUG: Assignment: {dict(assignment)}")
+                # 기본 정보만 출력
+                print(f"DEBUG: Found {len(students)} students")
                 
                 for student in students:
                     try:
@@ -520,16 +507,11 @@ def create_app() -> Flask:
                             (student_id,)
                         ).fetchall()
                         
-                        print(f"DEBUG: Student {student_name} submissions: {len(student_submissions)}")
-                        for sub in student_submissions:
-                            print(f"DEBUG: Submission: {sub['assignment_title']} | {sub['category']}")
-                        
                         # 학생의 제출 맵 생성
                         student_submission_map = {}
                         for submission in student_submissions:
                             key = f"{submission['assignment_title']}|{submission['category'] or ''}"
                             student_submission_map[key] = submission['created_at']
-                            print(f"DEBUG: Submission key: {key}")
                         
                         # 학생의 분야별 제출 현황
                         student_category_stats = {}
@@ -540,7 +522,6 @@ def create_app() -> Flask:
                                 category_assignments = [a for a in assignments if a.get('category') == category and not a.get('overdue', False)]
                                 
                                 if category_assignments:
-                                    print(f"DEBUG: Processing {len(category_assignments)} assignments for {student_name} in {category}")
                                     # 해당 학생이 제출한 과제들
                                     submitted_assignments = []
                                     for assignment in category_assignments:
@@ -552,10 +533,8 @@ def create_app() -> Flask:
                                         
                                         # 1. 정확한 매칭 시도
                                         exact_key = f"{assignment_title}|{assignment_category}"
-                                        print(f"DEBUG: Checking exact key: {exact_key}")
                                         if exact_key in student_submission_map:
                                             matched_submission = student_submission_map[exact_key]
-                                            print(f"DEBUG: EXACT MATCH FOUND! {exact_key}")
                                         else:
                                             # 2. 부분 매칭 시도 (과제 제목이 제출 제목에 포함되는지)
                                             for submission_key, submission_time in student_submission_map.items():
@@ -564,19 +543,13 @@ def create_app() -> Flask:
                                                 
                                                 if (assignment_title in submission_title or submission_title in assignment_title) and assignment_category == submission_category:
                                                     matched_submission = submission_time
-                                                    print(f"DEBUG: PARTIAL MATCH FOUND! {assignment_title} matches {submission_title}")
                                                     break
                                         
                                         if matched_submission:
-                                            print(f"DEBUG: MATCH FOUND! {assignment_title}")
                                             # 제출한 과제의 정보를 복사하여 추가
                                             submitted_assignment = dict(assignment)
                                             submitted_assignment['submitted_at'] = matched_submission
                                             submitted_assignments.append(submitted_assignment)
-                                        else:
-                                            print(f"DEBUG: No match for {assignment_title}")
-                                            # 사용 가능한 제출 키들 출력
-                                            print(f"DEBUG: Available submission keys: {list(student_submission_map.keys())}")
                                     
                                     # 과제가 있는 분야는 모두 추가 (제출 여부 관계없이)
                                     student_category_stats[category] = {
@@ -585,14 +558,10 @@ def create_app() -> Flask:
                                         'assignments': category_assignments,
                                         'submitted_assignments': submitted_assignments
                                     }
-                                    print(f"DEBUG: Added category {category} for {student_name}: {len(submitted_assignments)}/{len(category_assignments)}")
                         
                         # 관심 분야에 과제가 있는 학생은 모두 추가
                         if student_category_stats:
                             all_students_stats[student_name] = student_category_stats
-                            print(f"DEBUG: Added {student_name} with {len(student_category_stats)} categories")
-                        else:
-                            print(f"DEBUG: No categories for {student_name}")
                             
                     except Exception as e:
                         print(f"ERROR: Error processing student {student.get('name', 'Unknown')}: {e}")
