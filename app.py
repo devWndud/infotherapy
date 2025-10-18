@@ -92,7 +92,7 @@ def create_app() -> Flask:
             )
             """
         )
-        
+
         # 기존 테이블에 file_path 컬럼 추가 (이미 존재하면 무시됨)
         try:
             cx.execute("ALTER TABLE assignments ADD COLUMN file_path TEXT")

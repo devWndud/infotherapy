@@ -46,7 +46,7 @@
           <div class="progress-bar" style="width: {{ stats.rate }}%"></div>
         </div>
         <div class="contribution-details">
-          {% for assignment in stats.assignments %}
+          {% for assignment in stats.assignments | reverse %}
           <div class="assignment-item {{ 'submitted' if assignment.submitted_at else 'pending' }}">
             <span class="assignment-title">{{ assignment.title }}</span>
             <span class="assignment-status">
