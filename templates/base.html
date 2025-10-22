@@ -3,21 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="{% block description %}INFOTHERAPY · 천안월봉고 대표 AI SW 동아리. 실전 중심 학습과 협업을 지향하는 프로그래밍 동아리입니다. 인공지능, 머신러닝, 딥러닝, 웹개발, Unity 게임개발을 배우는 천안월봉고등학교 동아리입니다.{% endblock %}">
-    <meta name="keywords" content="{% block keywords %}인포테라피, INFOTHERAPY, 천안월봉고, 월봉고, AI 동아리, AI SW 동아리, 프로그래밍, 인공지능, 소프트웨어, 학습, 협업, 천안, 충청남도, 천안월봉고등학교, 월봉고등학교, 동아리, 학생, 고등학교{% endblock %}">
-    <meta name="author" content="INFOTHERAPY">
+    <meta name="description" content="{% block description %}Infotherapy · 천안월봉고 대표 AI SW 동아리. 실전 중심 학습과 협업을 지향하는 프로그래밍 동아리입니다.{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}천안월봉고, AI, SW, 동아리, 프로그래밍, 인공지능, 소프트웨어, 학습, 협업{% endblock %}">
+    <meta name="author" content="Infotherapy">
     <meta name="robots" content="index, follow">
     <meta name="google-site-verification" content="VCHWnxyTr_WIKYh1k0ZG-yKbybpMTO9-AYHLvRCXPlk" />
     
-    <meta property="og:title" content="{% block og_title %}INFOTHERAPY{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Infotherapy{% endblock %}">
     <meta property="og:description" content="{% block og_description %}천안월봉고 대표 AI SW 동아리. 실전 중심 학습과 협업을 지향합니다.{% endblock %}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://infotherapy.kro.kr{{ request.path }}">
     <meta property="og:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}">
-    <meta property="og:site_name" content="INFOTHERAPY">
+    <meta property="og:site_name" content="Infotherapy">
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{% block twitter_title %}INFOTHERAPY{% endblock %}">
+    <meta name="twitter:title" content="{% block twitter_title %}Infotherapy{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_description %}천안월봉고 대표 AI SW 동아리{% endblock %}">
     <meta name="twitter:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}">
     
@@ -25,8 +25,8 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "INFOTHERAPY",
-      "description": "천안월봉고 대표 AI SW 동아리. 인공지능, 머신러닝, 딥러닝, 웹개발, Unity 게임개발을 배우는 프로그래밍 동아리",
+      "name": "Infotherapy",
+      "description": "천안월봉고 대표 AI SW 동아리",
       "url": "https://infotherapy.kro.kr",
       "logo": "https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}",
       "address": {
@@ -38,12 +38,11 @@
       "memberOf": {
         "@type": "EducationalOrganization",
         "name": "천안월봉고등학교"
-      },
-      "keywords": ["인포테라피", "INFOTHERAPY", "천안월봉고", "월봉고", "AI 동아리", "AI SW 동아리", "프로그래밍", "인공지능", "소프트웨어", "학습", "협업", "천안", "충청남도", "천안월봉고등학교", "월봉고등학교", "동아리", "학생", "고등학교", "머신러닝", "딥러닝", "웹개발", "Unity", "게임개발"]
+      }
     }
     </script>
     
-    <title>{% block title %}INFOTHERAPY{% endblock %}</title>
+    <title>{% block title %}Infotherapy{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -56,8 +55,8 @@
     <header class="site-header">
       <div class="container header-inner">
         <a class="logo" href="{{ url_for('index') }}">
-          <img class="logo-mark-img" src="{{ url_for('static', filename='images/icon.png') }}?v=20251011" alt="INFOTHERAPY">
-          <span class="logo-text">INFOTHERAPY</span>
+          <img class="logo-mark-img" src="{{ url_for('static', filename='images/icon.png') }}?v=20251011" alt="Infotherapy">
+          <span class="logo-text">Infotherapy</span>
         </a>
         <nav class="nav">
           <a href="{{ url_for('index') }}">홈</a>
@@ -108,7 +107,7 @@
     <footer class="site-footer">
       <div class="container footer-grid">
         <div class="footer-col">
-          <h4>INFOTHERAPY</h4>
+          <h4>Infotherapy</h4>
           <div class="footer-links">
             <a href="{{ url_for('contact') }}">문의하기</a>
             <a href="{{ url_for('terms') }}">이용약관</a>
@@ -118,7 +117,7 @@
         <div class="footer-col">
           <h4>정보</h4>
           <div class="footer-links">
-            <span>© 2025 INFOTHERAPY</span>
+            <span>© 2025 Infotherapy</span>
           </div>
         </div>
       </div>

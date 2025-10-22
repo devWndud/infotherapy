@@ -28,7 +28,7 @@ def create_app() -> Flask:
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB 파일 크기 제한
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)  # 30일간 로그인 유지
 
-    db_path = os.path.join(os.path.dirname(__file__), "INFOTHERAPY.db")
+    db_path = os.path.join(os.path.dirname(__file__), "infotherapy.db")
     invites_path = os.path.join(os.path.dirname(__file__), "invites.json")
     uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
     os.makedirs(uploads_dir, exist_ok=True)
@@ -1214,7 +1214,6 @@ def create_app() -> Flask:
         urls = [
             {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0"},
             {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8"},
-            {"loc": "https://infotherapy.kro.kr/activities", "changefreq": "weekly", "priority": "0.8"},
             {"loc": "https://infotherapy.kro.kr/contact", "changefreq": "monthly", "priority": "0.6"},
             {"loc": "https://infotherapy.kro.kr/terms", "changefreq": "yearly", "priority": "0.4"},
             {"loc": "https://infotherapy.kro.kr/privacy", "changefreq": "yearly", "priority": "0.4"},
