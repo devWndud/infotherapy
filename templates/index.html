@@ -5,7 +5,7 @@
     <div>
       <span class="eyebrow">Heal The World with IT</span>
       <h1>INFOTHERAPY</h1>
-      <p>천안월봉고 대표 AI SW동아리</p>
+      <p>천안월봉고등학교 대표 AI SW 동아리 인포테라피</p>
       
     </div>
   </section>
@@ -22,13 +22,13 @@
       </div>
       <a class="card" href="{{ url_for('activities') }}" style="text-decoration:none; color:inherit;">
         <h3>활동</h3>
-        <p>인포테라피의 다양한 활동과 프로젝트를 확인해보세요</p>
+        <p>천안월봉고 인포테라피 동아리의 다양한 AI SW 활동과 프로젝트를 확인해보세요</p>
       </a>
     </div>
   </section>
 
   <section class="section centered team-section">
-    <h2 style="margin:0 0 16px;">기장단</h2>
+    <h2 style="margin:0 0 16px;">천안월봉고 인포테라피 동아리 기장단</h2>
     <div class="team two-only">
       <div class="team-item">
         <div class="avatar" style="background-image: url('{{ url_for('static', filename='images/gijang.jpg') }}'); background-size: cover; background-position: center;"></div>
@@ -44,7 +44,7 @@
   </section>
 
   <section class="section centered social-section">
-    <h2 style="margin:0 0 16px;">공식 SNS</h2>
+    <h2 style="margin:0 0 16px;">천안월봉고 인포테라피 동아리 공식 SNS</h2>
     <div class="social-links">
       <a href="https://www.instagram.com/info._.official/" target="_blank" class="social-card">
         <div class="social-icon">📸</div>
@@ -76,7 +76,7 @@
   </section>
 
   <section class="section centered info-section">
-    <h2 style="margin:0 0 16px;">2025 INFO</h2>
+    <h2 style="margin:0 0 16px;">천안월봉고 인포테라피 동아리 2025 성과</h2>
     <div class="timeline">
       <div class="timeline-item win">
         <div class="timeline-node"></div>
@@ -108,6 +108,18 @@
         </div>
       </div>
       </div>
+    </div>
+  </section>
+
+  <section class="section centered about-section">
+    <h2 style="margin:0 0 16px;">천안월봉고 인포테라피 동아리 소개</h2>
+    <div class="about-content">
+      <p>천안월봉고등학교 인포테라피(INFOTHERAPY)는 AI와 SW 개발을 전문으로 하는 프로그래밍 동아리입니다. 
+      인공지능, 소프트웨어 개발, 웹 프로그래밍 등 다양한 IT 기술을 학습하고 실전 프로젝트를 통해 
+      실무 경험을 쌓는 것을 목표로 합니다.</p>
+      <p>월봉고 인포테라피 동아리는 천안 지역에서 가장 활발한 AI SW 동아리 중 하나로, 
+      정기적인 코딩 교육, 해커톤 참가, 프로젝트 개발 등의 활동을 통해 
+      학생들의 프로그래밍 실력을 향상시키고 있습니다.</p>
     </div>
   </section>
 
@@ -206,6 +218,24 @@
 .info-section {
   background: #f1f5f9;
   padding: 4rem 0;
+}
+
+.about-section {
+  background: #ffffff;
+  padding: 4rem 0;
+}
+
+.about-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+  line-height: 1.7;
+}
+
+.about-content p {
+  margin-bottom: 1.5rem;
+  color: #4a5568;
+  font-size: 1.1rem;
 }
 
 @media (max-width: 768px) {
