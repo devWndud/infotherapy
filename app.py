@@ -1213,6 +1213,7 @@ def create_app() -> Flask:
         
         urls = [
             {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0"},
+            {"loc": "https://infotherapy.kro.kr/activities", "changefreq": "weekly", "priority": "0.9"},
             {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8"},
             {"loc": "https://infotherapy.kro.kr/contact", "changefreq": "monthly", "priority": "0.6"},
             {"loc": "https://infotherapy.kro.kr/terms", "changefreq": "yearly", "priority": "0.4"},

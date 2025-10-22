@@ -1,8 +1,10 @@
 User-agent: *
 Allow: /
 
-# 사이트맵 위치
+# Sitemap
 Sitemap: https://infotherapy.kro.kr/sitemap.xml
 
-# 크롤링 지연 (선택사항)
-Crawl-delay: 1
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
