@@ -387,6 +387,97 @@ def create_app() -> Flask:
             pass
         return redirect(url_for("learn"))
 
+    @app.route("/resubmit", methods=["POST"])
+    def resubmit_assignment():
+        if not session.get("uid"):
+            flash("로그인이 필요합니다.", "info")
+            return redirect(url_for("login"))
+        
+        title = request.form.get("title")
+        category = request.form.get("category")
+        text_content = request.form.get("text_content") or ""
+        
+        # 여러 파일 처리
+        uploaded_files = request.files.getlist("files")
+        file_paths = []
+        
+        for uploaded_file in uploaded_files:
+            if uploaded_file and uploaded_file.filename and uploaded_file.filename.strip():
+                # 한글 파일명 지원을 위해 secure_filename 대신 직접 처리
+                filename = uploaded_file.filename
+                # 위험한 문자만 제거
+                filename = filename.replace('..', '').replace('/', '').replace('\\', '')
+                
+                # 파일명 중복 방지를 위해 타임스탬프 추가
+                name, ext = os.path.splitext(filename)
+                timestamp = datetime.now(seoul_tz).strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 밀리초까지
+                unique_filename = f"{name}_{timestamp}{ext}"
+                
+                # 실제 파일 저장
+                full_dest = os.path.join(uploads_dir, unique_filename)
+                uploaded_file.save(full_dest)
+                
+                # 데이터베이스에는 파일명만 저장 (상대 경로)
+                file_paths.append(unique_filename)
+        
+        with get_db() as cx:
+            # 기존 제출 삭제
+            existing_submission = cx.execute(
+                "SELECT file_paths FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
+                (session.get("uid"), title, category),
+            ).fetchone()
+            
+            if existing_submission and existing_submission[0]:
+                try:
+                    old_file_paths = json.loads(existing_submission[0])
+                    for old_file in old_file_paths:
+                        old_file_path = os.path.join(uploads_dir, old_file)
+                        if os.path.exists(old_file_path):
+                            os.remove(old_file_path)
+                except:
+                    pass  # 파일 삭제 실패해도 계속 진행
+            
+            # 기존 제출 삭제
+            cx.execute(
+                "DELETE FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
+                (session.get("uid"), title, category),
+            )
+            
+            # 새 제출 추가
+            seoul_time = datetime.now(seoul_tz).isoformat()
+            cx.execute(
+                "INSERT INTO submissions (user_id, name, assignment_title, category, text_content, file_paths, created_at) VALUES (?,?,?,?,?,?,?)",
+                (session.get("uid"), session.get("name"), title, category, text_content, json.dumps(file_paths), seoul_time),
+            )
+        
+        flash("과제가 수정되었습니다.", "success")
+        
+        email_subject = f"{session.get('name')} - {title} 수정 제출"
+        body_lines = [
+            f"제출자: {session.get('name')}",
+            f"과제명: {title}",
+            f"카테고리: {category or '없음'}",
+            f"수정 제출 시간: {datetime.now(seoul_tz).strftime('%Y-%m-%d %H:%M:%S')}",
+            "",
+            "[수정된 제출 내용]",
+            text_content if text_content else "(텍스트 없음)",
+        ]
+        
+        if file_paths:
+            body_lines.extend([
+                "",
+                "[첨부파일]",
+                f"파일 개수: {len(file_paths)}개"
+            ])
+            for file_path in file_paths:
+                body_lines.append(f"- {os.path.basename(file_path)}")
+        
+        try:
+            send_admin_email(subject=email_subject, body="\n".join(body_lines), attachments=None)
+        except Exception:
+            pass
+        return redirect(url_for("learn"))
+
     def admin_required(fn):
         from functools import wraps
         @wraps(fn)
@@ -557,16 +648,18 @@ def create_app() -> Flask:
         overdue = is_overdue(a.get("due", ""))
         submitted = False
         submitted_at = None
+        submission_text = None
         if session.get("uid"):
             with get_db() as cx:
                 row = cx.execute(
-                    "SELECT created_at FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
+                    "SELECT created_at, text_content FROM submissions WHERE user_id=? AND assignment_title=? AND IFNULL(category,'')=IFNULL(?, '')",
                     (session.get("uid"), a["title"], a["category"]),
                 ).fetchone()
             if row:
                 submitted = True
                 submitted_at = row["created_at"]
-        return render_template("assignment_detail.html", a=a, submitted=submitted, submitted_at=submitted_at, overdue=overdue)
+                submission_text = row["text_content"]
+        return render_template("assignment_detail.html", a=a, submitted=submitted, submitted_at=submitted_at, overdue=overdue, submission_text=submission_text)
 
     @app.route("/assignment/<int:assignment_id>/download")
     def download_assignment_file(assignment_id: int):

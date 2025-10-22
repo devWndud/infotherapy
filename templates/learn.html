@@ -131,7 +131,7 @@
                 {% if a.submitted_at %}
                   <span class="status-badge submitted">제출 완료</span>
                 {% elif a.overdue %}
-                  <span class="status-badge overdue">제출 마감</span>
+                  <span class="status-badge overdue">마감됨</span>
                 {% else %}
                   <span class="due-badge">마감 {{ a.due | short_dt }}</span>
                 {% endif %}
