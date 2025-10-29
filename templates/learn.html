@@ -18,8 +18,8 @@
     </div>
   </div>
 
-  <!-- 분야별 제출 내역 (GitHub 잔디 스타일) -->
-  {% if category_stats %}
+  <!-- 분야별 제출 내역 (GitHub 잔디 스타일) - 로그인 시에만 표시 -->
+  {% if session.get('uid') and category_stats %}
   <div class="submission-contribution">
     <div class="contribution-header">
       <h3>📊 과제 제출 내역</h3>
@@ -128,10 +128,14 @@
                 {% elif a.file_path %}
                   <span class="category-badge attachment-color">📎 첨부파일</span>
                 {% endif %}
-                {% if a.submitted_at %}
-                  <span class="status-badge submitted">제출 완료</span>
-                {% elif a.overdue %}
-                  <span class="status-badge overdue">마감됨</span>
+                {% if session.get('uid') %}
+                  {% if a.submitted_at %}
+                    <span class="status-badge submitted">제출 완료</span>
+                  {% elif a.overdue %}
+                    <span class="status-badge overdue">마감됨</span>
+                  {% else %}
+                    <span class="due-badge">마감 {{ a.due | short_dt }}</span>
+                  {% endif %}
                 {% else %}
                   <span class="due-badge">마감 {{ a.due | short_dt }}</span>
                 {% endif %}
@@ -637,11 +641,11 @@
     const materialsSectionCount = document.getElementById('materials-section-count');
     const assignmentsSectionCount = document.getElementById('assignments-section-count');
     
-    let userInterests = {{ user_interests | tojson }};
+    let userInterests = {{ user_interests | tojson if session.get('uid') else '[]' }};
     
     let currentFilter = 'all';
     
-    // 모든 분야를 기본값으로 설정
+    // 로그인하지 않은 경우 모든 분야를 기본값으로 설정
     if (userInterests.length === 0) {
       userInterests = ['unity', 'ml', 'dl', 'web'];
     }
