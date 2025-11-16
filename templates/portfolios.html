@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+{% block title %}포트폴리오 · INFOTHERAPY{% endblock %}
+{% block content %}
+  <div class="portfolios-header">
+    <div class="header-content">
+      <div>
+        <h1>포트폴리오</h1>
+        <p>인포테라피 부원들의 프로젝트와 활동을 확인해보세요</p>
+      </div>
+      {% if session.get('uid') %}
+        <a href="{{ url_for('portfolio_edit') }}" class="btn btn-primary">프로필 생성</a>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if portfolios_by_grade %}
+    {% for grade in portfolios_by_grade.keys()|sort %}
+      <div class="grade-section">
+        <h2 class="grade-title">
+          {% if grade == 0 %}
+            기타
+          {% else %}
+            {{ grade }}학년
+          {% endif %}
+        </h2>
+        <div class="portfolios-grid">
+          {% for portfolio in portfolios_by_grade[grade] %}
+            <a href="{{ url_for('portfolio_detail', user_id=portfolio.user_id) }}" class="portfolio-card">
+              <div class="portfolio-avatar">
+                {{ portfolio.name[:1] }}
+              </div>
+              <div class="portfolio-info">
+                <h3>{{ portfolio.name }}</h3>
+                <p class="portfolio-student-id">{{ portfolio.student_id }}</p>
+                {% if portfolio.bio %}
+                  <p class="portfolio-bio">{{ portfolio.bio[:100] }}{% if portfolio.bio|length > 100 %}...{% endif %}</p>
+                {% else %}
+                  <p class="portfolio-bio empty">자기소개가 없습니다</p>
+                {% endif %}
+                <div class="portfolio-links">
+                  {% if portfolio.contacts and portfolio.contacts|length > 0 %}
+                    {% for contact in portfolio.contacts[:3] %}
+                      <span class="link-badge">🔗 {{ contact.type }}</span>
+                    {% endfor %}
+                    {% if portfolio.contacts|length > 3 %}
+                      <span class="link-badge">+{{ portfolio.contacts|length - 3 }}</span>
+                    {% endif %}
+                  {% endif %}
+                  {% set projects = portfolio.projects | from_json %}
+                  {% if projects|length > 0 %}
+                    <span class="link-badge">📁 프로젝트 {{ projects|length }}개</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <h3>아직 등록된 포트폴리오가 없습니다</h3>
+      <p>첫 번째 포트폴리오를 만들어보세요!</p>
+    </div>
+  {% endif %}
+
+  <style>
+  .portfolios-header {
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .portfolios-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .portfolios-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1.1rem;
+  }
+  
+  .grade-section {
+    max-width: 1200px;
+    margin: 0 auto 3rem auto;
+    padding: 0 1rem;
+  }
+  
+  .grade-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 1.5rem 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .portfolios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .portfolio-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .portfolio-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .portfolio-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 auto;
+  }
+  
+  .portfolio-info {
+    text-align: center;
+  }
+  
+  .portfolio-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .portfolio-student-id {
+    margin: 0 0 0.75rem 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+  
+  .portfolio-bio {
+    margin: 0 0 1rem 0;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    min-height: 3em;
+  }
+  
+  .portfolio-bio.empty {
+    color: #94a3b8;
+    font-style: italic;
+  }
+  
+  .portfolio-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .link-badge {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #334155;
+    font-size: 1.5rem;
+  }
+  
+  .empty-state p {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .portfolios-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .portfolios-header h1 {
+      font-size: 2rem;
+    }
+    
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-content .btn {
+      align-self: flex-end;
+    }
+    
+    .grade-section {
+      padding: 0 0.5rem;
+    }
+    
+    .grade-title {
+      font-size: 1.5rem;
+    }
+  }
+  </style>
+{% endblock %}

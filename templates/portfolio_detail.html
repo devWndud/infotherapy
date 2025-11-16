@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% block title %}{{ portfolio.name }}의 포트폴리오 · INFOTHERAPY{% endblock %}
+{% block content %}
+  <div class="portfolio-detail">
+    <div class="portfolio-header">
+      <div class="portfolio-avatar-large">
+        {{ portfolio.name[:1] }}
+      </div>
+      <div class="portfolio-header-info">
+        <h1>{{ portfolio.name }}</h1>
+        <p class="portfolio-student-id">{{ portfolio.student_id }}</p>
+        {% if is_owner %}
+          <a href="{{ url_for('portfolio_edit') }}" class="btn btn-outline">편집하기</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="portfolio-content">
+      <div class="portfolio-section">
+        <h2>연락처</h2>
+        <div class="contact-links">
+          {% if portfolio.contacts and portfolio.contacts|length > 0 %}
+            {% for contact in portfolio.contacts %}
+              {% set contact_type_lower = contact.type.lower() %}
+              {% set contact_value = contact.value.strip() %}
+              {% set is_url = 'http://' in contact_value or 'https://' in contact_value %}
+              {% set is_instagram = 'instagram' in contact_type_lower %}
+              
+              {% if is_url %}
+                {# 이미 URL인 경우 #}
+                <a href="{{ contact_value }}" target="_blank" rel="noopener" class="contact-link">
+                  <span class="contact-icon">🔗</span>
+                  <div>
+                    <strong>{{ contact.type }}</strong>
+                    <span>{{ contact_value }}</span>
+                  </div>
+                </a>
+              {% elif is_instagram %}
+                {# Instagram인 경우 URL 자동 생성 #}
+                {% set instagram_username = contact_value | replace('@', '') | replace('https://www.instagram.com/', '') | replace('https://instagram.com/', '') | replace('http://www.instagram.com/', '') | replace('http://instagram.com/', '') | replace('www.instagram.com/', '') | replace('instagram.com/', '') | trim %}
+                {% if instagram_username[-1:] == '/' %}
+                  {% set instagram_username = instagram_username[:-1] %}
+                {% endif %}
+                <a href="https://www.instagram.com/{{ instagram_username }}/" target="_blank" rel="noopener" class="contact-link">
+                  <span class="contact-icon">📷</span>
+                  <div>
+                    <strong>{{ contact.type }}</strong>
+                    <span>@{{ instagram_username }}</span>
+                  </div>
+                </a>
+              {% else %}
+                {# 일반 텍스트인 경우 #}
+                <div class="contact-link">
+                  <span class="contact-icon">📧</span>
+                  <div>
+                    <strong>{{ contact.type }}</strong>
+                    <span>{{ contact_value }}</span>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% else %}
+            <p class="empty-message">연락처 정보가 없습니다</p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if portfolio.bio %}
+      <div class="portfolio-section">
+        <h2>자기소개</h2>
+        <div class="bio-content">
+          {{ portfolio.bio | autolink | safe }}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="portfolio-section">
+        <h2>프로젝트</h2>
+        {% if portfolio.projects and portfolio.projects|length > 0 %}
+          <div class="projects-grid">
+            {% for project in portfolio.projects %}
+              <div class="project-card">
+                <h3>{{ project.title }}</h3>
+                {% if project.description %}
+                  <p class="project-description">{{ project.description | autolink | safe }}</p>
+                {% endif %}
+                {% if project.url %}
+                  <a href="{{ project.url }}" target="_blank" rel="noopener" class="project-link">
+                    프로젝트 보기 →
+                  </a>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty-message">등록된 프로젝트가 없습니다</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="portfolio-actions">
+      <a href="{{ url_for('portfolios') }}" class="btn btn-outline">목록으로</a>
+    </div>
+  </div>
+
+  <style>
+  .portfolio-detail {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .portfolio-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+  }
+  
+  .portfolio-avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  
+  .portfolio-header-info {
+    flex: 1;
+  }
+  
+  .portfolio-header-info h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .portfolio-student-id {
+    margin: 0 0 1rem 0;
+    color: #64748b;
+    font-size: 1rem;
+  }
+  
+  .portfolio-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .portfolio-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  
+  .portfolio-section h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+  }
+  
+  .contact-link:hover {
+    background: #f1f5f9;
+    border-color: #3b82f6;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .contact-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .contact-link div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .contact-link strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+  
+  .contact-link span {
+    color: #64748b;
+    font-size: 0.9rem;
+    word-break: break-all;
+  }
+  
+  .bio-content {
+    color: #475569;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    font-size: 1rem;
+  }
+  
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .project-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+  }
+  
+  .project-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .project-card h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  .project-description {
+    margin: 0 0 1rem 0;
+    color: #475569;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+  }
+  
+  .project-link {
+    display: inline-block;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  
+  .project-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+  
+  .empty-message {
+    color: #94a3b8;
+    font-style: italic;
+    margin: 0;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .portfolio-actions {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  
+  @media (max-width: 768px) {
+    .portfolio-header {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .portfolio-avatar-large {
+      width: 100px;
+      height: 100px;
+      font-size: 2.5rem;
+    }
+    
+    .portfolio-section {
+      padding: 1.5rem;
+    }
+    
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  </style>
+{% endblock %}

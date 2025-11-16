@@ -8,6 +8,7 @@
     <meta name="author" content="INFOTHERAPY">
     <meta name="robots" content="index, follow">
     <meta name="google-site-verification" content="VCHWnxyTr_WIKYh1k0ZG-yKbybpMTO9-AYHLvRCXPlk" />
+    <link rel="canonical" href="https://infotherapy.kro.kr{{ request.path }}">
     
     <meta property="og:title" content="{% block og_title %}INFOTHERAPY{% endblock %}">
     <meta property="og:description" content="{% block og_description %}인포테라피 · 천안월봉고등학교 정보윤리 동아리. 다양한 컴퓨터 언어 학습과 프로그래밍 활동을 하는 AI SW 동아리입니다.{% endblock %}">
@@ -62,6 +63,7 @@
           <a href="{{ url_for('index') }}">홈</a>
           <a href="{{ url_for('activities') }}">활동</a>
           <a href="{{ url_for('learn') }}">학습</a>
+          <a href="{{ url_for('portfolios') }}">포트폴리오</a>
           {% if session.get('admin') %}
             <a href="{{ url_for('admin_dashboard') }}">관리</a>
           {% endif %}

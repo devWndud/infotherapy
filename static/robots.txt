@@ -1,10 +1,19 @@
 User-agent: *
 Allow: /
+Allow: /activities
+Allow: /learn
+Allow: /portfolios
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+Allow: /material/
+Allow: /assignment/
+Allow: /portfolio/
 
-# Sitemap
-Sitemap: https://infotherapy.kro.kr/sitemap.xml
-
-# Disallow admin areas
+# Disallow admin and private areas
 Disallow: /admin/
 Disallow: /login
 Disallow: /signup
+
+# Sitemap
+Sitemap: https://infotherapy.kro.kr/sitemap.xml

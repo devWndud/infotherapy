@@ -110,6 +110,36 @@ def create_app() -> Flask:
             cx.execute("ALTER TABLE submissions ADD COLUMN file_paths TEXT DEFAULT '[]'")
         except sqlite3.OperationalError:
             pass  # 컬럼이 이미 존재하는 경우
+        
+        # 기존 users 테이블에 interests 컬럼 추가 (이미 존재하면 무시됨)
+        try:
+            cx.execute("ALTER TABLE users ADD COLUMN interests TEXT DEFAULT '[]'")
+        except sqlite3.OperationalError:
+            pass  # 컬럼이 이미 존재하는 경우
+        
+        # 포트폴리오 테이블 생성
+        cx.execute(
+            """
+            CREATE TABLE IF NOT EXISTS portfolios (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL UNIQUE,
+              github_url TEXT,
+              discord_id TEXT,
+              contacts TEXT DEFAULT '[]',
+              bio TEXT,
+              projects TEXT DEFAULT '[]',
+              created_at TEXT NOT NULL,
+              updated_at TEXT NOT NULL,
+              FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+            """
+        )
+        
+        # 기존 테이블에 contacts 컬럼 추가 (이미 존재하면 무시됨)
+        try:
+            cx.execute("ALTER TABLE portfolios ADD COLUMN contacts TEXT DEFAULT '[]'")
+        except sqlite3.OperationalError:
+            pass  # 컬럼이 이미 존재하는 경우
 
     url_regex = re.compile(r"(https?://[^\s]+)")
 
@@ -1184,6 +1214,233 @@ def create_app() -> Flask:
             return redirect(url_for("contact"))
         return render_template("contact.html")
 
+    @app.route("/portfolios")
+    def portfolios():
+        """포트폴리오 목록 페이지 - 비회원도 접근 가능"""
+        def get_grade(student_id):
+            """student_id에서 학년 추출 - 5자리 학번의 맨 앞 숫자가 학년"""
+            try:
+                if student_id and len(str(student_id)) >= 1:
+                    # 맨 앞 숫자가 학년
+                    grade = int(str(student_id)[0])
+                    # 1-3학년만 유효
+                    if 1 <= grade <= 3:
+                        return grade
+            except Exception as e:
+                pass
+            return None
+        
+        with get_db() as cx:
+            portfolios_data = cx.execute("""
+                SELECT p.*, u.name, u.student_id
+                FROM portfolios p
+                JOIN users u ON p.user_id = u.id
+                ORDER BY u.student_id ASC, u.name ASC
+            """).fetchall()
+        
+        # 학년별로 그룹화
+        portfolios_by_grade = {}
+        for portfolio in portfolios_data:
+            # 연락처 JSON 파싱
+            contacts = []
+            try:
+                contacts_raw = portfolio['contacts'] if 'contacts' in portfolio.keys() else None
+            except:
+                contacts_raw = None
+            
+            if contacts_raw and str(contacts_raw).strip() and str(contacts_raw) != 'None':
+                try:
+                    contacts = json.loads(str(contacts_raw))
+                    if not isinstance(contacts, list):
+                        contacts = []
+                except:
+                    contacts = []
+            
+            portfolio_dict = dict(portfolio)
+            portfolio_dict['contacts'] = contacts
+            
+            grade = get_grade(portfolio['student_id'])
+            # 학년을 계산할 수 없거나 3학년 이상인 경우 0으로 처리
+            if not grade:
+                grade = 0  # 기타/알 수 없음
+            if grade not in portfolios_by_grade:
+                portfolios_by_grade[grade] = []
+            portfolios_by_grade[grade].append(portfolio_dict)
+        
+        return render_template("portfolios.html", portfolios_by_grade=portfolios_by_grade)
+
+    @app.route("/portfolio/<int:user_id>")
+    def portfolio_detail(user_id):
+        """포트폴리오 상세 페이지 - 비회원도 접근 가능"""
+        with get_db() as cx:
+            portfolio = cx.execute("""
+                SELECT p.id, p.user_id, p.github_url, p.discord_id, p.contacts, p.bio, p.projects, 
+                       p.created_at, p.updated_at, u.name, u.student_id
+                FROM portfolios p
+                JOIN users u ON p.user_id = u.id
+                WHERE p.user_id = ?
+            """, (user_id,)).fetchone()
+            
+            if not portfolio:
+                flash("포트폴리오를 찾을 수 없습니다.", "error")
+                return redirect(url_for("portfolios"))
+            
+            # 연락처 및 프로젝트 JSON 파싱
+            contacts = []
+            try:
+                contacts_raw = portfolio['contacts'] if 'contacts' in portfolio.keys() else None
+            except:
+                contacts_raw = None
+            
+            if contacts_raw and str(contacts_raw).strip() and str(contacts_raw) != 'None':
+                try:
+                    contacts = json.loads(str(contacts_raw))
+                    if not isinstance(contacts, list):
+                        contacts = []
+                except Exception as e:
+                    contacts = []
+            
+            projects = []
+            try:
+                projects_raw = portfolio['projects'] if 'projects' in portfolio.keys() else None
+            except:
+                projects_raw = None
+            
+            if projects_raw and str(projects_raw).strip() and str(projects_raw) != 'None':
+                try:
+                    projects = json.loads(str(projects_raw))
+                    if not isinstance(projects, list):
+                        projects = []
+                except:
+                    projects = []
+            
+            portfolio_dict = dict(portfolio)
+            portfolio_dict['contacts'] = contacts
+            portfolio_dict['projects'] = projects
+            
+            # 본인 포트폴리오인지 확인
+            is_owner = session.get('uid') == user_id
+            
+        return render_template("portfolio_detail.html", portfolio=portfolio_dict, is_owner=is_owner)
+
+    @app.route("/portfolio/edit")
+    def portfolio_edit():
+        """포트폴리오 편집 페이지 - 로그인 필요"""
+        if not session.get('uid'):
+            flash("로그인이 필요합니다.", "info")
+            return redirect(url_for('login'))
+        
+        user_id = session.get('uid')
+        with get_db() as cx:
+            portfolio = cx.execute("""
+                SELECT p.id, p.user_id, p.github_url, p.discord_id, p.contacts, p.bio, p.projects, 
+                       p.created_at, p.updated_at, u.name, u.student_id
+                FROM portfolios p
+                JOIN users u ON p.user_id = u.id
+                WHERE p.user_id = ?
+            """, (user_id,)).fetchone()
+            
+            # 연락처 및 프로젝트 JSON 파싱
+            if portfolio:
+                contacts = []
+                try:
+                    contacts_raw = portfolio['contacts'] if 'contacts' in portfolio.keys() else None
+                except:
+                    contacts_raw = None
+                
+                if contacts_raw and str(contacts_raw).strip() and str(contacts_raw) != 'None':
+                    try:
+                        contacts = json.loads(str(contacts_raw))
+                        if not isinstance(contacts, list):
+                            contacts = []
+                    except:
+                        contacts = []
+                
+                projects = []
+                try:
+                    projects_raw = portfolio['projects'] if 'projects' in portfolio.keys() else None
+                except:
+                    projects_raw = None
+                
+                if projects_raw and str(projects_raw).strip() and str(projects_raw) != 'None':
+                    try:
+                        projects = json.loads(str(projects_raw))
+                        if not isinstance(projects, list):
+                            projects = []
+                    except:
+                        projects = []
+                
+                portfolio_dict = dict(portfolio)
+                portfolio_dict['contacts'] = contacts
+                portfolio_dict['projects'] = projects
+            else:
+                portfolio_dict = None
+            
+        return render_template("portfolio_edit.html", portfolio=portfolio_dict)
+
+    @app.route("/portfolio/update", methods=["POST"])
+    def portfolio_update():
+        """포트폴리오 업데이트 - 로그인 필요"""
+        if not session.get('uid'):
+            flash("로그인이 필요합니다.", "info")
+            return redirect(url_for('login'))
+        
+        user_id = session.get('uid')
+        bio = request.form.get('bio', '').strip()
+        
+        # 연락처 데이터 처리
+        contact_types = request.form.getlist('contact_type[]')
+        contact_values = request.form.getlist('contact_value[]')
+        
+        contacts = []
+        for i in range(len(contact_types)):
+            if contact_types[i].strip() and contact_values[i].strip():
+                contacts.append({
+                    'type': contact_types[i].strip(),
+                    'value': contact_values[i].strip()
+                })
+        
+        contacts_json = json.dumps(contacts, ensure_ascii=False)
+        
+        # 프로젝트 데이터 처리
+        project_titles = request.form.getlist('project_title[]')
+        project_descriptions = request.form.getlist('project_description[]')
+        project_urls = request.form.getlist('project_url[]')
+        
+        projects = []
+        for i in range(len(project_titles)):
+            if project_titles[i].strip():
+                projects.append({
+                    'title': project_titles[i].strip(),
+                    'description': project_descriptions[i].strip() if i < len(project_descriptions) else '',
+                    'url': project_urls[i].strip() if i < len(project_urls) else ''
+                })
+        
+        projects_json = json.dumps(projects, ensure_ascii=False)
+        now = datetime.now(seoul_tz).strftime("%Y-%m-%d %H:%M:%S")
+        
+        with get_db() as cx:
+            # 기존 포트폴리오 확인
+            existing = cx.execute("SELECT id FROM portfolios WHERE user_id = ?", (user_id,)).fetchone()
+            
+            if existing:
+                # 업데이트
+                cx.execute("""
+                    UPDATE portfolios
+                    SET contacts = ?, bio = ?, projects = ?, updated_at = ?
+                    WHERE user_id = ?
+                """, (contacts_json, bio, projects_json, now, user_id))
+            else:
+                # 새로 생성
+                cx.execute("""
+                    INSERT INTO portfolios (user_id, contacts, bio, projects, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (user_id, contacts_json, bio, projects_json, now, now))
+            cx.commit()
+        
+        flash("포트폴리오가 저장되었습니다.", "success")
+        return redirect(url_for('portfolio_detail', user_id=user_id))
+
     @app.route("/terms")
     def terms():
         return render_template("terms.html")
@@ -1212,12 +1469,22 @@ def create_app() -> Flask:
             {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0"},
             {"loc": "https://infotherapy.kro.kr/activities", "changefreq": "weekly", "priority": "0.9"},
             {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8"},
+            {"loc": "https://infotherapy.kro.kr/portfolios", "changefreq": "weekly", "priority": "0.8"},
             {"loc": "https://infotherapy.kro.kr/contact", "changefreq": "monthly", "priority": "0.6"},
             {"loc": "https://infotherapy.kro.kr/terms", "changefreq": "yearly", "priority": "0.4"},
             {"loc": "https://infotherapy.kro.kr/privacy", "changefreq": "yearly", "priority": "0.4"},
         ]
         
         with get_db() as cx:
+            # 포트폴리오 페이지 추가
+            portfolio_users = cx.execute("SELECT DISTINCT user_id FROM portfolios").fetchall()
+            for user in portfolio_users:
+                urls.append({
+                    "loc": f"https://infotherapy.kro.kr/portfolio/{user['user_id']}",
+                    "changefreq": "monthly",
+                    "priority": "0.7"
+                })
+            
             materials = cx.execute("SELECT id FROM materials").fetchall()
             assignments = cx.execute("SELECT id FROM assignments").fetchall()
             
@@ -1235,9 +1502,12 @@ def create_app() -> Flask:
                     "priority": "0.7"
                 })
         
+        now = datetime.now(seoul_tz).strftime("%Y-%m-%d")
+        
         for url_data in urls:
             url_elem = ET.SubElement(root, "url")
             ET.SubElement(url_elem, "loc").text = url_data["loc"]
+            ET.SubElement(url_elem, "lastmod").text = now
             ET.SubElement(url_elem, "changefreq").text = url_data["changefreq"]
             ET.SubElement(url_elem, "priority").text = url_data["priority"]
         
@@ -1246,7 +1516,26 @@ def create_app() -> Flask:
 
     @app.route("/robots.txt")
     def robots_txt():
-        return "User-agent: *\nAllow: /\n\nSitemap: https://infotherapy.kro.kr/sitemap.xml"
+        return """User-agent: *
+Allow: /
+Allow: /activities
+Allow: /learn
+Allow: /portfolios
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+Allow: /material/
+Allow: /assignment/
+Allow: /portfolio/
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /login
+Disallow: /signup
+
+# Sitemap
+Sitemap: https://infotherapy.kro.kr/sitemap.xml
+"""
 
     @app.errorhandler(404)
     def not_found(e):
