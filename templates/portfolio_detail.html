@@ -30,8 +30,8 @@
                 {# Instagram인 경우 - 아이디만 입력해도 URL 자동 생성 #}
                 {# @ 제거, URL 부분 제거, 공백 제거 #}
                 {% set temp_username = contact_value | replace('@', '') | replace('https://www.instagram.com/', '') | replace('https://instagram.com/', '') | replace('http://www.instagram.com/', '') | replace('http://instagram.com/', '') | replace('www.instagram.com/', '') | replace('instagram.com/', '') | trim %}
-                {% if temp_username[-1:] == '/' %}
-                  {% set temp_username = temp_username[:-1] %}
+                {% if temp_username | length > 0 and temp_username[temp_username | length - 1:] == '/' %}
+                  {% set temp_username = temp_username[:temp_username | length - 1] %}
                 {% endif %}
                 {% set instagram_username = temp_username | trim %}
                 <a href="https://www.instagram.com/{{ instagram_username }}/" target="_blank" rel="noopener" class="contact-link">
