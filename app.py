@@ -1270,7 +1270,58 @@ def create_app() -> Flask:
                 portfolios_by_grade[grade] = []
             portfolios_by_grade[grade].append(portfolio_dict)
         
-        return render_template("portfolios.html", portfolios_by_grade=portfolios_by_grade)
+        # JSON-LD 생성
+        json_ld_data = None
+        if portfolios_by_grade and len(portfolios_by_grade) > 0:
+            total_count = sum(len(portfolios) for portfolios in portfolios_by_grade.values())
+            item_list = []
+            position = 1
+            
+            for grade in sorted(portfolios_by_grade.keys()):
+                for portfolio in portfolios_by_grade[grade]:
+                    item = {
+                        "@type": "ListItem",
+                        "position": position,
+                        "item": {
+                            "@type": "Person",
+                            "name": portfolio.get('name', ''),
+                            "url": f"https://infotherapy.kro.kr/portfolio/{portfolio.get('user_id', '')}",
+                            "identifier": str(portfolio.get('student_id', '')),
+                            "jobTitle": "인포테라피 부원",
+                            "memberOf": {
+                                "@type": "Organization",
+                                "name": "INFOTHERAPY"
+                            },
+                            "alumniOf": {
+                                "@type": "EducationalOrganization",
+                                "name": "천안월봉고등학교"
+                            }
+                        }
+                    }
+                    
+                    # bio 추가
+                    bio = portfolio.get('bio', '')
+                    if bio:
+                        # 줄바꿈 제거 및 길이 제한
+                        bio_clean = bio.replace('\n', ' ').replace('\r', ' ').replace('\r\n', ' ').strip()
+                        if len(bio_clean) > 200:
+                            bio_clean = bio_clean[:200] + "..."
+                        item["item"]["description"] = bio_clean
+                    
+                    item_list.append(item)
+                    position += 1
+            
+            json_ld_data = {
+                "@context": "https://schema.org",
+                "@type": "ItemList",
+                "name": "인포테라피 부원 포트폴리오",
+                "description": "천안월봉고등학교 인포테라피 동아리 부원들의 포트폴리오와 프로젝트 목록",
+                "url": "https://infotherapy.kro.kr/portfolios",
+                "numberOfItems": total_count,
+                "itemListElement": item_list
+            }
+        
+        return render_template("portfolios.html", portfolios_by_grade=portfolios_by_grade, json_ld_data=json_ld_data)
 
     @app.route("/portfolio/<int:user_id>")
     def portfolio_detail(user_id):
