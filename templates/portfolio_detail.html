@@ -1,21 +1,20 @@
 {% extends 'base.html' %}
 {% block title %}{{ portfolio.name }}의 포트폴리오 · {{ portfolio.student_id }} · INFOTHERAPY{% endblock %}
-{% block description %}{{ portfolio.name }}({{ portfolio.student_id }}) · {% if portfolio.bio %}{{ portfolio.bio[:150] }}{% else %}천안월봉고등학교 인포테라피 동아리 부원{% endif %}{% if portfolio.projects and portfolio.projects|length > 0 %} · 프로젝트: {% for project in portfolio.projects[:3] %}{{ project.title }}{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% endblock %}
-{% block keywords %}{{ portfolio.name }}, {{ portfolio.student_id }}, 인포테라피, 포트폴리오, 프로젝트, 천안월봉고{% if portfolio.projects %}{% for project in portfolio.projects %}, {{ project.title }}{% endfor %}{% endif %}{% endblock %}
+{% block description %}{{ portfolio.name }}({{ portfolio.student_id }}) · {% if portfolio.bio %}{{ portfolio.bio[:150] }}{% else %}천안월봉고등학교 인포테라피 동아리 부원{% endif %}{% if portfolio.projects and portfolio.projects|length > 0 %} · 프로젝트: {% for project in portfolio.projects[:3] %}{% if project and project.title %}{{ project.title }}{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}{% endif %}{% endblock %}
+{% block keywords %}{{ portfolio.name }}, {{ portfolio.student_id }}, 인포테라피, 포트폴리오, 프로젝트, 천안월봉고{% if portfolio.projects and portfolio.projects|length > 0 %}{% for project in portfolio.projects %}{% if project and project.title %}, {{ project.title }}{% endif %}{% endfor %}{% endif %}{% endblock %}
 {% block og_title %}{{ portfolio.name }}의 포트폴리오{% endblock %}
 {% block og_description %}{{ portfolio.name }} · {{ portfolio.student_id }} · {% if portfolio.bio %}{{ portfolio.bio[:100] }}{% else %}인포테라피 부원의 포트폴리오{% endif %}{% endblock %}
 {% block twitter_title %}{{ portfolio.name }}의 포트폴리오{% endblock %}
 {% block twitter_description %}{{ portfolio.name }} · 인포테라피 부원{% endblock %}
 {% block json_ld %}
 <script type="application/ld+json">
-[
 {
   "@context": "https://schema.org",
   "@type": "Person",
-  "name": "{{ portfolio.name }}",
-  "description": "{% if portfolio.bio %}{{ portfolio.bio | replace('"', '\\"') }}{% else %}인포테라피 부원, 천안월봉고등학교 학생{% endif %}",
+  "name": "{{ portfolio.name | replace('"', '\\"') }}",
+  "description": "{% if portfolio.bio %}{{ portfolio.bio | replace('"', '\\"') | replace('\n', ' ') }}{% else %}인포테라피 부원, 천안월봉고등학교 학생{% endif %}",
   "url": "https://infotherapy.kro.kr/portfolio/{{ portfolio.user_id }}",
-  "identifier": "{{ portfolio.student_id }}",
+  "identifier": "{{ portfolio.student_id | replace('"', '\\"') }}",
   "jobTitle": "인포테라피 부원",
   "memberOf": {
     "@type": "Organization",
@@ -36,53 +35,13 @@
   "additionalProperty": {
     "@type": "PropertyValue",
     "name": "학번",
-    "value": "{{ portfolio.student_id }}"
+    "value": "{{ portfolio.student_id | replace('"', '\\"') }}"
   }{% endif %}{% if portfolio.bio %},
   "about": {
     "@type": "Thing",
-    "description": "{{ portfolio.bio | replace('"', '\\"') }}"
-  }{% endif %}{% if portfolio.contacts and portfolio.contacts|length > 0 %}{% set has_same_as = false %}{% for contact in portfolio.contacts %}{% if contact %}{% set contact_type = contact.type if 'type' in contact else '' %}{% set contact_value = contact.value if 'value' in contact else '' %}{% if contact_type and contact_value %}{% set contact_type_lower = contact_type|lower %}{% set contact_value = contact_value|string|trim %}{% if 'github' in contact_type_lower or 'instagram' in contact_type_lower or 'http://' in contact_value or 'https://' in contact_value %}{% set has_same_as = true %}{% break %}{% endif %}{% endif %}{% endif %}{% endfor %}{% if has_same_as %},
-  "sameAs": [
-    {% set first_item = true %}{% for contact in portfolio.contacts %}{% if contact %}{% set contact_type = contact.type if 'type' in contact else '' %}{% set contact_value = contact.value if 'value' in contact else '' %}{% if contact_type and contact_value %}{% set contact_type_lower = contact_type|lower %}{% set contact_value = contact_value|string|trim %}{% if 'github' in contact_type_lower %}{% set github_username = contact_value | replace('@', '') | replace('https://github.com/', '') | replace('https://www.github.com/', '') | replace('http://github.com/', '') | replace('http://www.github.com/', '') | replace('github.com/', '') | replace('www.github.com/', '') | trim %}{% if github_username and github_username|length > 0 %}{% if github_username[-1:] == '/' %}{% set github_username = github_username[:-1] %}{% endif %}{% if '/' in github_username %}{% set github_username = github_username.split('/')[0] %}{% endif %}{% if not first_item %},{% endif %}
-    "https://github.com/{{ github_username }}"{% set first_item = false %}{% endif %}{% elif 'instagram' in contact_type_lower %}{% set instagram_username = contact_value | replace('@', '') | replace('https://www.instagram.com/', '') | replace('https://instagram.com/', '') | replace('http://www.instagram.com/', '') | replace('http://instagram.com/', '') | replace('www.instagram.com/', '') | replace('instagram.com/', '') | trim %}{% if instagram_username and instagram_username|length > 0 %}{% if instagram_username[-1:] == '/' %}{% set instagram_username = instagram_username[:-1] %}{% endif %}{% if not first_item %},{% endif %}
-    "https://www.instagram.com/{{ instagram_username }}/"{% set first_item = false %}{% endif %}{% elif 'http://' in contact_value or 'https://' in contact_value %}{% if contact_value and contact_value|length > 0 %}{% if not first_item %},{% endif %}
-    "{{ contact_value | replace('"', '\\"') }}"{% set first_item = false %}{% endif %}{% endif %}{% endif %}{% endif %}{% endfor %}
-  ]{% endif %}{% endif %}{% if portfolio.projects and portfolio.projects|length > 0 %},
-  "knowsAbout": [
-    {% for project in portfolio.projects %}{% if project and 'title' in project and project.title %}
-      "{{ project.title | replace('"', '\\"') }}"{% if not loop.last %},{% endif %}
-    {% endif %}{% endfor %}
-  ],
-  "hasCredential": [
-    {% for project in portfolio.projects %}{% if project and 'title' in project and project.title %}
-    {
-      "@type": "EducationalOccupationalCredential",
-      "credentialCategory": "프로젝트",
-      "name": "{{ project.title | replace('"', '\\"') }}"{% if 'description' in project and project.description %},
-      "description": "{{ project.description | replace('"', '\\"') | replace('\n', ' ') | truncate(200) }}"{% endif %}{% if 'url' in project and project.url %},
-      "url": "{{ project.url | replace('"', '\\"') }}"{% endif %}
-    }{% if not loop.last %},{% endif %}
-    {% endif %}{% endfor %}
-  ]{% endif %}
-}{% if portfolio.projects and portfolio.projects|length > 0 %}{% for project in portfolio.projects %}{% if project and 'title' in project and project.title %},
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "{{ project.title | replace('"', '\\"') }}"{% if 'description' in project and project.description %},
-  "description": "{{ project.description | replace('"', '\\"') | replace('\n', ' ') }}"{% endif %}{% if 'url' in project and project.url %},
-  "url": "{{ project.url | replace('"', '\\"') }}"{% endif %},
-  "applicationCategory": "프로젝트",
-  "author": {
-    "@type": "Person",
-    "name": "{{ portfolio.name | replace('"', '\\"') }}",
-    "url": "https://infotherapy.kro.kr/portfolio/{{ portfolio.user_id }}"
-  },
-  "memberOf": {
-    "@type": "Organization",
-    "name": "INFOTHERAPY"
-  }
-}{% endif %}{% endfor %}{% endif %}
-]
+    "description": "{{ portfolio.bio | replace('"', '\\"') | replace('\n', ' ') }}"
+  }{% endif %}
+}
 </script>
 {% endblock %}
 {% block content %}
