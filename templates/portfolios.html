@@ -22,11 +22,11 @@
   "numberOfItems": {{ total_count }},
   "itemListElement": [
     {% set item_index = 1 %}
-    {% set first_item = true %}
+    {% set is_first = true %}
     {% for grade in portfolios_by_grade.keys()|sort %}
       {% for portfolio in portfolios_by_grade[grade] %}
-        {% if not first_item %},{% endif %}
-        {% set first_item = false %}
+        {% if not is_first %},{% endif %}
+        {% set is_first = false %}
         {
           "@type": "ListItem",
           "position": {{ item_index }},
