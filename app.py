@@ -1465,49 +1465,98 @@ def create_app() -> Flask:
         root = ET.Element("urlset")
         root.set("xmlns", "http://www.sitemaps.org/schemas/sitemap/0.9")
         
+        now = datetime.now(seoul_tz).strftime("%Y-%m-%d")
+        
         urls = [
-            {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0"},
-            {"loc": "https://infotherapy.kro.kr/activities", "changefreq": "weekly", "priority": "0.9"},
-            {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8"},
-            {"loc": "https://infotherapy.kro.kr/portfolios", "changefreq": "weekly", "priority": "0.8"},
-            {"loc": "https://infotherapy.kro.kr/contact", "changefreq": "monthly", "priority": "0.6"},
-            {"loc": "https://infotherapy.kro.kr/terms", "changefreq": "yearly", "priority": "0.4"},
-            {"loc": "https://infotherapy.kro.kr/privacy", "changefreq": "yearly", "priority": "0.4"},
+            {"loc": "https://infotherapy.kro.kr/", "changefreq": "daily", "priority": "1.0", "lastmod": now},
+            {"loc": "https://infotherapy.kro.kr/activities", "changefreq": "weekly", "priority": "0.9", "lastmod": now},
+            {"loc": "https://infotherapy.kro.kr/learn", "changefreq": "weekly", "priority": "0.8", "lastmod": now},
+            {"loc": "https://infotherapy.kro.kr/portfolios", "changefreq": "weekly", "priority": "0.8", "lastmod": now},
+            {"loc": "https://infotherapy.kro.kr/contact", "changefreq": "monthly", "priority": "0.6", "lastmod": now},
+            {"loc": "https://infotherapy.kro.kr/terms", "changefreq": "yearly", "priority": "0.4", "lastmod": now},
+            {"loc": "https://infotherapy.kro.kr/privacy", "changefreq": "yearly", "priority": "0.4", "lastmod": now},
         ]
         
         with get_db() as cx:
-            # 포트폴리오 페이지 추가
-            portfolio_users = cx.execute("SELECT DISTINCT user_id FROM portfolios").fetchall()
-            for user in portfolio_users:
+            # 포트폴리오 페이지 추가 (실제 수정 날짜 사용)
+            portfolio_data = cx.execute("""
+                SELECT DISTINCT p.user_id, 
+                       COALESCE(p.updated_at, p.created_at, ?) as lastmod_date
+                FROM portfolios p
+            """, (now,)).fetchall()
+            for portfolio in portfolio_data:
+                # 날짜 형식 변환 (YYYY-MM-DD)
+                lastmod = portfolio['lastmod_date']
+                if lastmod:
+                    try:
+                        # 다양한 날짜 형식 처리
+                        if 'T' in str(lastmod):
+                            lastmod = str(lastmod).split('T')[0]
+                        elif ' ' in str(lastmod):
+                            lastmod = str(lastmod).split(' ')[0]
+                        lastmod = lastmod[:10]  # YYYY-MM-DD 형식으로 제한
+                    except:
+                        lastmod = now
+                else:
+                    lastmod = now
+                
                 urls.append({
-                    "loc": f"https://infotherapy.kro.kr/portfolio/{user['user_id']}",
+                    "loc": f"https://infotherapy.kro.kr/portfolio/{portfolio['user_id']}",
                     "changefreq": "monthly",
-                    "priority": "0.7"
+                    "priority": "0.7",
+                    "lastmod": lastmod
                 })
             
-            materials = cx.execute("SELECT id FROM materials").fetchall()
-            assignments = cx.execute("SELECT id FROM assignments").fetchall()
-            
+            # 학습 자료 추가 (date 컬럼 사용)
+            materials = cx.execute("SELECT id, date FROM materials").fetchall()
             for material in materials:
+                lastmod = material['date'] if material['date'] else now
+                if lastmod:
+                    try:
+                        if 'T' in str(lastmod):
+                            lastmod = str(lastmod).split('T')[0]
+                        elif ' ' in str(lastmod):
+                            lastmod = str(lastmod).split(' ')[0]
+                        lastmod = lastmod[:10]
+                    except:
+                        lastmod = now
+                else:
+                    lastmod = now
+                
                 urls.append({
                     "loc": f"https://infotherapy.kro.kr/material/{material['id']}",
                     "changefreq": "monthly",
-                    "priority": "0.7"
+                    "priority": "0.7",
+                    "lastmod": lastmod
                 })
             
+            # 과제 추가 (due 컬럼 사용, 없으면 오늘 날짜)
+            assignments = cx.execute("SELECT id, due FROM assignments").fetchall()
             for assignment in assignments:
+                lastmod = assignment['due'] if assignment['due'] else now
+                if lastmod:
+                    try:
+                        if 'T' in str(lastmod):
+                            lastmod = str(lastmod).split('T')[0]
+                        elif ' ' in str(lastmod):
+                            lastmod = str(lastmod).split(' ')[0]
+                        lastmod = lastmod[:10]
+                    except:
+                        lastmod = now
+                else:
+                    lastmod = now
+                
                 urls.append({
                     "loc": f"https://infotherapy.kro.kr/assignment/{assignment['id']}",
                     "changefreq": "weekly",
-                    "priority": "0.7"
+                    "priority": "0.7",
+                    "lastmod": lastmod
                 })
-        
-        now = datetime.now(seoul_tz).strftime("%Y-%m-%d")
         
         for url_data in urls:
             url_elem = ET.SubElement(root, "url")
             ET.SubElement(url_elem, "loc").text = url_data["loc"]
-            ET.SubElement(url_elem, "lastmod").text = now
+            ET.SubElement(url_elem, "lastmod").text = url_data.get("lastmod", now)
             ET.SubElement(url_elem, "changefreq").text = url_data["changefreq"]
             ET.SubElement(url_elem, "priority").text = url_data["priority"]
         
