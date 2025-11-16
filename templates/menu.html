@@ -34,6 +34,14 @@
     </a>
     {% endif %}
     
+    <a href="{{ url_for('portfolios') }}" class="menu-item" onclick="window.location.href=this.href; return false;">
+      <div class="menu-icon">👥</div>
+      <div class="menu-text">
+        <h3>포트폴리오</h3>
+        <p>부원 프로필</p>
+      </div>
+    </a>
+    
     {% if session.get('admin') %}
     <a href="{{ url_for('admin_dashboard') }}" class="menu-item admin" onclick="window.location.href=this.href; return false;">
       <div class="menu-icon">⚙️</div>
