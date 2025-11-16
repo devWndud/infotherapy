@@ -24,6 +24,7 @@
               {% set contact_type_lower = contact.type.lower() %}
               {% set contact_value = contact.value.strip() %}
               {% set is_instagram = 'instagram' in contact_type_lower %}
+              {% set is_github = 'github' in contact_type_lower %}
               
               {% if is_instagram %}
                 {# Instagram인 경우 URL 자동 생성 (아이디만 있어도 처리) #}
@@ -36,6 +37,24 @@
                   <div>
                     <strong>{{ contact.type }}</strong>
                     <span>@{{ instagram_username }}</span>
+                  </div>
+                </a>
+              {% elif is_github %}
+                {# GitHub인 경우 URL 자동 생성 (아이디만 있어도 처리) #}
+                {% set github_username = contact_value | replace('@', '') | replace('https://github.com/', '') | replace('https://www.github.com/', '') | replace('http://github.com/', '') | replace('http://www.github.com/', '') | replace('github.com/', '') | replace('www.github.com/', '') | trim %}
+                {# 슬래시 제거 #}
+                {% if github_username[-1:] == '/' %}
+                  {% set github_username = github_username[:-1] %}
+                {% endif %}
+                {# URL에서 username만 추출 (예: https://github.com/user/repo -> user) #}
+                {% if '/' in github_username %}
+                  {% set github_username = github_username.split('/')[0] %}
+                {% endif %}
+                <a href="https://github.com/{{ github_username }}" target="_blank" rel="noopener" class="contact-link">
+                  <span class="contact-icon">💻</span>
+                  <div>
+                    <strong>{{ contact.type }}</strong>
+                    <span>@{{ github_username }}</span>
                   </div>
                 </a>
               {% elif 'http://' in contact_value or 'https://' in contact_value %}
