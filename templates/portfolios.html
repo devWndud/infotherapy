@@ -21,7 +21,7 @@
   "url": "https://infotherapy.kro.kr/portfolios",
   "numberOfItems": {{ total_count }},
   "itemListElement": [
-    {% set item_index = 1 %}
+    {% set position = 1 %}
     {% set is_first = true %}
     {% for grade in portfolios_by_grade.keys()|sort %}
       {% for portfolio in portfolios_by_grade[grade] %}
@@ -29,7 +29,7 @@
         {% set is_first = false %}
         {
           "@type": "ListItem",
-          "position": {{ item_index }},
+          "position": {{ position }},
           "item": {
             "@type": "Person",
             "name": "{{ portfolio.name | replace('"', '\\"') }}",
@@ -44,10 +44,10 @@
               "@type": "EducationalOrganization",
               "name": "천안월봉고등학교"
             }{% if portfolio.bio %},
-            "description": "{{ portfolio.bio[:200] | replace('"', '\\"') | replace('\n', ' ') }}{% if portfolio.bio|length > 200 %}...{% endif %}"{% endif %}
+            "description": "{{ portfolio.bio[:200] | replace('"', '\\"') | replace('\n', ' ') | replace('\r', ' ') | replace('\r\n', ' ') | trim }}{% if portfolio.bio|length > 200 %}...{% endif %}"{% endif %}
           }
         }
-        {% set item_index = item_index + 1 %}
+        {% set position = position + 1 %}
       {% endfor %}
     {% endfor %}
   ]
