@@ -166,7 +166,10 @@ def create_app() -> Flask:
     @app.context_processor
     def inject_static_url():
         def static_url(filename: str) -> str:
-            return url_for("static", filename=filename, v=app.config.get("ASSET_VERSION"))
+            base_url = url_for("static", filename=filename)
+            version = app.config.get("ASSET_VERSION", "20251011")
+            separator = "&" if "?" in base_url else "?"
+            return f"{base_url}{separator}v={version}"
         return {"static_url": static_url}
 
     def format_datetime_short(value: str) -> str:
