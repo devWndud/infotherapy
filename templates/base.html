@@ -22,6 +22,7 @@
     <meta name="twitter:description" content="{% block twitter_description %}인포테라피 · 천안월봉고등학교 정보윤리 동아리{% endblock %}">
     <meta name="twitter:image" content="https://infotherapy.kro.kr{{ url_for('static', filename='images/icon.png') }}">
     
+    {% block json_ld %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -42,6 +43,7 @@
       }
     }
     </script>
+    {% endblock %}
     
     <title>{% block title %}INFOTHERAPY{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
