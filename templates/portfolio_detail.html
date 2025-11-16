@@ -24,16 +24,13 @@
               {% set contact_type_lower = contact.type.lower() %}
               {% set contact_value = contact.value.strip() %}
               {% set is_instagram = 'instagram' in contact_type_lower %}
-              {% set is_url = 'http://' in contact_value or 'https://' in contact_value %}
               
               {% if is_instagram %}
-                {# Instagram인 경우 - 아이디만 입력해도 URL 자동 생성 #}
-                {# @ 제거, URL 부분 제거, 공백 제거 #}
-                {% set temp_username = contact_value | replace('@', '') | replace('https://www.instagram.com/', '') | replace('https://instagram.com/', '') | replace('http://www.instagram.com/', '') | replace('http://instagram.com/', '') | replace('www.instagram.com/', '') | replace('instagram.com/', '') | trim %}
-                {% if temp_username | length > 0 and temp_username[temp_username | length - 1:] == '/' %}
-                  {% set temp_username = temp_username[:temp_username | length - 1] %}
+                {# Instagram인 경우 URL 자동 생성 (아이디만 있어도 처리) #}
+                {% set instagram_username = contact_value | replace('@', '') | replace('https://www.instagram.com/', '') | replace('https://instagram.com/', '') | replace('http://www.instagram.com/', '') | replace('http://instagram.com/', '') | replace('www.instagram.com/', '') | replace('instagram.com/', '') | trim %}
+                {% if instagram_username[-1:] == '/' %}
+                  {% set instagram_username = instagram_username[:-1] %}
                 {% endif %}
-                {% set instagram_username = temp_username | trim %}
                 <a href="https://www.instagram.com/{{ instagram_username }}/" target="_blank" rel="noopener" class="contact-link">
                   <span class="contact-icon">📷</span>
                   <div>
@@ -41,8 +38,8 @@
                     <span>@{{ instagram_username }}</span>
                   </div>
                 </a>
-              {% elif is_url %}
-                {# 이미 URL인 경우 (Instagram이 아닌) #}
+              {% elif 'http://' in contact_value or 'https://' in contact_value %}
+                {# 이미 URL인 경우 #}
                 <a href="{{ contact_value }}" target="_blank" rel="noopener" class="contact-link">
                   <span class="contact-icon">🔗</span>
                   <div>
