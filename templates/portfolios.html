@@ -7,6 +7,11 @@
 {% block twitter_title %}포트폴리오 · INFOTHERAPY{% endblock %}
 {% block twitter_description %}인포테라피 부원들의 포트폴리오{% endblock %}
 {% block json_ld %}
+{% if portfolios_by_grade and portfolios_by_grade|length > 0 %}
+{% set total_count = 0 %}
+{% for grade in portfolios_by_grade.keys()|sort %}
+  {% set total_count = total_count + portfolios_by_grade[grade]|length %}
+{% endfor %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -14,33 +19,41 @@
   "name": "인포테라피 부원 포트폴리오",
   "description": "천안월봉고등학교 인포테라피 동아리 부원들의 포트폴리오와 프로젝트 목록",
   "url": "https://infotherapy.kro.kr/portfolios",
-  {% set total_count = 0 %}{% for grade in portfolios_by_grade.keys()|sort %}{% set total_count = total_count + portfolios_by_grade[grade]|length %}{% endfor %}"numberOfItems": {{ total_count }},
+  "numberOfItems": {{ total_count }},
   "itemListElement": [
-    {% set item_index = 1 %}{% for grade in portfolios_by_grade.keys()|sort %}{% for portfolio in portfolios_by_grade[grade] %}
-    {
-      "@type": "ListItem",
-      "position": {{ item_index }},
-      "item": {
-        "@type": "Person",
-        "name": "{{ portfolio.name }}",
-        "url": "https://infotherapy.kro.kr/portfolio/{{ portfolio.user_id }}",
-        "identifier": "{{ portfolio.student_id }}",
-        "jobTitle": "인포테라피 부원",
-        "memberOf": {
-          "@type": "Organization",
-          "name": "INFOTHERAPY"
-        },
-        "alumniOf": {
-          "@type": "EducationalOrganization",
-          "name": "천안월봉고등학교"
-        }{% if portfolio.bio %},
-        "description": "{{ portfolio.bio[:200] | replace('"', '\\"') }}{% if portfolio.bio|length > 200 %}...{% endif %}"{% endif %}
-      }
-    }{% set item_index = item_index + 1 %}{% if not (loop.last and loop.parent.loop.last) %},{% endif %}
-    {% endfor %}{% endfor %}
+    {% set item_index = 1 %}
+    {% set first_item = true %}
+    {% for grade in portfolios_by_grade.keys()|sort %}
+      {% for portfolio in portfolios_by_grade[grade] %}
+        {% if not first_item %},{% endif %}
+        {% set first_item = false %}
+        {
+          "@type": "ListItem",
+          "position": {{ item_index }},
+          "item": {
+            "@type": "Person",
+            "name": "{{ portfolio.name | replace('"', '\\"') }}",
+            "url": "https://infotherapy.kro.kr/portfolio/{{ portfolio.user_id }}",
+            "identifier": "{{ portfolio.student_id | replace('"', '\\"') }}",
+            "jobTitle": "인포테라피 부원",
+            "memberOf": {
+              "@type": "Organization",
+              "name": "INFOTHERAPY"
+            },
+            "alumniOf": {
+              "@type": "EducationalOrganization",
+              "name": "천안월봉고등학교"
+            }{% if portfolio.bio %},
+            "description": "{{ portfolio.bio[:200] | replace('"', '\\"') | replace('\n', ' ') }}{% if portfolio.bio|length > 200 %}...{% endif %}"{% endif %}
+          }
+        }
+        {% set item_index = item_index + 1 %}
+      {% endfor %}
+    {% endfor %}
   ]
 }
 </script>
+{% endif %}
 {% endblock %}
 {% block content %}
   <div class="portfolios-header">
