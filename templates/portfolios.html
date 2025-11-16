@@ -22,11 +22,10 @@
   "numberOfItems": {{ total_count }},
   "itemListElement": [
     {% set position = 1 %}
-    {% set is_first = true %}
+    {% set item_count = 0 %}
     {% for grade in portfolios_by_grade.keys()|sort %}
       {% for portfolio in portfolios_by_grade[grade] %}
-        {% if not is_first %},{% endif %}
-        {% set is_first = false %}
+        {% if item_count > 0 %},{% endif %}
         {
           "@type": "ListItem",
           "position": {{ position }},
@@ -48,6 +47,7 @@
           }
         }
         {% set position = position + 1 %}
+        {% set item_count = item_count + 1 %}
       {% endfor %}
     {% endfor %}
   ]
