@@ -152,4 +152,5 @@ Thumbs.db
 
 # AWS
 .aws/myenv/
-./myenv
+./myenv/
+/myenv/
