@@ -192,7 +192,10 @@
           </div>
           <div class="form-group">
             <label for="add-member-code">코드</label>
-            <input type="text" id="add-member-code" name="code" required>
+            <div class="input-with-button">
+              <input type="text" id="add-member-code" name="code" required>
+              <button type="button" class="btn btn-sm btn-outline" onclick="generateRandomCode()">랜덤 생성</button>
+            </div>
           </div>
           <div class="form-group">
             <label class="checkbox-label">
@@ -619,6 +622,33 @@
     font-size: 0.875rem;
   }
 
+  .input-with-button {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .input-with-button input[type="text"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .input-with-button input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .input-with-button .btn-sm {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   .form-group input[type="text"] {
     width: 100%;
     padding: 0.75rem;
@@ -746,6 +776,14 @@
 
   function closeAddMemberModal() {
     document.getElementById('addMemberModal').style.display = 'none';
+  }
+
+  function generateRandomCode() {
+    const year = new Date().getFullYear();
+    // 랜덤 3자리 숫자 생성 (001-999)
+    const randomNum = Math.floor(Math.random() * 999) + 1;
+    const code = `INF-${year}-${String(randomNum).padStart(3, '0')}`;
+    document.getElementById('add-member-code').value = code;
   }
 
   function openEditMemberModal(name, code, isAdmin) {
