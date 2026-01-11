@@ -807,10 +807,41 @@ def create_app() -> Flask:
     @app.route("/admin")
     @admin_required
     def admin_dashboard():
+        # invites.json 읽기
+        try:
+            with open(invites_path, "r", encoding="utf-8") as f:
+                invite_list = json.load(f)
+        except FileNotFoundError:
+            invite_list = []
+        except Exception as e:
+            print(f"Error reading invites.json: {e}")
+            invite_list = []
+        
+        # 데이터베이스에서 가입한 사용자 정보 가져오기
+        with get_db() as cx:
+            registered_users = cx.execute("SELECT name, student_id, admin FROM users").fetchall()
+            registered_dict = {user["name"]: {"student_id": user["student_id"], "admin": user["admin"]} for user in registered_users}
+        
+        # invites.json의 각 부원에 대해 회원가입 여부 확인
+        members = []
+        for invite in invite_list:
+            name = invite.get("name", "").strip()
+            code = invite.get("code", "").strip()
+            is_admin = invite.get("admin", False)
+            is_registered = name in registered_dict
+            student_id = registered_dict.get(name, {}).get("student_id", "") if is_registered else ""
+            members.append({
+                "name": name,
+                "code": code,
+                "admin": is_admin,
+                "registered": is_registered,
+                "student_id": student_id
+            })
+        
         with get_db() as cx:
             materials = cx.execute("SELECT id, title, category, type, date FROM materials ORDER BY date DESC").fetchall()
             assignments = cx.execute("SELECT id, title, category, due FROM assignments ORDER BY due ASC").fetchall()
-        return render_template("admin_dashboard.html", materials=materials, assignments=assignments)
+        return render_template("admin_dashboard.html", materials=materials, assignments=assignments, members=members)
 
     @app.route("/admin/material/new", methods=["GET", "POST"])
     @admin_required
@@ -1212,6 +1243,149 @@ def create_app() -> Flask:
         bio.seek(0)
         from flask import send_file
         return send_file(bio, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", as_attachment=True, download_name="invites.xlsx")
+
+    @app.route("/admin/member/add", methods=["GET", "POST"])
+    @admin_required
+    def admin_member_add():
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            code = request.form.get("code", "").strip()
+            is_admin = request.form.get("admin") == "true"
+            
+            if not name or not code:
+                flash("이름과 코드를 모두 입력해주세요.", "info")
+                return redirect(url_for("admin_dashboard"))
+            
+            try:
+                with open(invites_path, "r", encoding="utf-8") as f:
+                    invite_list = json.load(f)
+            except FileNotFoundError:
+                invite_list = []
+            except Exception as e:
+                print(f"Error reading invites.json: {e}")
+                invite_list = []
+            
+            # 중복 확인
+            if any(inv.get("name", "").strip() == name or inv.get("code", "").strip() == code for inv in invite_list):
+                flash("이미 존재하는 이름 또는 코드입니다.", "info")
+                return redirect(url_for("admin_dashboard"))
+            
+            # 새 부원 추가
+            new_member = {"name": name, "code": code}
+            if is_admin:
+                new_member["admin"] = True
+            invite_list.append(new_member)
+            
+            # 파일 저장
+            with open(invites_path, "w", encoding="utf-8") as f:
+                json.dump(invite_list, f, ensure_ascii=False, indent=2)
+            
+            flash(f"{name} 부원이 추가되었습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        return redirect(url_for("admin_dashboard"))
+
+    @app.route("/admin/member/<member_code>/edit", methods=["GET", "POST"])
+    @admin_required
+    def admin_member_edit(member_code):
+        try:
+            with open(invites_path, "r", encoding="utf-8") as f:
+                invite_list = json.load(f)
+        except FileNotFoundError:
+            flash("부원 목록을 불러올 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        except Exception as e:
+            print(f"Error reading invites.json: {e}")
+            flash("부원 목록을 불러올 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        # 수정할 부원 찾기
+        member_index = None
+        for i, inv in enumerate(invite_list):
+            if inv.get("code", "").strip() == member_code:
+                member_index = i
+                break
+        
+        if member_index is None:
+            flash("부원을 찾을 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            code = request.form.get("code", "").strip()
+            is_admin = request.form.get("admin") == "true"
+            
+            if not name or not code:
+                flash("이름과 코드를 모두 입력해주세요.", "info")
+                return redirect(url_for("admin_dashboard"))
+            
+            # 코드가 변경된 경우 중복 확인 (현재 항목 제외)
+            if code != member_code:
+                if any(i != member_index and inv.get("code", "").strip() == code for i, inv in enumerate(invite_list)):
+                    flash("이미 존재하는 코드입니다.", "info")
+                    return redirect(url_for("admin_dashboard"))
+            
+            # 이름이 변경된 경우 중복 확인 (현재 항목 제외)
+            old_name = invite_list[member_index].get("name", "").strip()
+            if name != old_name:
+                if any(i != member_index and inv.get("name", "").strip() == name for i, inv in enumerate(invite_list)):
+                    flash("이미 존재하는 이름입니다.", "info")
+                    return redirect(url_for("admin_dashboard"))
+            
+            # 부원 정보 업데이트
+            invite_list[member_index]["name"] = name
+            invite_list[member_index]["code"] = code
+            if is_admin:
+                invite_list[member_index]["admin"] = True
+            elif "admin" in invite_list[member_index]:
+                del invite_list[member_index]["admin"]
+            
+            # 파일 저장
+            with open(invites_path, "w", encoding="utf-8") as f:
+                json.dump(invite_list, f, ensure_ascii=False, indent=2)
+            
+            flash(f"{name} 부원 정보가 수정되었습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        # GET 요청 시 현재 정보 반환 (템플릿에서 처리)
+        return redirect(url_for("admin_dashboard"))
+
+    @app.route("/admin/member/<member_code>/delete", methods=["POST"])
+    @admin_required
+    def admin_member_delete(member_code):
+        try:
+            with open(invites_path, "r", encoding="utf-8") as f:
+                invite_list = json.load(f)
+        except FileNotFoundError:
+            flash("부원 목록을 불러올 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        except Exception as e:
+            print(f"Error reading invites.json: {e}")
+            flash("부원 목록을 불러올 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        # 삭제할 부원 찾기
+        member_index = None
+        member_name = None
+        for i, inv in enumerate(invite_list):
+            if inv.get("code", "").strip() == member_code:
+                member_index = i
+                member_name = inv.get("name", "").strip()
+                break
+        
+        if member_index is None:
+            flash("부원을 찾을 수 없습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
+        # 부원 삭제
+        invite_list.pop(member_index)
+        
+        # 파일 저장
+        with open(invites_path, "w", encoding="utf-8") as f:
+            json.dump(invite_list, f, ensure_ascii=False, indent=2)
+        
+        flash(f"{member_name} 부원이 삭제되었습니다.", "info")
+        return redirect(url_for("admin_dashboard"))
 
     @app.route("/contact", methods=["GET", "POST"])
     def contact():

@@ -15,6 +15,10 @@
         <div class="stat-number">{{ assignments|length }}</div>
         <div class="stat-label">과제</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ members|length }}</div>
+        <div class="stat-label">부원</div>
+      </div>
     </div>
   </div>
 
@@ -119,6 +123,122 @@
         {% endif %}
       </div>
     </div>
+
+    <div class="admin-section">
+      <div class="section-header">
+        <div class="section-title">
+          <h2>부원 관리</h2>
+          <span class="section-count">{{ members|length }}명</span>
+        </div>
+        <button class="btn btn-primary" onclick="openAddMemberModal()">
+          부원 추가
+        </button>
+      </div>
+      <div class="admin-list">
+        {% for member in members %}
+          <div class="admin-item member-item">
+            <div class="item-content">
+              <div class="item-title">{{ member['name'] }}</div>
+              <div class="item-meta">
+                <span class="code-badge">{{ member['code'] }}</span>
+                {% if member['admin'] %}
+                <span class="admin-badge">관리자</span>
+                {% endif %}
+                {% if member['registered'] %}
+                <span class="registered-badge">회원가입 완료</span>
+                {% else %}
+                <span class="unregistered-badge">미가입</span>
+                {% endif %}
+                {% if member['student_id'] %}
+                <span class="student-id-badge">학번: {{ member['student_id'] }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-sm btn-outline" onclick="openEditMemberModal('{{ member['name'] }}', '{{ member['code'] }}', {{ 'true' if member['admin'] else 'false' }})">
+                수정
+              </button>
+              <form method="post" action="{{ url_for('admin_member_delete', member_code=member['code']) }}" onsubmit="return confirm('정말로 {{ member['name'] }} 부원을 삭제하시겠습니까?\\n\\n이 작업은 되돌릴 수 없습니다.')">
+                <button class="btn btn-sm btn-danger" type="submit">
+                  삭제
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+        {% if not members %}
+          <div class="empty-state">
+            <h3>아직 부원이 없습니다</h3>
+            <p>첫 번째 부원을 추가해보세요</p>
+            <button class="btn btn-primary" onclick="openAddMemberModal()">부원 추가하기</button>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- 부원 추가 모달 -->
+  <div id="addMemberModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>부원 추가</h2>
+        <button class="modal-close" onclick="closeAddMemberModal()">&times;</button>
+      </div>
+      <form method="post" action="{{ url_for('admin_member_add') }}">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="add-member-name">이름</label>
+            <input type="text" id="add-member-name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="add-member-code">코드</label>
+            <input type="text" id="add-member-code" name="code" required>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="add-member-admin" name="admin" value="true">
+              <span>관리자 권한 부여</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeAddMemberModal()">취소</button>
+          <button type="submit" class="btn btn-primary">추가</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 부원 수정 모달 -->
+  <div id="editMemberModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>부원 정보 수정</h2>
+        <button class="modal-close" onclick="closeEditMemberModal()">&times;</button>
+      </div>
+      <form method="post" id="editMemberForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="edit-member-name">이름</label>
+            <input type="text" id="edit-member-name" name="name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-member-code">코드</label>
+            <input type="text" id="edit-member-code" name="code" required>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="edit-member-admin" name="admin" value="true">
+              <span>관리자 권한 부여</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeEditMemberModal()">취소</button>
+          <button type="submit" class="btn btn-primary">수정</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <style>
@@ -218,6 +338,10 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
+  }
+
+  .admin-grid .admin-section:last-child {
+    grid-column: 1 / -1;
   }
   
   .admin-section {
@@ -373,8 +497,161 @@
       justify-content: center;
     }
     
-    .item-actions {
-      flex-direction: column;
+  .item-actions {
+    flex-direction: column;
+    }
+  }
+
+  .code-badge, .admin-badge, .registered-badge, .unregistered-badge, .student-id-badge {
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .code-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+
+  .admin-badge {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .registered-badge {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .unregistered-badge {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .student-id-badge {
+    background: #f3e8ff;
+    color: #6b21a8;
+  }
+
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .modal-close:hover {
+    background: #f1f5f9;
+    color: #334155;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #334155;
+    font-size: 0.875rem;
+  }
+
+  .form-group input[type="text"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .form-group input[type="text"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: normal;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .admin-grid .admin-section:last-child {
+      grid-column: 1;
     }
   }
   </style>
@@ -459,6 +736,41 @@
     
     applyFilterState();
   });
+
+  function openAddMemberModal() {
+    document.getElementById('addMemberModal').style.display = 'flex';
+    document.getElementById('add-member-name').value = '';
+    document.getElementById('add-member-code').value = '';
+    document.getElementById('add-member-admin').checked = false;
+  }
+
+  function closeAddMemberModal() {
+    document.getElementById('addMemberModal').style.display = 'none';
+  }
+
+  function openEditMemberModal(name, code, isAdmin) {
+    document.getElementById('editMemberModal').style.display = 'flex';
+    document.getElementById('edit-member-name').value = name;
+    document.getElementById('edit-member-code').value = code;
+    document.getElementById('edit-member-admin').checked = isAdmin === 'true';
+    document.getElementById('editMemberForm').action = '/admin/member/' + encodeURIComponent(code) + '/edit';
+  }
+
+  function closeEditMemberModal() {
+    document.getElementById('editMemberModal').style.display = 'none';
+  }
+
+  // 모달 외부 클릭 시 닫기
+  window.onclick = function(event) {
+    const addModal = document.getElementById('addMemberModal');
+    const editModal = document.getElementById('editMemberModal');
+    if (event.target === addModal) {
+      closeAddMemberModal();
+    }
+    if (event.target === editModal) {
+      closeEditMemberModal();
+    }
+  }
   </script>
 {% endblock %}
 
