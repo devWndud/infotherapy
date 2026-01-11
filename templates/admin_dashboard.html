@@ -779,10 +779,26 @@
   }
 
   function generateRandomCode() {
-    const year = new Date().getFullYear();
-    // 랜덤 3자리 숫자 생성 (001-999)
-    const randomNum = Math.floor(Math.random() * 999) + 1;
-    const code = `INF-${year}-${String(randomNum).padStart(3, '0')}`;
+    // 소문자, 대문자, 숫자를 포함한 10자리 랜덤 코드 생성
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const allChars = lowercase + uppercase + numbers;
+    
+    let code = '';
+    // 최소 1개의 소문자, 대문자, 숫자가 포함되도록 보장
+    code += lowercase[Math.floor(Math.random() * lowercase.length)];
+    code += uppercase[Math.floor(Math.random() * uppercase.length)];
+    code += numbers[Math.floor(Math.random() * numbers.length)];
+    
+    // 나머지 7자리 랜덤 생성
+    for (let i = 0; i < 7; i++) {
+      code += allChars[Math.floor(Math.random() * allChars.length)];
+    }
+    
+    // 무작위로 섞기 (Fisher-Yates shuffle)
+    code = code.split('').sort(() => Math.random() - 0.5).join('');
+    
     document.getElementById('add-member-code').value = code;
   }
 
