@@ -268,9 +268,9 @@ def create_app() -> Flask:
     @app.route("/signup", methods=["GET", "POST"])
     def signup():
         if request.method == "POST":
-            name = request.form.get("name")
-            student_id = request.form.get("student_id")
-            invite_code = request.form.get("invite_code")
+            name = request.form.get("name", "").strip()
+            student_id = request.form.get("student_id", "").strip()
+            invite_code = request.form.get("invite_code", "").strip()
             password = request.form.get("password")
             password2 = request.form.get("password2")
             admin_flag = 0
@@ -281,7 +281,7 @@ def create_app() -> Flask:
             except FileNotFoundError:
                 invite_list = []
 
-            match = next((i for i in invite_list if i.get("name") == name and i.get("code") == invite_code), None)
+            match = next((i for i in invite_list if i.get("name", "").strip() == name and i.get("code", "").strip() == invite_code), None)
             if not match:
                 flash("초대 정보가 일치하지 않습니다.", "info")
                 return redirect(url_for("signup"))
