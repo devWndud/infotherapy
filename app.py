@@ -280,6 +280,9 @@ def create_app() -> Flask:
                     invite_list = json.load(f)
             except FileNotFoundError:
                 invite_list = []
+            except Exception as e:
+                print(f"Error reading invites.json: {e}")
+                invite_list = []
 
             match = next((i for i in invite_list if i.get("name", "").strip() == name and i.get("code", "").strip() == invite_code), None)
             if not match:
