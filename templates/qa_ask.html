@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% block title %}질문하기 · INFOTHERAPY{% endblock %}
+{% block content %}
+  <div class="qa-ask">
+    <div class="ask-header">
+      <h1>질문하기</h1>
+      <p>인포테라피 동아리에 대해 궁금한 점을 남겨주세요</p>
+    </div>
+
+    <form class="qa-form" method="post" action="{{ url_for('qa_ask') }}">
+      <div class="form-group">
+        <label for="question">질문</label>
+        <textarea 
+          id="question" 
+          name="question" 
+          rows="6"
+          placeholder="질문을 입력해주세요..."
+          required
+        ></textarea>
+        <small>관리자 검토 후 답변이 공개됩니다.</small>
+      </div>
+      
+      <div class="form-actions">
+        <a href="{{ url_for('qa') }}" class="btn btn-outline">취소</a>
+        <button type="submit" class="btn btn-primary">등록하기</button>
+      </div>
+    </form>
+  </div>
+
+  <style>
+  .qa-ask {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .ask-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+  
+  .ask-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .ask-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+  }
+  
+  .qa-form {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 2rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.95rem;
+  }
+  
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .form-group small {
+    display: block;
+    margin-top: 0.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  @media (max-width: 768px) {
+    .qa-form {
+      padding: 1.5rem;
+    }
+    
+    .form-actions {
+      flex-direction: column-reverse;
+    }
+    
+    .form-actions .btn {
+      width: 100%;
+    }
+  }
+  </style>
+{% endblock %}
+

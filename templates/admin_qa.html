@@ -1,0 +1,363 @@
+{% extends 'base.html' %}
+{% block title %}Q&A 관리 · INFOTHERAPY{% endblock %}
+{% block content %}
+  <div class="admin-header">
+    <div class="admin-title">
+      <h1>Q&A 관리</h1>
+      <p>질문에 답변하고 관리하세요</p>
+    </div>
+  </div>
+
+  <div class="admin-filters">
+    <div class="filter-section">
+      <h3>상태별 필터링</h3>
+      <div class="filter-buttons">
+        <a href="{{ url_for('admin_qa', status='all') }}" class="filter-chip {% if status_filter == 'all' %}active{% endif %}">전체</a>
+        <a href="{{ url_for('admin_qa', status='pending') }}" class="filter-chip {% if status_filter == 'pending' %}active{% endif %}">대기중</a>
+        <a href="{{ url_for('admin_qa', status='approved') }}" class="filter-chip {% if status_filter == 'approved' %}active{% endif %}">답변완료</a>
+        <a href="{{ url_for('admin_qa', status='rejected') }}" class="filter-chip {% if status_filter == 'rejected' %}active{% endif %}">거부됨</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-qa-list">
+    {% for q in questions %}
+      <div class="admin-qa-item" data-status="{{ q['status'] }}">
+        <div class="qa-item-header">
+          <div class="qa-status-badge status-{{ q['status'] }}">
+            {% if q['status'] == 'pending' %}대기중
+            {% elif q['status'] == 'approved' %}답변완료
+            {% elif q['status'] == 'rejected' %}거부됨
+            {% endif %}
+          </div>
+          <span class="qa-date">{{ q['created_at'] }}</span>
+        </div>
+        
+        <div class="qa-question-section">
+          <div class="qa-label">Q</div>
+          <div class="qa-content">
+            <p>{{ q['question'] }}</p>
+          </div>
+        </div>
+
+        {% if q['status'] == 'approved' and q['answer'] %}
+          <div class="qa-answer-section">
+            <div class="qa-label answer-label">A</div>
+            <div class="qa-content">
+              <p>{{ q['answer'] | autolink | safe }}</p>
+              {% if q['answered_at'] %}
+                <span class="qa-date">답변일: {{ q['answered_at'] }}</span>
+              {% endif %}
+              {% if q['answered_by_name'] %}
+                <span class="qa-date">답변자: {{ q['answered_by_name'] }}</span>
+              {% endif %}
+            </div>
+          </div>
+        {% elif q['status'] == 'pending' %}
+          <div class="qa-actions">
+            <form method="post" action="{{ url_for('admin_qa_answer', question_id=q['id']) }}" class="answer-form">
+              <div class="form-group">
+                <textarea name="answer" rows="4" placeholder="답변을 입력하세요..." required></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-sm btn-primary">답변하기</button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="rejectQuestion({{ q['id'] }})">거부하기</button>
+              </div>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    
+    {% if not questions %}
+      <div class="empty-state">
+        <h3>질문이 없습니다</h3>
+        <p>등록된 질문이 없습니다</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <form id="rejectForm" method="post" style="display: none;">
+  </form>
+
+  <style>
+  .admin-header {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #334155;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+  }
+  
+  .admin-title h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .admin-title p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1rem;
+  }
+  
+  .admin-filters {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .filter-section h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #334155;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-chip {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-chip:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+    text-decoration: none;
+    color: #64748b;
+  }
+  
+  .filter-chip.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+  }
+  
+  .admin-qa-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .admin-qa-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.2s ease;
+  }
+  
+  .admin-qa-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .qa-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .qa-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .status-pending {
+    background: #fef3c7;
+    color: #d97706;
+  }
+  
+  .status-approved {
+    background: #d1fae5;
+    color: #065f46;
+  }
+  
+  .status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  
+  .qa-date {
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+  
+  .qa-question-section,
+  .qa-answer-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .qa-label {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  
+  .answer-label {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  
+  .qa-content {
+    flex: 1;
+  }
+  
+  .qa-content p {
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+    font-size: 1rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  
+  .qa-actions {
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .answer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .answer-form .form-group {
+    margin-bottom: 0;
+  }
+  
+  .answer-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  
+  .answer-form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .answer-form .form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+  }
+  
+  .btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: #2563eb;
+  }
+  
+  .btn-danger {
+    background: #ef4444;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background: #dc2626;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #334155;
+    font-size: 1.5rem;
+  }
+  
+  .empty-state p {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .admin-qa-item {
+      padding: 1.5rem;
+    }
+    
+    .qa-item-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    
+    .answer-form .form-actions {
+      flex-direction: column;
+    }
+    
+    .answer-form .form-actions .btn {
+      width: 100%;
+    }
+  }
+  </style>
+
+  <script>
+  function rejectQuestion(questionId) {
+    if (confirm('정말로 이 질문을 거부하시겠습니까?')) {
+      const form = document.getElementById('rejectForm');
+      form.action = '{{ url_for("admin_qa_reject", question_id=0) }}'.replace('0', questionId);
+      form.method = 'post';
+      form.submit();
+    }
+  }
+  </script>
+{% endblock %}
+

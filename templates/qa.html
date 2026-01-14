@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Q&A · INFOTHERAPY{% endblock %}
+{% block description %}인포테라피 동아리에 대한 질문과 답변을 확인하세요.{% endblock %}
+{% block keywords %}Q&A, 질문, 답변, 인포테라피, FAQ{% endblock %}
+{% block content %}
+  <div class="qa-header">
+    <div class="header-content">
+      <div>
+        <h1>Q&A</h1>
+        <p>인포테라피 동아리에 대한 질문과 답변</p>
+      </div>
+      <a href="{{ url_for('qa_ask') }}" class="btn btn-primary">질문하기</a>
+    </div>
+  </div>
+
+  {% if questions %}
+    <div class="qa-list">
+      {% for q in questions %}
+        <div class="qa-item">
+          <div class="qa-question">
+            <div class="qa-label">Q</div>
+            <div class="qa-content">
+              <p>{{ q['question'] }}</p>
+              <span class="qa-date">{{ q['created_at'] }}</span>
+            </div>
+          </div>
+          <div class="qa-answer">
+            <div class="qa-label answer-label">A</div>
+            <div class="qa-content">
+              <p>{{ q['answer'] | autolink | safe }}</p>
+              <span class="qa-date">
+                {{ q['answered_at'] }}
+                {% if q['answered_by_name'] %}
+                  · 답변자: {{ q['answered_by_name'] }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>아직 답변된 질문이 없습니다</h3>
+      <p>첫 번째 질문을 남겨보세요!</p>
+      <a href="{{ url_for('qa_ask') }}" class="btn btn-primary">질문하기</a>
+    </div>
+  {% endif %}
+
+  <style>
+  .qa-header {
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .qa-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+  
+  .qa-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 1.1rem;
+  }
+  
+  .qa-list {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .qa-item {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .qa-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+  }
+  
+  .qa-question {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .qa-answer {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .qa-label {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  
+  .answer-label {
+    background: linear-gradient(135deg, #10b981, #059669);
+  }
+  
+  .qa-content {
+    flex: 1;
+  }
+  
+  .qa-content p {
+    margin: 0 0 0.75rem 0;
+    color: #1e293b;
+    font-size: 1rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  
+  .qa-date {
+    color: #64748b;
+    font-size: 0.875rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+  }
+  
+  .empty-state h3 {
+    margin: 0 0 0.5rem 0;
+    color: #334155;
+    font-size: 1.5rem;
+  }
+  
+  .empty-state p {
+    margin: 0 0 1.5rem 0;
+    font-size: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .qa-header h1 {
+      font-size: 2rem;
+    }
+    
+    .header-content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .header-content .btn {
+      align-self: flex-end;
+    }
+    
+    .qa-item {
+      padding: 1.5rem;
+    }
+    
+    .qa-label {
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+    }
+  }
+  </style>
+{% endblock %}
+

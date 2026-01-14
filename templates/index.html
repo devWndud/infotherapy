@@ -11,15 +11,15 @@
   </section>
 
   <section class="section centered">
-    <div class="grid">
+    <div class="grid home-grid">
+      <a class="card card-primary" href="{{ url_for('qa') }}" style="text-decoration:none; color:inherit;">
+        <h3>Q&A</h3>
+        <p>동아리에 대해 궁금한 점을 언제든지 질문해보세요</p>
+      </a>
       <a class="card" href="{{ url_for('learn') }}" style="text-decoration:none; color:inherit;">
         <h3>학습</h3>
         <p>동아리 부원 전용 프로그래밍 학습 공간입니다</p>
       </a>
-      <div class="card">
-        <h3>슬로건</h3>
-        <p>Heal The World with IT</p>
-      </div>
       <a class="card" href="{{ url_for('activities') }}" style="text-decoration:none; color:inherit;">
         <h3>활동</h3>
         <p>인포테라피의 다양한 활동과 프로젝트를 확인해보세요</p>

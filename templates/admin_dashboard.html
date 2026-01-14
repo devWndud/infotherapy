@@ -127,6 +127,32 @@
     <div class="admin-section">
       <div class="section-header">
         <div class="section-title">
+          <h2>Q&A 관리</h2>
+        </div>
+        <a class="btn btn-primary" href="{{ url_for('admin_qa') }}">
+          Q&A 관리하기
+        </a>
+      </div>
+      <div class="admin-list">
+        <div class="admin-item">
+          <div class="item-content">
+            <div class="item-title">질문과 답변 관리</div>
+            <div class="item-meta">
+              <span class="type-badge">질문 답변 및 거부 관리</span>
+            </div>
+          </div>
+          <div class="item-actions">
+            <a class="btn btn-sm btn-primary" href="{{ url_for('admin_qa') }}">
+              관리하기
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <div class="section-header">
+        <div class="section-title">
           <h2>부원 관리</h2>
           <span class="section-count">{{ members|length }}명</span>
         </div>

@@ -123,9 +123,25 @@ main.container { padding: 32px 20px; flex: 1; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 2vw, 20px); }
 .section.centered { text-align: center; }
 .section.centered .grid { max-width: 900px; margin: 0 auto; }
-.card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 1px 2px rgba(17,24,39,0.04); }
+.card { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 1px 2px rgba(17,24,39,0.04); transition: all 0.2s ease; }
 .card h3 { margin: 0 0 6px; font-size: 18px; }
 .card p { margin: 0; color: var(--muted); }
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  border-color: var(--primary);
+}
+
+.card-primary {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, #1b64ff, #2563eb);
+  color: #fff;
+}
+
+.card-primary p {
+  color: rgba(241, 245, 249, 0.9);
+}
 
 .timeline { position: relative; display: grid; gap: 18px; max-width: 800px; margin: 0 auto; }
 .timeline:before { content: ""; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: var(--border); }

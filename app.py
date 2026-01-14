@@ -140,6 +140,22 @@ def create_app() -> Flask:
             cx.execute("ALTER TABLE portfolios ADD COLUMN contacts TEXT DEFAULT '[]'")
         except sqlite3.OperationalError:
             pass  # 컬럼이 이미 존재하는 경우
+        
+        # Q&A 테이블 생성
+        cx.execute(
+            """
+            CREATE TABLE IF NOT EXISTS questions (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              question TEXT NOT NULL,
+              answer TEXT,
+              status TEXT DEFAULT 'pending',
+              created_at TEXT NOT NULL,
+              answered_at TEXT,
+              answered_by INTEGER,
+              FOREIGN KEY(answered_by) REFERENCES users(id)
+            )
+            """
+        )
 
     url_regex = re.compile(r"(https?://[^\s]+)")
 
@@ -1393,6 +1409,120 @@ def create_app() -> Flask:
             flash("문의가 접수되었습니다 (UI 데모).", "info")
             return redirect(url_for("contact"))
         return render_template("contact.html")
+
+    @app.route("/qa")
+    def qa():
+        """Q&A 목록 페이지 - 답변된 질문만 공개"""
+        with get_db() as cx:
+            questions = cx.execute("""
+                SELECT q.id, q.question, q.answer, q.created_at, q.answered_at, u.name as answered_by_name
+                FROM questions q
+                LEFT JOIN users u ON q.answered_by = u.id
+                WHERE q.status = 'approved'
+                ORDER BY q.answered_at DESC, q.created_at DESC
+            """).fetchall()
+        return render_template("qa.html", questions=questions)
+
+    @app.route("/qa/ask", methods=["GET", "POST"])
+    def qa_ask():
+        """질문 작성 페이지 - 로그인 불필요"""
+        if request.method == "POST":
+            question = request.form.get("question", "").strip()
+            if not question:
+                flash("질문을 입력해주세요.", "info")
+                return redirect(url_for("qa_ask"))
+            
+            now = datetime.now(seoul_tz).strftime("%Y-%m-%d %H:%M:%S")
+            with get_db() as cx:
+                cx.execute("""
+                    INSERT INTO questions (question, status, created_at)
+                    VALUES (?, 'pending', ?)
+                """, (question, now))
+                cx.commit()
+            
+            flash("질문이 등록되었습니다. 관리자 검토 후 답변이 공개됩니다.", "success")
+            return redirect(url_for("qa"))
+        
+        return render_template("qa_ask.html")
+
+    @app.route("/admin/qa")
+    @admin_required
+    def admin_qa():
+        """관리자 Q&A 관리 페이지"""
+        status_filter = request.args.get("status", "all")
+        
+        with get_db() as cx:
+            if status_filter == "pending":
+                questions = cx.execute("""
+                    SELECT q.id, q.question, q.answer, q.status, q.created_at, q.answered_at, u.name as answered_by_name
+                    FROM questions q
+                    LEFT JOIN users u ON q.answered_by = u.id
+                    WHERE q.status = 'pending'
+                    ORDER BY q.created_at DESC
+                """).fetchall()
+            elif status_filter == "approved":
+                questions = cx.execute("""
+                    SELECT q.id, q.question, q.answer, q.status, q.created_at, q.answered_at, u.name as answered_by_name
+                    FROM questions q
+                    LEFT JOIN users u ON q.answered_by = u.id
+                    WHERE q.status = 'approved'
+                    ORDER BY q.answered_at DESC
+                """).fetchall()
+            elif status_filter == "rejected":
+                questions = cx.execute("""
+                    SELECT q.id, q.question, q.answer, q.status, q.created_at, q.answered_at, u.name as answered_by_name
+                    FROM questions q
+                    LEFT JOIN users u ON q.answered_by = u.id
+                    WHERE q.status = 'rejected'
+                    ORDER BY q.created_at DESC
+                """).fetchall()
+            else:
+                questions = cx.execute("""
+                    SELECT q.id, q.question, q.answer, q.status, q.created_at, q.answered_at, u.name as answered_by_name
+                    FROM questions q
+                    LEFT JOIN users u ON q.answered_by = u.id
+                    ORDER BY q.created_at DESC
+                """).fetchall()
+        
+        return render_template("admin_qa.html", questions=questions, status_filter=status_filter)
+
+    @app.route("/admin/qa/<int:question_id>/answer", methods=["POST"])
+    @admin_required
+    def admin_qa_answer(question_id):
+        """관리자 질문 답변"""
+        answer = request.form.get("answer", "").strip()
+        if not answer:
+            flash("답변을 입력해주세요.", "info")
+            return redirect(url_for("admin_qa"))
+        
+        now = datetime.now(seoul_tz).strftime("%Y-%m-%d %H:%M:%S")
+        user_id = session.get('uid')
+        
+        with get_db() as cx:
+            cx.execute("""
+                UPDATE questions
+                SET answer = ?, status = 'approved', answered_at = ?, answered_by = ?
+                WHERE id = ?
+            """, (answer, now, user_id, question_id))
+            cx.commit()
+        
+        flash("답변이 등록되었습니다.", "success")
+        return redirect(url_for("admin_qa"))
+
+    @app.route("/admin/qa/<int:question_id>/reject", methods=["POST"])
+    @admin_required
+    def admin_qa_reject(question_id):
+        """관리자 질문 거부"""
+        with get_db() as cx:
+            cx.execute("""
+                UPDATE questions
+                SET status = 'rejected'
+                WHERE id = ?
+            """, (question_id,))
+            cx.commit()
+        
+        flash("질문이 거부되었습니다.", "success")
+        return redirect(url_for("admin_qa"))
 
     @app.route("/portfolios")
     def portfolios():
