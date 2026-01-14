@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}포트폴리오 · INFOTHERAPY{% endblock %}
-{% block description %}인포테라피 부원들의 포트폴리오와 프로젝트를 확인해보세요. 각 부원의 GitHub, Instagram 등 연락처와 프로젝트를 볼 수 있습니다.{% endblock %}
-{% block keywords %}포트폴리오, 인포테라피, 부원 프로필, 프로젝트, GitHub, Instagram, 천안월봉고{% endblock %}
-{% block og_title %}포트폴리오 · INFOTHERAPY{% endblock %}
-{% block og_description %}인포테라피 부원들의 포트폴리오와 프로젝트를 확인해보세요{% endblock %}
-{% block twitter_title %}포트폴리오 · INFOTHERAPY{% endblock %}
-{% block twitter_description %}인포테라피 부원들의 포트폴리오{% endblock %}
+{% block title %}프로필 · INFOTHERAPY{% endblock %}
+{% block description %}인포테라피 부원들의 프로필과 프로젝트를 확인해보세요. 각 부원의 GitHub, Instagram 등 연락처와 프로젝트를 볼 수 있습니다.{% endblock %}
+{% block keywords %}프로필, 인포테라피, 부원 프로필, 프로젝트, GitHub, Instagram, 천안월봉고{% endblock %}
+{% block og_title %}프로필 · INFOTHERAPY{% endblock %}
+{% block og_description %}인포테라피 부원들의 프로필과 프로젝트를 확인해보세요{% endblock %}
+{% block twitter_title %}프로필 · INFOTHERAPY{% endblock %}
+{% block twitter_description %}인포테라피 부원들의 프로필{% endblock %}
 {% block json_ld %}
 {% if json_ld_data %}
 <script type="application/ld+json">
@@ -17,7 +17,7 @@
   <div class="portfolios-header">
     <div class="header-content">
       <div>
-        <h1>포트폴리오</h1>
+        <h1>프로필</h1>
         <p>인포테라피 부원들의 프로젝트와 활동을 확인해보세요</p>
       </div>
       {% if session.get('uid') %}
@@ -72,8 +72,8 @@
     {% endfor %}
   {% else %}
     <div class="empty-state">
-      <h3>아직 등록된 포트폴리오가 없습니다</h3>
-      <p>첫 번째 포트폴리오를 만들어보세요!</p>
+      <h3>아직 등록된 프로필이 없습니다</h3>
+      <p>첫 번째 프로필을 만들어보세요!</p>
     </div>
   {% endif %}
 

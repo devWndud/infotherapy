@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}{{ portfolio.name }}의 포트폴리오 · {{ portfolio.student_id }} · INFOTHERAPY{% endblock %}
+{% block title %}{{ portfolio.name }}의 프로필 · {{ portfolio.student_id }} · INFOTHERAPY{% endblock %}
 {% block description %}{{ portfolio.name }}({{ portfolio.student_id }}) · {% if portfolio.bio %}{{ portfolio.bio[:150] }}{% else %}천안월봉고등학교 인포테라피 동아리 부원{% endif %}{% if portfolio.projects and portfolio.projects|length > 0 %} · 프로젝트: {% for project in portfolio.projects[:3] %}{% if project and project.title %}{{ project.title }}{% if not loop.last %}, {% endif %}{% endif %}{% endfor %}{% endif %}{% endblock %}
-{% block keywords %}{{ portfolio.name }}, {{ portfolio.student_id }}, 인포테라피, 포트폴리오, 프로젝트, 천안월봉고{% if portfolio.projects and portfolio.projects|length > 0 %}{% for project in portfolio.projects %}{% if project and project.title %}, {{ project.title }}{% endif %}{% endfor %}{% endif %}{% endblock %}
-{% block og_title %}{{ portfolio.name }}의 포트폴리오{% endblock %}
-{% block og_description %}{{ portfolio.name }} · {{ portfolio.student_id }} · {% if portfolio.bio %}{{ portfolio.bio[:100] }}{% else %}인포테라피 부원의 포트폴리오{% endif %}{% endblock %}
-{% block twitter_title %}{{ portfolio.name }}의 포트폴리오{% endblock %}
+{% block keywords %}{{ portfolio.name }}, {{ portfolio.student_id }}, 인포테라피, 프로필, 프로젝트, 천안월봉고{% if portfolio.projects and portfolio.projects|length > 0 %}{% for project in portfolio.projects %}{% if project and project.title %}, {{ project.title }}{% endif %}{% endif %}{% endfor %}{% endblock %}
+{% block og_title %}{{ portfolio.name }}의 프로필{% endblock %}
+{% block og_description %}{{ portfolio.name }} · {{ portfolio.student_id }} · {% if portfolio.bio %}{{ portfolio.bio[:100] }}{% else %}인포테라피 부원의 프로필{% endif %}{% endblock %}
+{% block twitter_title %}{{ portfolio.name }}의 프로필{% endblock %}
 {% block twitter_description %}{{ portfolio.name }} · 인포테라피 부원{% endblock %}
 {% block json_ld %}
 <script type="application/ld+json">

@@ -6,19 +6,19 @@ nohup gunicorn --bind 127.0.0.1:5000 application:application > app.log 2>&1 &
 sudo systemctl restart nginx
 
 
-pkill -f gunicorn && pkill -f python
+    pkill -f gunicorn && pkill -f python
 
-cd /root/wndud/infotherapy && source myenv/bin/activate
+    cd /root/wndud/infotherapy && source myenv/bin/activate
 
-git pull
+    git pull
 
-sudo cp -r /root/wndud/infotherapy/static/* /var/www/html/infotherapy/static/
-sudo chown -R www-data:www-data /var/www/html/infotherapy/static/
-sudo chmod -R 755 /var/www/html/infotherapy/static/
+    sudo cp -r /root/wndud/infotherapy/static/* /var/www/html/infotherapy/static/
+    sudo chown -R www-data:www-data /var/www/html/infotherapy/static/
+    sudo chmod -R 755 /var/www/html/infotherapy/static/
 
-nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+    nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
 
-sudo systemctl restart nginx
+    sudo systemctl restart nginx
 
 
 

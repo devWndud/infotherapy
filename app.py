@@ -117,7 +117,7 @@ def create_app() -> Flask:
         except sqlite3.OperationalError:
             pass  # 컬럼이 이미 존재하는 경우
         
-        # 포트폴리오 테이블 생성
+        # 프로필(포트폴리오) 테이블 생성
         cx.execute(
             """
             CREATE TABLE IF NOT EXISTS portfolios (
@@ -1396,7 +1396,7 @@ def create_app() -> Flask:
 
     @app.route("/portfolios")
     def portfolios():
-        """포트폴리오 목록 페이지 - 비회원도 접근 가능"""
+        """프로필 목록 페이지 - 비회원도 접근 가능"""
         def get_grade(student_id):
             """student_id에서 학년 추출 - 5자리 학번의 맨 앞 숫자가 학년"""
             try:
@@ -1491,8 +1491,8 @@ def create_app() -> Flask:
             json_ld_data = {
                 "@context": "https://schema.org",
                 "@type": "ItemList",
-                "name": "인포테라피 부원 포트폴리오",
-                "description": "천안월봉고등학교 인포테라피 동아리 부원들의 포트폴리오와 프로젝트 목록",
+                "name": "인포테라피 부원 프로필",
+                "description": "천안월봉고등학교 인포테라피 동아리 부원들의 프로필과 프로젝트 목록",
                 "url": "https://infotherapy.kro.kr/portfolios",
                 "numberOfItems": total_count,
                 "itemListElement": item_list
@@ -1502,7 +1502,7 @@ def create_app() -> Flask:
 
     @app.route("/portfolio/<int:user_id>")
     def portfolio_detail(user_id):
-        """포트폴리오 상세 페이지 - 비회원도 접근 가능"""
+        """프로필 상세 페이지 - 비회원도 접근 가능"""
         with get_db() as cx:
             portfolio = cx.execute("""
                 SELECT p.id, p.user_id, p.github_url, p.discord_id, p.contacts, p.bio, p.projects, 
@@ -1513,7 +1513,7 @@ def create_app() -> Flask:
             """, (user_id,)).fetchone()
             
             if not portfolio:
-                flash("포트폴리오를 찾을 수 없습니다.", "error")
+                flash("프로필을 찾을 수 없습니다.", "error")
                 return redirect(url_for("portfolios"))
             
             # 연락처 및 프로젝트 JSON 파싱
@@ -1549,14 +1549,14 @@ def create_app() -> Flask:
             portfolio_dict['contacts'] = contacts
             portfolio_dict['projects'] = projects
             
-            # 본인 포트폴리오인지 확인
+            # 본인 프로필인지 확인
             is_owner = session.get('uid') == user_id
             
         return render_template("portfolio_detail.html", portfolio=portfolio_dict, is_owner=is_owner)
 
     @app.route("/portfolio/edit")
     def portfolio_edit():
-        """포트폴리오 편집 페이지 - 로그인 필요"""
+        """프로필 편집 페이지 - 로그인 필요"""
         if not session.get('uid'):
             flash("로그인이 필요합니다.", "info")
             return redirect(url_for('login'))
@@ -1611,7 +1611,7 @@ def create_app() -> Flask:
 
     @app.route("/portfolio/update", methods=["POST"])
     def portfolio_update():
-        """포트폴리오 업데이트 - 로그인 필요"""
+        """프로필 업데이트 - 로그인 필요"""
         if not session.get('uid'):
             flash("로그인이 필요합니다.", "info")
             return redirect(url_for('login'))
@@ -1651,7 +1651,7 @@ def create_app() -> Flask:
         now = datetime.now(seoul_tz).strftime("%Y-%m-%d %H:%M:%S")
         
         with get_db() as cx:
-            # 기존 포트폴리오 확인
+            # 기존 프로필 확인
             existing = cx.execute("SELECT id FROM portfolios WHERE user_id = ?", (user_id,)).fetchone()
             
             if existing:
@@ -1669,7 +1669,7 @@ def create_app() -> Flask:
                 """, (user_id, contacts_json, bio, projects_json, now, now))
             cx.commit()
         
-        flash("포트폴리오가 저장되었습니다.", "success")
+        flash("프로필이 저장되었습니다.", "success")
         return redirect(url_for('portfolio_detail', user_id=user_id))
 
     @app.route("/terms")
@@ -1709,7 +1709,7 @@ def create_app() -> Flask:
         ]
         
         with get_db() as cx:
-            # 포트폴리오 페이지 추가 (실제 수정 날짜 사용)
+            # 프로필 페이지 추가 (실제 수정 날짜 사용)
             portfolio_data = cx.execute("""
                 SELECT DISTINCT p.user_id, 
                        COALESCE(p.updated_at, p.created_at, ?) as lastmod_date
