@@ -668,6 +668,16 @@
       };
       
       allInterests.forEach(interest => {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip';
+        chip.dataset.cat = interest;
+        chip.textContent = interestLabels[interest] || interest;
+        filterButtons.appendChild(chip);
+      });
+      
+      setupFilterChips();
+    }
+
     function setupFilterChips() {
       const allFilterChips = document.querySelectorAll('.filter-chip');
       allFilterChips.forEach(chip => {

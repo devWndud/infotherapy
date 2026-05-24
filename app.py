@@ -585,6 +585,7 @@ def create_app() -> Flask:
             d["submitted_at"] = submission_map.get(key)
             assignments.append(d)
         user_interests = []
+        known_categories = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c']
         if session.get("uid"):
             with get_db() as cx:
                 user_row = cx.execute("SELECT interests FROM users WHERE id=?", (session.get("uid"),)).fetchone()
@@ -593,10 +594,18 @@ def create_app() -> Flask:
                         user_interests = json.loads(user_row['interests'])
                     except:
                         user_interests = []
-        
+
+        # 기존 사용자도 새 카테고리를 볼 수 있도록 병합
+        if user_interests:
+            for cat in known_categories:
+                if cat not in user_interests:
+                    user_interests.append(cat)
+        else:
+            user_interests = known_categories.copy()
+
         # 분야별 제출 통계 데이터 생성 (GitHub 잔디 스타일)
         category_stats = {}
-        categories = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c']
+        categories = known_categories
         
         for category in categories:
             # 해당 분야의 과제 수
