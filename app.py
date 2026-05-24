@@ -246,7 +246,10 @@ def create_app() -> Flask:
             'unity': 'Unity',
             'ml': '머신러닝',
             'dl': '딥러닝',
-            'web': 'Web'
+            'web': 'Web',
+            'python': '파이썬',
+            'arduino': '아두이노',
+            'c': 'C'
         }
         return category_map.get(category, category)
     

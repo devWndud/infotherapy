@@ -70,6 +70,24 @@
                 <span class="option-text">Web</span>
               </div>
             </label>
+            <label class="category-option {{ 'active' if cat=='python' }}">
+              <input type="radio" name="category" value="python" {{ 'checked' if cat=='python' }}>
+              <div class="option-content">
+                <span class="option-text">파이썬</span>
+              </div>
+            </label>
+            <label class="category-option {{ 'active' if cat=='arduino' }}">
+              <input type="radio" name="category" value="arduino" {{ 'checked' if cat=='arduino' }}>
+              <div class="option-content">
+                <span class="option-text">아두이노</span>
+              </div>
+            </label>
+            <label class="category-option {{ 'active' if cat=='c' }}">
+              <input type="radio" name="category" value="c" {{ 'checked' if cat=='c' }}>
+              <div class="option-content">
+                <span class="option-text">C</span>
+              </div>
+            </label>
           </div>
         </div>
 

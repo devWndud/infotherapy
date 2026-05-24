@@ -647,7 +647,7 @@
     
     // 로그인하지 않은 경우 모든 분야를 기본값으로 설정
     if (userInterests.length === 0) {
-      userInterests = ['unity', 'ml', 'dl', 'web'];
+      userInterests = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c'];
     }
 
     function createInterestChips() {
@@ -658,9 +658,12 @@
       
       const interestLabels = {
         'unity': 'Unity',
-        'ml': '머신러닝', 
+        'ml': '머신러닝',
         'dl': '딥러닝',
-        'web': 'Web'
+        'web': 'Web',
+        'python': '파이썬',
+        'arduino': '아두이노',
+        'c': 'C'
       };
       
       userInterests.forEach(interest => {
