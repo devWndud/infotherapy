@@ -642,12 +642,13 @@
     const assignmentsSectionCount = document.getElementById('assignments-section-count');
     
     let userInterests = {{ user_interests | tojson if session.get('uid') else '[]' }};
+    const allInterests = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c'];
     
     let currentFilter = 'all';
     
     // 로그인하지 않은 경우 모든 분야를 기본값으로 설정
     if (userInterests.length === 0) {
-      userInterests = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c'];
+      userInterests = allInterests.slice();
     }
 
     function createInterestChips() {
@@ -666,17 +667,7 @@
         'c': 'C'
       };
       
-      userInterests.forEach(interest => {
-        const chip = document.createElement('button');
-        chip.className = 'filter-chip';
-        chip.dataset.cat = interest;
-        chip.textContent = interestLabels[interest] || interest;
-        filterButtons.appendChild(chip);
-      });
-      
-      setupFilterChips();
-    }
-
+      allInterests.forEach(interest => {
     function setupFilterChips() {
       const allFilterChips = document.querySelectorAll('.filter-chip');
       allFilterChips.forEach(chip => {
