@@ -314,7 +314,7 @@ def create_app() -> Flask:
             try:
                 with get_db() as cx:
                     # 모든 분야를 기본값으로 설정
-                    default_interests = '["unity", "ml", "dl", "web"]'
+                    default_interests = '["unity", "ml", "dl", "web", "python", "arduino", "c"]'
                     cx.execute(
                         "INSERT INTO users (name, student_id, password_hash, admin, interests) VALUES (?,?,?,?,?)",
                         (name, student_id, generate_password_hash(password), admin_flag, default_interests),
@@ -596,7 +596,7 @@ def create_app() -> Flask:
         
         # 분야별 제출 통계 데이터 생성 (GitHub 잔디 스타일)
         category_stats = {}
-        categories = ['unity', 'ml', 'dl', 'web']
+        categories = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c']
         
         for category in categories:
             # 해당 분야의 과제 수
@@ -645,7 +645,7 @@ def create_app() -> Flask:
             if not isinstance(interests, list):
                 return {"error": "관심 분야는 배열 형태여야 합니다."}, 400
             
-            valid_interests = ["unity", "ml", "dl", "web"]
+            valid_interests = ["unity", "ml", "dl", "web", "python", "arduino", "c"]
             for interest in interests:
                 if interest not in valid_interests:
                     return {"error": f"유효하지 않은 분야: {interest}"}, 400
