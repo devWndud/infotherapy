@@ -642,7 +642,7 @@
     const assignmentsSectionCount = document.getElementById('assignments-section-count');
     
     let userInterests = {{ user_interests | tojson if session.get('uid') else '[]' }};
-    const allInterests = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c'];
+    const allInterests = ['unity', 'ml', 'dl', 'web', 'python', 'arduino', 'c', 'overall'];
     
     let currentFilter = 'all';
     
