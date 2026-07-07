@@ -249,7 +249,8 @@ def create_app() -> Flask:
             'web': 'Web',
             'python': '파이썬',
             'arduino': '아두이노',
-            'c': 'C'
+            'c': 'C',
+            'overall': '종합'
         }
         return category_map.get(category, category)
     
