@@ -29,7 +29,7 @@ sudo chmod -R 755 /var/www/html/infotherapy/static/
 
 # 6. Gunicorn 서버 시작
 echo "6. Gunicorn 서버 시작..."
-nohup gunicorn --config gunicorn.conf.py application:application > app.log 2>&1 &
+nohup gunicorn --bind 127.0.0.1:5000 application:application > app.log 2>&1 &
 
 # 7. 서버 상태 확인
 echo "7. 서버 상태 확인..."
