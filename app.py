@@ -1406,6 +1406,19 @@ def create_app() -> Flask:
             flash("부원을 찾을 수 없습니다.", "info")
             return redirect(url_for("admin_dashboard"))
         
+        # DB에 등록된 사용자도 함께 삭제
+        try:
+            with get_db() as cx:
+                user_row = cx.execute("SELECT id FROM users WHERE name = ?", (member_name,)).fetchone()
+                if user_row:
+                    user_id = user_row["id"]
+                    cx.execute("DELETE FROM submissions WHERE user_id = ?", (user_id,))
+                    cx.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        except Exception as e:
+            print(f"Error deleting user from DB: {e}")
+            flash("DB 사용자 삭제 중 오류가 발생했습니다.", "info")
+            return redirect(url_for("admin_dashboard"))
+        
         # 부원 삭제
         invite_list.pop(member_index)
         
